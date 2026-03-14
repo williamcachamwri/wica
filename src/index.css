@@ -1,0 +1,129 @@
+@import "tailwindcss";
+
+:root {
+  --bg: #ffffff;
+  --surface: #fafafa;
+  --surface-elevated: #ffffff;
+  --text: #111111;
+  --text-primary: #1a1a1a;
+  --text-secondary: #333333;
+  --text-muted: #6b7280;
+  --text-subtle: #9ca3af;
+  --border: #e5e7eb;
+  --border-strong: #d4d4d4;
+  --ring: rgba(17, 17, 17, 0.12);
+  --overlay: rgba(0, 0, 0, 0.9);
+  --code-bg: #f3f4f6;
+  --kbd-bg: #f3f4f6;
+  --kbd-border: #e5e7eb;
+  --note-bg: #eff6ff;
+  --pre-bg: #f3f4f6;
+  --pre-text: #1a1a1a;
+  --pre-btn-border: rgba(0, 0, 0, 0.12);
+  --pre-btn-bg: rgba(0, 0, 0, 0.05);
+  --pre-btn-color: rgba(0, 0, 0, 0.55);
+  --loader-bg: #0a0a0a;
+  --cursor-ring: rgba(17, 17, 17, 0.35);
+  --icon-box-bg: #fafafa;
+
+  --navbar-bg: rgba(255, 255, 255, 0.88);
+  --navbar-border: rgba(229, 229, 229, 0.8);
+  --link-hover-bg: rgba(0, 0, 0, 0.03);
+  --link-active-bg: rgba(0, 0, 0, 0.06);
+  --inspector-highlight-bg: rgba(37, 99, 235, 0.08);
+  --inspector-highlight-shadow: rgba(37, 99, 235, 0.2);
+  --loader-line: rgba(255, 255, 255, 0.9);
+  --loader-line-glow: rgba(255, 255, 255, 0.4);
+  --prose-link-underline: rgba(26, 26, 26, 0.3);
+}
+
+.dark {
+  --bg: #07070a;
+  --surface: #0f0f14;
+  --surface-elevated: #13131a;
+  --text: #f4f4f5;
+  --text-primary: #e4e4e7;
+  --text-secondary: #d4d4d8;
+  --text-muted: #a1a1aa;
+  --text-subtle: #a1a1aa;
+  --border: #3f3f46;
+  --border-strong: #52525b;
+  --ring: rgba(255, 255, 255, 0.1);
+  --overlay: rgba(0, 0, 0, 0.92);
+  --code-bg: #18181b;
+  --kbd-bg: #18181b;
+  --kbd-border: #3f3f46;
+  --note-bg: rgba(37, 99, 235, 0.12);
+  --pre-bg: #13131a;
+  --pre-text: #f5f5f5;
+  --pre-btn-border: rgba(255, 255, 255, 0.15);
+  --pre-btn-bg: rgba(255, 255, 255, 0.08);
+  --pre-btn-color: rgba(255, 255, 255, 0.65);
+  --loader-bg: #000000;
+  --cursor-ring: rgba(255, 255, 255, 0.25);
+  --icon-box-bg: #2e2e3e;
+
+  --navbar-bg: rgba(19, 19, 26, 0.88);
+  --navbar-border: rgba(63, 63, 70, 0.8);
+  --link-hover-bg: rgba(255, 255, 255, 0.04);
+  --link-active-bg: rgba(255, 255, 255, 0.08);
+  --inspector-highlight-bg: rgba(37, 99, 235, 0.12);
+  --inspector-highlight-shadow: rgba(37, 99, 235, 0.3);
+  --loader-line: rgba(255, 255, 255, 0.9);
+  --loader-line-glow: rgba(255, 255, 255, 0.4);
+  --prose-link-underline: rgba(244, 244, 245, 0.3);
+}
+
+@theme {
+  --color-text: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-muted: var(--text-muted);
+  --color-subtle: var(--text-subtle);
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-elevated: var(--surface-elevated);
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+  --color-accent: var(--accent);
+  --color-code: var(--code-bg);
+  --color-note: var(--note-bg);
+
+  --font-sans: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-mono: "JetBrains Mono", "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  --font-hand: "Caveat", "Kalam", cursive;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  background-color: var(--bg);
+  color: var(--text);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+::selection {
+  background-color: rgba(37, 99, 235, 0.15);
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+.animate-blink {
+  animation: blink 1s step-end infinite;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
