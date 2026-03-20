@@ -1,0 +1,46 @@
+import { Callout, Counter, Math, PixelBox } from '../mdx/components'
+
+export const meta = {
+  slug: 'mdx-test',
+  title: 'MDX Interactive Test',
+  date: '2024-12-15',
+  summary: 'A demo of JSX components, LaTeX math, and Markdown living together.',
+}
+
+This post is written in **MDX**, which means we can mix Markdown with React components.
+
+## LaTeX math
+
+Inline math: <Math>E = mc^2</Math>
+
+Block math:
+
+<Math block>{`\\int_{-\\infty}^{\\infty} e^{-x^2} dx = \\sqrt{\\pi}`}</Math>
+
+## Interactive components
+
+<Callout>
+  This is a custom callout component rendered from MDX. You can use it for tips, warnings, or asides.
+</Callout>
+
+<PixelBox>
+  <p>A pixel-styled box that keeps the site's monochrome pixel aesthetic.</p>
+</PixelBox>
+
+Here is an interactive counter:
+
+<Counter />
+
+## Markdown still works
+
+- Lists
+- **Bold** and *italic* text
+- `inline code`
+- [Links](/blog)
+
+And a code block:
+
+```ts
+const greeting = 'Hello from MDX!'
+console.log(greeting)
+```
