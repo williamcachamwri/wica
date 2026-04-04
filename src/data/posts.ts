@@ -31,3 +31,4 @@ export const posts: PostMeta[] = [
     summary: 'On resisting the urge to optimize every second and building software that respects attention.',
   },
 ]
+/* cd7bba8a */
