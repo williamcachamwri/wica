@@ -69,3 +69,4 @@ export const HOME_SPRITES: Record<
   cat: { config: HOME_CONFIG, frame: CAT },
   bonsai: { config: HOME_CONFIG, frame: BONSAI },
 };
+/* 9002c8e7 */
