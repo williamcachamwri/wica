@@ -371,3 +371,4 @@ export const GARDEN_ELEMENTS: Record<GardenElementType, GardenElementConfig> = {
     loop: true,
   },
 };
+/* b9ca192e */
