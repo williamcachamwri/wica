@@ -69,4 +69,4 @@ export function FloatingNavbar({ inspectActive, onToggleInspect, accent, onAccen
     </nav>
   )
 }
-/* 84167dad */
+/* a9974fd4 */
