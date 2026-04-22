@@ -39,4 +39,4 @@ export function ProjectCard({ project }: ProjectCardProps) {
     </article>
   )
 }
-/* 82b4c3f5 */
+/* 94c079dc */
