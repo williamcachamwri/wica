@@ -56,4 +56,4 @@ export default function BlogList() {
     </div>
   )
 }
-/* aa94a5a5 */
+/* d3af20fd */
