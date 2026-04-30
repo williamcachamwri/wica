@@ -8,4 +8,4 @@ createRoot(document.getElementById('root')!).render(
     <App />
   </StrictMode>,
 )
-/* 59f5d1b2 */
+/* 8fbb0b39 */
