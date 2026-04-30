@@ -34,4 +34,4 @@ export interface FireworkParticle {
   vy: number
   rot: number
 }
-/* aff7e00c */
+/* c796f658 */
