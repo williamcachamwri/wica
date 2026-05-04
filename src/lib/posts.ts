@@ -40,4 +40,4 @@ export async function fetchPost(slug: string): Promise<ParsedPost> {
     content,
   }
 }
-/* 0183b8f8 */
+/* b11462ed */
