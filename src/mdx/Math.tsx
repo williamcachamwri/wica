@@ -27,4 +27,4 @@ export function Math({ children, block = false }: MathProps) {
     />
   )
 }
-/* 1d3753ce */
+/* 9b6e08cd */
