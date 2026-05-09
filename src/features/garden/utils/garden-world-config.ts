@@ -16,4 +16,4 @@ export const GARDEN_OBJECTS: GardenObject[] = [
   // A small rocket drifting near bottom right
   { id: "rocket-1", type: "decoration", x: 92, y: 78, zIndex: 4, scale: 2.2, element: "rocket" },
 ];
-/* 842bbf4e */
+/* c0014190 */
