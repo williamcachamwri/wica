@@ -34,4 +34,4 @@ export function Typewriter({ text, delay = 70, start = true }: TypewriterProps) 
     </span>
   )
 }
-/* 8112dbc7 */
+/* bb6f6d10 */
