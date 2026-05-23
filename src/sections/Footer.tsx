@@ -25,4 +25,4 @@ export function Footer() {
     </footer>
   )
 }
-/* dfd4170b */
+/* 09c0bd37 */
