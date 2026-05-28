@@ -9,4 +9,4 @@ function sortByDate(a: PostMeta, b: PostMeta): number {
 }
 
 export const allPosts: PostMeta[] = [...posts, ...mdxPosts].sort(sortByDate)
-/* b37a652b */
+/* a1c5c02e */
