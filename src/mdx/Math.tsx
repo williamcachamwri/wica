@@ -27,4 +27,4 @@ export function Math({ children, block = false }: MathProps) {
     />
   )
 }
-/* 9b6e08cd */
+/* 78683e38 */
