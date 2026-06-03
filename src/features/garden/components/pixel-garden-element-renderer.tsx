@@ -55,4 +55,4 @@ const AnimatedGardenElementRenderer = memo(({ element, scale, className }: Varia
 });
 
 export const PixelGardenElementRenderer = memo(PixelGardenElementRendererImpl);
-/* 834e19af */
+/* a91abbb5 */
