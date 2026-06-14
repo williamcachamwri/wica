@@ -6,7 +6,6 @@ import remarkMath from 'remark-math'
 import rehypeHighlight from 'rehype-highlight'
 import rehypeKatex from 'rehype-katex'
 import rehypeRaw from 'rehype-raw'
-import { InlineLink } from '../components/InlineLink'
 import { ToastContainer, showToast } from '../components/Toast'
 import { allPosts } from '../data/allPosts'
 import type { PostMeta } from '../data/allPosts'
@@ -26,6 +25,7 @@ export default function BlogPost() {
   const [post, setPost] = useState<{ meta: PostMeta; content: string } | null>(null)
   const [MdxComponent, setMdxComponent] = useState<React.ComponentType | null>(null)
   const [error, setError] = useState(false)
+  const [progress, setProgress] = useState(0)
 
   useEffect(() => {
     if (!slug) return
@@ -49,6 +49,17 @@ export default function BlogPost() {
 
     const pres = article.querySelectorAll('pre')
     const handlers: Array<() => void> = []
+
+    const updateProgress = () => {
+      const scrollTop = window.scrollY
+      const docHeight = document.documentElement.scrollHeight - window.innerHeight
+      const ratio = docHeight > 0 ? scrollTop / docHeight : 0
+      setProgress(Math.min(100, Math.max(0, ratio * 100)))
+    }
+
+    window.addEventListener('scroll', updateProgress, { passive: true })
+    updateProgress()
+    handlers.push(() => window.removeEventListener('scroll', updateProgress))
 
     pres.forEach((pre) => {
       if (pre.querySelector('.code-copy-btn')) return
@@ -110,6 +121,7 @@ export default function BlogPost() {
   return (
     <div className="app-shell app-shell--in">
       <div className="grain" aria-hidden="true" />
+      <div className="reading-progress" style={{ transform: `scaleX(${progress / 100})` }} aria-hidden="true" />
       <ToastContainer />
 
       <main id="main" className="max-w-[680px] mx-auto px-6 pt-16 md:pt-24 pb-20">
@@ -137,10 +149,7 @@ export default function BlogPost() {
         </article>
 
         <footer className="text-sm text-subtle text-center">
-          <p>
-            Built with React & Tailwind. Typeset in Inter, JetBrains Mono, and Caveat.{' '}
-            <InlineLink href="#">View source</InlineLink>.
-          </p>
+          <p>built with patience &middot; styled with restraint</p>
         </footer>
       </main>
     </div>

@@ -1,5 +1,4 @@
 import { Link } from 'react-router-dom'
-import { InlineLink } from '../components/InlineLink'
 import { SectionDivider } from '../components/SectionDivider'
 import { allPosts } from '../data/allPosts'
 
@@ -16,8 +15,8 @@ export default function BlogList() {
     <div className="app-shell app-shell--in">
       <div className="grain" aria-hidden="true" />
 
-      <main id="main" className="max-w-[680px] mx-auto px-6 pt-16 md:pt-24 pb-20">
-        <section className="mb-12">
+      <main id="main" className="max-w-[720px] mx-auto px-6 pt-16 md:pt-24 pb-20">
+        <section className="mb-14">
           <Link to="/" className="inline-link text-sm mb-6 inline-block">
             ‹ back home
           </Link>
@@ -29,17 +28,26 @@ export default function BlogList() {
 
         <section className="mb-14">
           <SectionDivider label="All posts" />
-          <div className="space-y-6">
+          <div className="blog-list">
             {allPosts.map((post) => (
               <article key={post.slug} className="blog-item group">
-                <Link to={`/blog/${post.slug}`} className="block">
-                  <div className="flex flex-col sm:flex-row sm:items-baseline sm:justify-between gap-1 mb-2">
-                    <h2 className="text-lg font-semibold text-text tracking-tight group-hover:text-accent transition-colors duration-300">
+                <Link to={`/blog/${post.slug}`} className="blog-item__link">
+                  <div className="blog-item__header">
+                    <h2 className="blog-item__title">
                       {post.title}
                     </h2>
-                    <time className="text-sm text-subtle font-mono shrink-0">{formatDate(post.date)}</time>
+                    <time className="blog-item__date" dateTime={post.date}>
+                      {formatDate(post.date)}
+                    </time>
                   </div>
-                  <p className="text-[15px] leading-relaxed text-text/75">{post.summary}</p>
+                  <p className="blog-item__summary">{post.summary}</p>
+                  <span className="blog-item__arrow" aria-hidden="true">
+                    read article
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <line x1="5" y1="12" x2="19" y2="12" />
+                      <polyline points="12 5 19 12 12 19" />
+                    </svg>
+                  </span>
                 </Link>
               </article>
             ))}
@@ -47,10 +55,7 @@ export default function BlogList() {
         </section>
 
         <footer className="text-sm text-subtle text-center">
-          <p>
-            Built with React & Tailwind. Typeset in Inter, JetBrains Mono, and Caveat.{' '}
-            <InlineLink href="#">View source</InlineLink>.
-          </p>
+          <p>built with patience &middot; styled with restraint</p>
         </footer>
       </main>
     </div>
