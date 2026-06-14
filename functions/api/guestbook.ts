@@ -3,8 +3,48 @@ const TURNSTILE_VERIFY = 'https://challenges.cloudflare.com/turnstile/v0/sitever
 const REPO_ID = 'R_kgDOS6MeVw'
 const CATEGORY_ID = 'DIC_kwDOS6MeV84C_Jgv'
 
-function headers(token) {
-  const h = {
+interface Env {
+  GITHUB_TOKEN: string
+  TURNSTILE_SECRET: string
+}
+
+interface TurnstileResponse {
+  success: boolean
+  'error-codes'?: string[]
+}
+
+interface DiscussionNode {
+  id: string
+  title: string
+  author: { login: string } | null
+  createdAt: string
+  url: string
+}
+
+interface GitHubResponse {
+  data?: {
+    repository?: {
+      discussions?: {
+        nodes?: DiscussionNode[]
+      }
+    }
+    createDiscussion?: {
+      discussion?: DiscussionNode
+    }
+  }
+  errors?: Array<{ message: string }>
+}
+
+interface Entry {
+  id: string
+  message: string
+  author: string
+  date: string
+  url: string
+}
+
+function headers(token?: string): Record<string, string> {
+  const h: Record<string, string> = {
     Accept: 'application/vnd.github.v3+json',
     'User-Agent': 'wica-guestbook/1.0',
     'Content-Type': 'application/json',
@@ -27,7 +67,7 @@ const LIST_QUERY = `query {
   }
 }`
 
-function formatDiscussion(node) {
+function formatDiscussion(node: DiscussionNode): Entry {
   return {
     id: node.id,
     message: node.title,
@@ -37,7 +77,7 @@ function formatDiscussion(node) {
   }
 }
 
-export async function onRequest(context) {
+export async function onRequest(context: { request: Request; env: Env }): Promise<Response> {
   const { request, env } = context
 
   if (request.method === 'POST') {
@@ -49,7 +89,10 @@ export async function onRequest(context) {
     }
 
     try {
-      const { message, turnstileToken } = await request.json()
+      const { message, turnstileToken } = (await request.json()) as {
+        message: string
+        turnstileToken: string
+      }
       if (!message || typeof message !== 'string' || message.trim().length === 0) {
         return new Response(JSON.stringify({ error: 'Message is required' }), {
           status: 400,
@@ -78,7 +121,7 @@ export async function onRequest(context) {
           response: turnstileToken,
         }),
       })
-      const verifyData = await verifyRes.json()
+      const verifyData = (await verifyRes.json()) as TurnstileResponse
       if (!verifyData.success) {
         return new Response(JSON.stringify({ error: 'Captcha verification failed' }), {
           status: 403,
@@ -110,7 +153,7 @@ export async function onRequest(context) {
         body: JSON.stringify({ query: mutation }),
       })
 
-      const json = await res.json()
+      const json = (await res.json()) as GitHubResponse
 
       if (json.errors) {
         throw new Error(json.errors[0]?.message || 'GitHub API error')
@@ -124,7 +167,7 @@ export async function onRequest(context) {
         headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
       })
     } catch (err) {
-      return new Response(JSON.stringify({ error: err.message }), {
+      return new Response(JSON.stringify({ error: (err as Error).message }), {
         status: 500,
         headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
       })
@@ -138,7 +181,7 @@ export async function onRequest(context) {
       body: JSON.stringify({ query: LIST_QUERY }),
     })
 
-    const json = await res.json()
+    const json = (await res.json()) as GitHubResponse
 
     if (json.errors) {
       throw new Error(json.errors[0]?.message || 'GitHub API error')
@@ -155,7 +198,7 @@ export async function onRequest(context) {
       },
     })
   } catch (err) {
-    return new Response(JSON.stringify({ error: err.message }), {
+    return new Response(JSON.stringify({ error: (err as Error).message }), {
       status: 500,
       headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
     })

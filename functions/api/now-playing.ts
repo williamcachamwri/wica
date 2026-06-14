@@ -1,7 +1,51 @@
 const SPOTIFY_ACCOUNTS = 'https://accounts.spotify.com/api/token'
 const SPOTIFY_API = 'https://api.spotify.com/v1/me/player/currently-playing'
 
-async function getAccessToken(env) {
+interface Env {
+  SPOTIFY_CLIENT_ID: string
+  SPOTIFY_CLIENT_SECRET: string
+  SPOTIFY_REFRESH_TOKEN: string
+}
+
+interface TokenResponse {
+  access_token: string
+}
+
+interface Artist {
+  name: string
+}
+
+interface Album {
+  name: string
+  images: Array<{ url: string }>
+}
+
+interface Track {
+  name: string
+  artists: Artist[]
+  album: Album
+  duration_ms: number
+  external_urls: { spotify: string }
+}
+
+interface NowPlayingResponse {
+  is_playing: boolean
+  item: Track
+  progress_ms: number
+}
+
+interface NowPlayingResult {
+  isPlaying: boolean
+  title?: string
+  artist?: string
+  album?: string
+  albumArt?: string | null
+  url?: string
+  progressMs?: number
+  durationMs?: number
+}
+
+async function getAccessToken(env: Env): Promise<string> {
   const body = new URLSearchParams({
     grant_type: 'refresh_token',
     refresh_token: env.SPOTIFY_REFRESH_TOKEN,
@@ -19,11 +63,11 @@ async function getAccessToken(env) {
     throw new Error('Failed to refresh token')
   }
 
-  const data = await res.json()
+  const data = (await res.json()) as TokenResponse
   return data.access_token
 }
 
-async function getNowPlaying(accessToken) {
+async function getNowPlaying(accessToken: string): Promise<NowPlayingResult> {
   const res = await fetch(SPOTIFY_API, {
     headers: { Authorization: `Bearer ${accessToken}` },
   })
@@ -42,12 +86,12 @@ async function getNowPlaying(accessToken) {
     throw new Error(`Failed to fetch currently playing: ${res.status} ${body}`)
   }
 
-  const data = await res.json()
+  const data = (await res.json()) as NowPlayingResponse
 
   return {
     isPlaying: true,
     title: data.item.name,
-    artist: data.item.artists.map((a) => a.name).join(', '),
+    artist: data.item.artists.map((a: Artist) => a.name).join(', '),
     album: data.item.album.name,
     albumArt: data.item.album.images[0]?.url || null,
     url: data.item.external_urls.spotify,
@@ -56,7 +100,7 @@ async function getNowPlaying(accessToken) {
   }
 }
 
-export async function onRequest(context) {
+export async function onRequest(context: { request: Request; env: Env }): Promise<Response> {
   const { env } = context
 
   if (!env.SPOTIFY_CLIENT_ID || !env.SPOTIFY_CLIENT_SECRET || !env.SPOTIFY_REFRESH_TOKEN) {
@@ -81,7 +125,7 @@ export async function onRequest(context) {
       },
     })
   } catch (err) {
-    return new Response(JSON.stringify({ error: err.message }), {
+    return new Response(JSON.stringify({ error: (err as Error).message }), {
       status: 500,
       headers: {
         'Content-Type': 'application/json',
