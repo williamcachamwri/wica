@@ -17,10 +17,7 @@ export function Footer() {
         </nav>
       </div>
       <div className="footer__bottom">
-        <p>
-          Built with React & Tailwind. Typeset in Inter, JetBrains Mono, and Caveat.{' '}
-          <InlineLink href="#">View source</InlineLink>.
-        </p>
+        <p>built with patience &middot; styled with restraint</p>
       </div>
     </footer>
   )
