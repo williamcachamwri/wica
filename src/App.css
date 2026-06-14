@@ -10,54 +10,37 @@ html {
 /* ── Name title effect ───────────────────────────────────────────── */
 .name-title {
   color: var(--text);
-  background: linear-gradient(
-    110deg,
-    var(--text) 0%,
-    var(--text) 40%,
-    var(--accent) 50%,
-    var(--text) 60%,
-    var(--text) 100%
-  );
-  background-size: 250% 100%;
-  background-position: 100% 0;
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  transition: background-position 0.8s cubic-bezier(0.22, 1, 0.36, 1);
-  padding-bottom: 0.1em;
+  transition: color 0.3s ease, transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-.name-title:hover {
-  background-position: 0% 0;
+@media (hover: hover) {
+  .name-title:hover {
+    color: var(--accent);
+  }
 }
 
 .name-title--hero {
-  transition: background-position 0.8s cubic-bezier(0.22, 1, 0.36, 1), filter 0.4s ease, transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
   display: inline-block;
 }
 
-.name-title--hero:hover {
-  background-position: 0% 0;
-  filter: drop-shadow(0 0 18px color-mix(in srgb, var(--accent) 30%, transparent));
-  transform: translateY(-2px);
+@media (hover: hover) {
+  .name-title--hero:hover {
+    filter: drop-shadow(0 0 18px color-mix(in srgb, var(--accent) 30%, transparent));
+    transform: translateY(-2px);
+  }
 }
 
-/* Load-in shimmer */
+/* Load-in fade */
 .app-shell--in .name-title {
-  animation: name-shine 1.4s cubic-bezier(0.22, 1, 0.36, 1) 0.3s both;
+  animation: name-fade-in 1s cubic-bezier(0.22, 1, 0.36, 1) 0.3s both;
 }
 
-@keyframes name-shine {
+@keyframes name-fade-in {
   0% {
-    background-position: 100% 0;
     opacity: 0;
     transform: translateY(8px);
   }
-  40% {
-    opacity: 1;
-  }
   100% {
-    background-position: 0% 0;
     opacity: 1;
     transform: translateY(0);
   }
@@ -412,9 +395,11 @@ html {
   cursor: pointer;
 }
 
-.sprite:hover {
-  transform: translateY(-5px) scale(1.12) rotate(-3deg);
-  color: var(--accent);
+@media (hover: hover) {
+  .sprite:hover {
+    transform: translateY(-5px) scale(1.12) rotate(-3deg);
+    color: var(--accent);
+  }
 }
 
 @keyframes sprite-bob {
@@ -548,10 +533,12 @@ html {
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
 }
 
-.project-card:hover {
-  transform: translateY(-3px);
-  border-color: var(--border-strong);
-  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.05);
+@media (hover: hover) {
+  .project-card:hover {
+    transform: translateY(-3px);
+    border-color: var(--border-strong);
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.05);
+  }
 }
 
 .icon-box {
@@ -567,9 +554,11 @@ html {
   transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), border-color 0.3s ease, background 0.2s ease;
 }
 
-.project-card:hover .icon-box {
-  transform: scale(1.08) rotate(-3deg);
-  border-color: var(--accent);
+@media (hover: hover) {
+  .project-card:hover .icon-box {
+    transform: scale(1.08) rotate(-3deg);
+    border-color: var(--accent);
+  }
 }
 
 .tag {
@@ -583,9 +572,11 @@ html {
   transition: background 0.2s ease, color 0.2s ease;
 }
 
-.project-card:hover .tag {
-  background: var(--note-bg);
-  color: var(--accent);
+@media (hover: hover) {
+  .project-card:hover .tag {
+    background: var(--note-bg);
+    color: var(--accent);
+  }
 }
 
 /* ── Static photo desk ───────────────────────────────────────────── */
@@ -640,13 +631,15 @@ html {
   transform: rotate(-1deg);
 }
 
-.polaroid:hover {
-  transform: rotate(0deg) translateY(-8px) scale(1.06);
-  box-shadow:
-    0 8px 16px rgba(0, 0, 0, 0.12),
-    0 20px 40px rgba(0, 0, 0, 0.14),
-    0 40px 72px rgba(0, 0, 0, 0.18);
-  z-index: 20;
+@media (hover: hover) {
+  .polaroid:hover {
+    transform: rotate(0deg) translateY(-8px) scale(1.06);
+    box-shadow:
+      0 8px 16px rgba(0, 0, 0, 0.12),
+      0 20px 40px rgba(0, 0, 0, 0.14),
+      0 40px 72px rgba(0, 0, 0, 0.18);
+    z-index: 20;
+  }
 }
 
 /* ── Footer ──────────────────────────────────────────────────────── */
@@ -1046,21 +1039,23 @@ html {
   transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.blog-item:hover {
-  background: var(--surface);
-  border-color: transparent;
-  transform: translateY(-3px);
-  box-shadow:
-    0 0 0 1px color-mix(in srgb, var(--accent) 15%, transparent),
-    0 20px 40px -10px color-mix(in srgb, var(--accent) 10%, transparent);
-}
+@media (hover: hover) {
+  .blog-item:hover {
+    background: var(--surface);
+    border-color: transparent;
+    transform: translateY(-3px);
+    box-shadow:
+      0 0 0 1px color-mix(in srgb, var(--accent) 15%, transparent),
+      0 20px 40px -10px color-mix(in srgb, var(--accent) 10%, transparent);
+  }
 
-.blog-item:hover::before {
-  opacity: 1;
-}
+  .blog-item:hover::before {
+    opacity: 1;
+  }
 
-.blog-item:hover::after {
-  transform: translateY(-50%) scaleY(1);
+  .blog-item:hover::after {
+    transform: translateY(-50%) scaleY(1);
+  }
 }
 
 .blog-item__link {
@@ -1094,8 +1089,10 @@ html {
   transition: color 0.25s ease;
 }
 
-.blog-item:hover .blog-item__title {
-  color: var(--accent);
+@media (hover: hover) {
+  .blog-item:hover .blog-item__title {
+    color: var(--accent);
+  }
 }
 
 .blog-item__date {
@@ -1106,8 +1103,10 @@ html {
   flex-shrink: 0;
 }
 
-.blog-item:hover .blog-item__date {
-  transform: translateX(4px);
+@media (hover: hover) {
+  .blog-item:hover .blog-item__date {
+    transform: translateX(4px);
+  }
 }
 
 .blog-item__summary {
@@ -1118,8 +1117,10 @@ html {
   transition: color 0.25s ease;
 }
 
-.blog-item:hover .blog-item__summary {
-  color: var(--text);
+@media (hover: hover) {
+  .blog-item:hover .blog-item__summary {
+    color: var(--text);
+  }
 }
 
 .blog-item__arrow {
@@ -1138,13 +1139,15 @@ html {
   transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.blog-item:hover .blog-item__arrow {
-  transform: translateX(0);
-  opacity: 1;
-}
+@media (hover: hover) {
+  .blog-item:hover .blog-item__arrow {
+    transform: translateX(0);
+    opacity: 1;
+  }
 
-.blog-item:hover .blog-item__arrow svg {
-  transform: translateX(3px);
+  .blog-item:hover .blog-item__arrow svg {
+    transform: translateX(3px);
+  }
 }
 
 /* ── Reduced motion ──────────────────────────────────────────────── */
