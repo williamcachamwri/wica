@@ -1,16 +1,17 @@
-import { useEffect, useRef, useState } from 'react'
+import { lazy, Suspense, useEffect, useRef, useState } from 'react'
 import { BrowserRouter, Route, Routes, useLocation } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import { CustomCursor } from './components/CustomCursor'
 import { FloatingNavbar } from './components/FloatingNavbar'
 import { Inspector } from './components/Inspector'
 import BlogList from './pages/BlogList'
-import BlogPost from './pages/BlogPost'
-import Guestbook from './pages/Guestbook'
-import Universe from './pages/Universe'
-import NotFound from './pages/NotFound'
 import Home from './pages/Home'
 import './App.css'
+
+const BlogPost = lazy(() => import('./pages/BlogPost'))
+const Guestbook = lazy(() => import('./pages/Guestbook'))
+const Universe = lazy(() => import('./pages/Universe'))
+const NotFound = lazy(() => import('./pages/NotFound'))
 
 const DEFAULT_ACCENT = '#2563eb'
 const THEME_KEY = 'ddt-theme'
@@ -66,14 +67,16 @@ function AnimatedRoutes() {
         transition={pageTransition}
         className="motion-page"
       >
-        <Routes location={location}>
-          <Route path="/" element={<Home />} />
-          <Route path="/blog" element={<BlogList />} />
-          <Route path="/blog/:slug" element={<BlogPost />} />
-          <Route path="/guestbook" element={<Guestbook />} />
-          <Route path="/universe" element={<Universe />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
+        <Suspense fallback={null}>
+          <Routes location={location}>
+            <Route path="/" element={<Home />} />
+            <Route path="/blog" element={<BlogList />} />
+            <Route path="/blog/:slug" element={<BlogPost />} />
+            <Route path="/guestbook" element={<Guestbook />} />
+            <Route path="/universe" element={<Universe />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </Suspense>
       </motion.div>
     </AnimatePresence>
   )

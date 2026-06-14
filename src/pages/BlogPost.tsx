@@ -13,6 +13,14 @@ import type { PostMeta } from '../data/allPosts'
 import { fetchPost } from '../lib/posts'
 import { getMdxPost } from '../lib/mdxPosts'
 
+function loadCss(href: string) {
+  if (document.querySelector(`link[href="${href}"]`)) return
+  const link = document.createElement('link')
+  link.rel = 'stylesheet'
+  link.href = href
+  document.head.appendChild(link)
+}
+
 function formatDate(date: string) {
   return new Date(date).toLocaleDateString('en-US', {
     year: 'numeric',
@@ -36,11 +44,17 @@ export default function BlogPost() {
       setMdxComponent(() => mdx.default)
       setPost({ meta: mdx.meta, content: '' })
       setError(false)
+      if (mdx.content?.includes('$')) loadCss('https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css')
+      if (mdx.content?.includes('```')) loadCss('https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css')
       return
     }
 
     fetchPost(slug)
-      .then(setPost)
+      .then((p) => {
+        setPost(p)
+        if (p.content.includes('$')) loadCss('https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css')
+        if (p.content.includes('```')) loadCss('https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css')
+      })
       .catch(() => setError(true))
   }, [slug])
 
