@@ -1,4 +1,10 @@
 import { useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
+
+interface CommitInfo {
+  sha: string
+  date: string
+}
 
 function timeAgo(iso: string): string {
   const diff = Date.now() - new Date(iso).getTime()
@@ -14,26 +20,48 @@ function timeAgo(iso: string): string {
 }
 
 export function BuildInfo() {
-  const [label, setLabel] = useState(() => timeAgo(__BUILD_TIME__))
+  const [info, setInfo] = useState<CommitInfo | null>(null)
 
   useEffect(() => {
-    const interval = setInterval(() => setLabel(timeAgo(__BUILD_TIME__)), 60000)
-    return () => clearInterval(interval)
+    let mounted = true
+
+    async function fetchCommit() {
+      try {
+        const res = await fetch('https://api.github.com/repos/williamcachamwri/wica/commits/main')
+        if (!res.ok) return
+        const json = await res.json()
+        if (mounted && json.sha) {
+          setInfo({
+            sha: json.sha.slice(0, 7),
+            date: json.commit?.committer?.date || json.commit?.author?.date || '',
+          })
+        }
+      } catch {
+        // ignore
+      }
+    }
+
+    fetchCommit()
+    const interval = setInterval(fetchCommit, 60000)
+    return () => {
+      mounted = false
+      clearInterval(interval)
+    }
   }, [])
 
+  if (!info) return null
+
   return (
-    <a
-      href={`https://github.com/williamcachamwri/pixelp/commit/${__COMMIT_HASH__}`}
-      target="_blank"
-      rel="noopener noreferrer"
+    <Link
+      to={`/changelog/${info.sha}`}
       className="build-info"
-      title={`Built at ${__BUILD_TIME__.replace('T', ' ').replace(/\.\d+Z/, ' UTC')}`}
+      title={`Latest commit · ${info.date.replace('T', ' ').replace(/\.\d+Z/, ' UTC')}`}
     >
       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <circle cx="12" cy="12" r="10" />
         <polyline points="12 6 12 12 16 14" />
       </svg>
-      built {label} · <code>{__COMMIT_HASH__}</code>
-    </a>
+      built {timeAgo(info.date)} · <code>{info.sha}</code>
+    </Link>
   )
 }
