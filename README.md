@@ -19,6 +19,10 @@
   <a href="https://github.com/williamcachamwri/wica">source</a>
 </p>
 
+<p align="center">
+  <img src="screenshots/hero.png" alt="wica portfolio screenshot" width="720">
+</p>
+
 <br>
 
 ---
