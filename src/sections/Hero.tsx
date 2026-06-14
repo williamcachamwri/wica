@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom'
 import { CyclingTypewriter } from '../components/CyclingTypewriter'
 import { InlineLink } from '../components/InlineLink'
 import { SpriteWithFirework } from '../components/SpriteWithFirework'
+import { AnimatedName } from '../components/AnimatedName'
 import { sprites } from '../data/sprites'
 
 interface HeroProps {
@@ -38,8 +39,8 @@ export function Hero({ typewriterStart }: HeroProps) {
       </div>
 
       <div className="mb-6">
-        <h1 className="name-title name-title--hero text-[clamp(2.25rem,8vw,3.75rem)] font-bold tracking-[-0.03em] leading-[1.08]">
-          Lê Vĩnh Khang
+        <h1 className="name-title name-title--hero text-[clamp(2rem,7vw,3.75rem)] font-bold tracking-[-0.03em] leading-[1.08]">
+          <AnimatedName>Lê Vĩnh Khang</AnimatedName>
         </h1>
         <span className="block mt-2 text-muted text-lg">Developer & maker</span>
       </div>

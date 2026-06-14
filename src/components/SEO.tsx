@@ -9,11 +9,16 @@ interface SEOProps {
   publishedTime?: string
 }
 
+function getBaseUrl() {
+  if (typeof window !== 'undefined') return window.location.origin
+  return 'https://wica.pages.dev'
+}
+
 const SITE = {
   name: 'Lê Vĩnh Khang',
   title: 'wica — minimalist developer portfolio',
   description: 'A personal portfolio by Lê Vĩnh Khang. Notes on design, code, and slow living.',
-  url: 'https://williamcachamwri.github.io/wica',
+  url: getBaseUrl(),
   twitter: '@williamcachamwri',
 }
 
