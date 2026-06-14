@@ -7,6 +7,7 @@ interface SEOProps {
   image?: string
   type?: 'website' | 'article'
   publishedTime?: string
+  subtitle?: string
 }
 
 const SITE = {
@@ -17,17 +18,44 @@ const SITE = {
   twitter: '@williamcachamwri',
 }
 
+function buildOgUrl({
+  title,
+  description,
+  subtitle,
+  isHome,
+}: {
+  title: string
+  description: string
+  subtitle?: string
+  isHome?: boolean
+}) {
+  const params = new URLSearchParams()
+  params.set('title', title)
+  params.set('description', description)
+  if (subtitle) params.set('subtitle', subtitle)
+  if (isHome) params.set('home', 'true')
+  return `${SITE.url}/api/og?${params.toString()}`
+}
+
 export function SEO({
   title,
   description = SITE.description,
   pathname = '',
-  image = '/og-image.png',
+  image,
   type = 'website',
   publishedTime,
+  subtitle,
 }: SEOProps) {
   const fullTitle = title ? `${title} · wica` : SITE.title
   const url = `${SITE.url}${pathname}`
-  const ogImage = image.startsWith('http') ? image : `${SITE.url}${image}`
+  const ogImage =
+    image ||
+    buildOgUrl({
+      title: fullTitle,
+      description,
+      subtitle,
+      isHome: !title,
+    })
 
   return (
     <Helmet>

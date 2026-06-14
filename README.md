@@ -204,6 +204,29 @@ npm run build
 npm run preview
 ```
 
+## deployment
+
+### Vercel (recommended)
+
+The project includes a Vercel Edge Function at `/api/og` that dynamically generates OpenGraph images.
+
+```bash
+npm i -g vercel
+vercel
+```
+
+`vercel.json` is already configured. The `build` script runs `vite build` only; OG images are generated on-demand via `/api/og?title=...&description=...`.
+
+### Static hosting (GitHub Pages, etc.)
+
+If you deploy to a static host without serverless functions, pre-generate OG images before building:
+
+```bash
+npm run build:static
+```
+
+This runs `npm run generate:og` to create `public/og-image.png` and `public/og/{slug}.png`, then builds the site.
+
 <br>
 
 ---

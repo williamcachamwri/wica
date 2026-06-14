@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "vite",
     "generate:og": "tsx scripts/generate-og.mjs",
-    "build": "npm run generate:og && vite build",
+    "build": "vite build",
+    "build:static": "npm run generate:og && vite build",
     "lint": "eslint .",
     "preview": "vite preview"
   },
@@ -14,6 +15,7 @@
     "@mdx-js/react": "^3.1.1",
     "@mdx-js/rollup": "^3.1.1",
     "@resvg/resvg-js": "^2.6.2",
+    "@vercel/og": "^0.11.1",
     "framer-motion": "^12.40.0",
     "react": "^19.2.6",
     "react-dom": "^19.2.6",
