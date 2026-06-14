@@ -1,0 +1,137 @@
+/* ── Project cards ───────────────────────────────────────────────── */
+.project-card {
+  position: relative;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 1.15rem;
+  transition:
+    transform 0.3s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.3s ease,
+    border-color 0.3s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03), 0 1px 2px rgba(0, 0, 0, 0.02);
+}
+
+.dark .project-card {
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15), 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+@media (hover: hover) {
+  .project-card:hover {
+    transform: translateY(-3px);
+    border-color: var(--border-strong);
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.05);
+  }
+}
+
+.icon-box {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  background: var(--icon-box-bg);
+  border: 1px solid var(--border);
+  flex-shrink: 0;
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), border-color 0.3s ease, background 0.2s ease;
+}
+
+@media (hover: hover) {
+  .project-card:hover .icon-box {
+    transform: scale(1.08) rotate(-3deg);
+    border-color: var(--accent);
+  }
+}
+
+.tag {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-muted);
+  background: var(--code-bg);
+  padding: 3px 8px;
+  border-radius: 999px;
+  letter-spacing: 0.02em;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+@media (hover: hover) {
+  .project-card:hover .tag {
+    background: var(--note-bg);
+    color: var(--accent);
+  }
+}
+
+/* ── Static photo desk ───────────────────────────────────────────── */
+.photo-desk {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0;
+  padding: 1.5rem 0 2rem;
+}
+
+.polaroid {
+  flex: 0 0 auto;
+  width: 130px;
+  background: #ffffff;
+  padding: 7px 7px 22px 7px;
+  border-radius: 3px;
+  box-shadow:
+    0 1px 1px rgba(0, 0, 0, 0.08),
+    0 4px 8px rgba(0, 0, 0, 0.06),
+    0 10px 20px rgba(0, 0, 0, 0.08);
+  transform: rotate(var(--rotate, 0deg));
+  transition:
+    transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1),
+    box-shadow 0.35s ease,
+    z-index 0s;
+  margin-left: -18px;
+  position: relative;
+  z-index: 1;
+}
+
+.polaroid:first-child {
+  margin-left: 0;
+}
+
+.polaroid img {
+  display: block;
+  width: 100%;
+  height: 100px;
+  object-fit: cover;
+  border-radius: 2px;
+  background: #f3f4f6;
+}
+
+.polaroid figcaption {
+  font-family: "Caveat", "Kalam", cursive;
+  font-size: 0.95rem;
+  color: #1a1a1a;
+  text-align: center;
+  margin-top: 8px;
+  line-height: 1.2;
+  transform: rotate(-1deg);
+}
+
+@media (hover: hover) {
+  .polaroid:hover {
+    transform: rotate(0deg) translateY(-8px) scale(1.06);
+    box-shadow:
+      0 8px 16px rgba(0, 0, 0, 0.12),
+      0 20px 40px rgba(0, 0, 0, 0.14),
+      0 40px 72px rgba(0, 0, 0, 0.18);
+    z-index: 20;
+  }
+}
+
+@media (max-width: 640px) {
+  .polaroid {
+    width: 130px;
+    margin-left: -22px;
+  }
+
+  .polaroid img {
+    height: 100px;
+  }
+}

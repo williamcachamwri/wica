@@ -1,0 +1,56 @@
+/* ── Floating inspect button ─────────────────────────────────────── */
+.inspect-floating {
+  position: fixed;
+  bottom: 1.5rem;
+  left: 1.5rem;
+  z-index: 71;
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.55rem 1rem;
+  background: var(--navbar-bg);
+  border: 1px solid var(--navbar-border);
+  border-radius: 999px;
+  box-shadow:
+    0 4px 6px rgba(0, 0, 0, 0.02),
+    0 16px 32px rgba(0, 0, 0, 0.05);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  font-size: 13.5px;
+  line-height: 1;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: color 0.2s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.inspect-floating:hover {
+  color: var(--text);
+  border-color: color-mix(in srgb, var(--accent) 30%, var(--navbar-border));
+}
+
+.inspect-floating--active {
+  color: var(--accent);
+  border-color: color-mix(in srgb, var(--accent) 40%, transparent);
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--accent) 10%, transparent),
+    0 4px 12px color-mix(in srgb, var(--accent) 8%, transparent);
+}
+
+.inspect-floating__icon {
+  font-size: 18px;
+  line-height: 1;
+  display: inline-flex;
+}
+
+.inspect-floating__label {
+  font-weight: 500;
+}
+
+@media (max-width: 640px) {
+  .inspect-floating {
+    bottom: 1rem;
+    left: 1rem;
+    padding: 0.45rem 0.85rem;
+    font-size: 12.5px;
+  }
+}

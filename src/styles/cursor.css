@@ -1,0 +1,105 @@
+/* ── Custom cursor ───────────────────────────────────────────────── */
+@media (pointer: fine) {
+  html,
+  body,
+  a,
+  button,
+  [role="button"],
+  input,
+  textarea,
+  select {
+    cursor: none;
+  }
+}
+
+.custom-cursor {
+  position: fixed;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  z-index: 9999;
+  border-radius: 50%;
+  transform: translate(-100px, -100px);
+  will-change: transform;
+}
+
+.custom-cursor--dot {
+  width: 8px;
+  height: 8px;
+  margin-top: -4px;
+  margin-left: -4px;
+  background: var(--text);
+  mix-blend-mode: difference;
+  transition: width 0.15s ease, height 0.15s ease, margin 0.15s ease, background 0.15s ease;
+}
+
+.custom-cursor--ring {
+  width: 32px;
+  height: 32px;
+  margin-top: -16px;
+  margin-left: -16px;
+  border: 1px solid var(--cursor-ring);
+  transition: width 0.2s ease, height 0.2s ease, margin 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+}
+
+.custom-cursor--hover.custom-cursor--dot {
+  width: 12px;
+  height: 12px;
+  margin-top: -6px;
+  margin-left: -6px;
+  background: var(--accent);
+  mix-blend-mode: normal;
+}
+
+.custom-cursor--hover.custom-cursor--ring {
+  width: 48px;
+  height: 48px;
+  margin-top: -24px;
+  margin-left: -24px;
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 8%, transparent);
+}
+
+.custom-cursor--click.custom-cursor--dot {
+  width: 5px;
+  height: 5px;
+  margin-top: -2.5px;
+  margin-left: -2.5px;
+}
+
+.custom-cursor--click.custom-cursor--ring {
+  width: 38px;
+  height: 38px;
+  margin-top: -19px;
+  margin-left: -19px;
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+}
+
+.custom-cursor--ripple {
+  width: 8px;
+  height: 8px;
+  margin-top: -4px;
+  margin-left: -4px;
+  border: 1px solid var(--accent);
+  background: transparent;
+  animation: cursor-ripple 0.5s ease-out forwards;
+}
+
+@keyframes cursor-ripple {
+  0% {
+    width: 8px; height: 8px;
+    margin-top: -4px; margin-left: -4px;
+    opacity: 0.8;
+  }
+  100% {
+    width: 64px; height: 64px;
+    margin-top: -32px; margin-left: -32px;
+    opacity: 0;
+  }
+}
+
+.custom-cursor--hidden {
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}

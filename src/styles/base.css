@@ -1,0 +1,153 @@
+/* ── Base ────────────────────────────────────────────────────────── */
+html {
+  scroll-behavior: smooth;
+}
+
+::selection {
+  background-color: rgba(37, 99, 235, 0.12);
+}
+
+/* ── Page transition wrapper ─────────────────────────────────────── */
+.motion-page {
+  width: 100%;
+  min-height: 100vh;
+}
+
+/* ── App shell fade ──────────────────────────────────────────────── */
+.app-shell {
+  min-height: 100vh;
+  background: var(--surface);
+  color: var(--text-primary);
+  transition: opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.app-shell--out {
+  opacity: 0;
+}
+
+.app-shell--in {
+  opacity: 1;
+}
+
+/* ── Skip link ───────────────────────────────────────────────────── */
+.skip-link {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  z-index: 50;
+  transform: translateY(-150%);
+  transition: transform 0.2s ease;
+  padding: 0.5rem 1rem;
+  background: var(--bg);
+  border-radius: 0.5rem;
+  border: 1px solid var(--border);
+  font-size: 0.875rem;
+}
+
+.skip-link:focus {
+  transform: translateY(0);
+}
+
+/* ── Film grain texture ──────────────────────────────────────────── */
+.grain {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.03;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+}
+
+.dark .grain {
+  filter: invert(1);
+}
+
+/* ── Blinking cursor ─────────────────────────────────────────────── */
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+.animate-blink {
+  animation: blink 1.05s step-end infinite;
+}
+
+/* ── Section divider ─────────────────────────────────────────────── */
+.section-divider {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  margin-bottom: 1.25rem;
+  padding-bottom: 0.5rem;
+}
+
+.section-divider::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 24px;
+  height: 2px;
+  background: color-mix(in srgb, var(--accent) 50%, transparent);
+  border-radius: 1px;
+  transition: width 0.3s ease, opacity 0.3s ease;
+  opacity: 0.7;
+}
+
+.section-divider:hover::after {
+  width: 100%;
+  opacity: 1;
+}
+
+.section-divider span {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--text-subtle);
+}
+
+.dark .section-divider::after {
+  opacity: 0.85;
+}
+
+/* ── Math ──────────────────────────────────────────────────────────── */
+.math-inline {
+  display: inline-flex;
+  align-items: center;
+}
+
+.math-block {
+  display: flex;
+  justify-content: center;
+  margin: 1.25rem 0;
+  overflow-x: auto;
+}
+
+/* ── Reduced motion ──────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .loader,
+  .loader-half,
+  .loader-line,
+  .slider-track,
+  .sprite,
+  .polaroid,
+  .project-card,
+  .inline-link,
+  .subtle-link {
+    transition: none;
+    animation: none;
+  }
+
+  .app-shell {
+    opacity: 1;
+  }
+}
+
+/* ── Mobile app shell ────────────────────────────────────────────── */
+@media (max-width: 640px) {
+  .app-shell > main {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+}

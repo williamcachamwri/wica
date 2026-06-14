@@ -1,0 +1,268 @@
+/* ── Guestbook ──────────────────────────────────────────────────── */
+.guestbook-form {
+  margin-bottom: 2rem;
+  transition: opacity 0.3s ease;
+}
+
+.guestbook-form--sent {
+  animation: guestbookPulse 0.5s ease;
+}
+
+@keyframes guestbookPulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.01); }
+  100% { transform: scale(1); }
+}
+
+.guestbook-form__card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 1.25rem;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.guestbook-form__card:focus-within {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent) 15%, transparent);
+}
+
+.guestbook-form__label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.guestbook-form__field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.guestbook-form__input {
+  width: 100%;
+  padding: 0.75rem 0.85rem;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 14px;
+  font-family: inherit;
+  line-height: 1.55;
+  outline: none;
+  resize: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  box-sizing: border-box;
+}
+
+.guestbook-form__input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 8%, transparent);
+}
+
+.guestbook-form__input:disabled {
+  opacity: 0.5;
+}
+
+.guestbook-form__input::placeholder {
+  color: var(--text-subtle);
+  opacity: 0.5;
+}
+
+.guestbook-form__toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.guestbook-form__actions {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.guestbook-form__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.55rem 1rem;
+  border: 1px solid var(--accent);
+  border-radius: 999px;
+  background: var(--accent);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 500;
+  font-family: inherit;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: opacity 0.2s ease, transform 0.15s ease;
+}
+
+.guestbook-form__btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.guestbook-form__btn:not(:disabled):hover {
+  opacity: 0.85;
+}
+
+.guestbook-form__btn:not(:disabled):active {
+  transform: scale(0.96);
+}
+
+.guestbook-form__btn-icon {
+  opacity: 0.7;
+}
+
+.guestbook-form__spinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: guestbookSpin 0.6s linear infinite;
+}
+
+@keyframes guestbookSpin {
+  to { transform: rotate(360deg); }
+}
+
+.guestbook-form__captcha {
+  --turnstile-scale: 0.78;
+  transform: scale(var(--turnstile-scale));
+  transform-origin: left center;
+}
+
+.guestbook-form__count {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 11px;
+  color: var(--text-subtle);
+  opacity: 0.4;
+  transition: opacity 0.2s ease, color 0.2s ease;
+}
+
+.guestbook-form__count--warn {
+  opacity: 1;
+  color: var(--accent);
+}
+
+.guestbook-entries {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.guestbook-entry {
+  display: flex;
+  gap: 0.75rem;
+  padding: 0.9rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+  text-decoration: none;
+  animation: guestbookFadeIn 0.35s ease both;
+  transition: border-color 0.2s ease, transform 0.2s ease;
+}
+
+@keyframes guestbookFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.guestbook-entry:hover {
+  border-color: var(--accent);
+  transform: translateY(-1px);
+}
+
+.guestbook-entry__avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 600;
+  color: #fff;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.guestbook-entry__body {
+  flex: 1;
+  min-width: 0;
+}
+
+.guestbook-entry__message {
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--text);
+  margin-bottom: 0.35rem;
+  word-break: break-word;
+}
+
+.guestbook-entry__meta {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 11.5px;
+  color: var(--text-subtle);
+  font-family: "JetBrains Mono", monospace;
+}
+
+.guestbook-entry__author {
+  font-weight: 500;
+  opacity: 0.7;
+}
+
+.guestbook-entry__dot {
+  opacity: 0.25;
+}
+
+.guestbook-entry__date {
+  opacity: 0.35;
+  font-size: 11px;
+}
+
+.guestbook-loading {
+  display: flex;
+  gap: 0.35rem;
+  justify-content: center;
+  padding: 2rem 0;
+}
+
+.guestbook-loading__dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--text-subtle);
+  opacity: 0.25;
+  animation: guestbookBounce 0.8s ease-in-out infinite;
+}
+
+.guestbook-loading__dot:nth-child(2) {
+  animation-delay: 0.15s;
+}
+
+.guestbook-loading__dot:nth-child(3) {
+  animation-delay: 0.3s;
+}
+
+@keyframes guestbookBounce {
+  0%, 80%, 100% { transform: translateY(0); opacity: 0.25; }
+  40% { transform: translateY(-6px); opacity: 0.7; }
+}

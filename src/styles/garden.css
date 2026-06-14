@@ -1,0 +1,22 @@
+/* ── Garden page ─────────────────────────────────────────────────── */
+.garden-wrapper {
+  width: 100%;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.2);
+  background: #050510;
+}
+
+.garden-ambient-drift {
+  animation: garden-drift var(--garden-drift-duration, 4s) ease-in-out infinite alternate;
+  animation-delay: var(--garden-drift-delay, 0ms);
+}
+
+@keyframes garden-drift {
+  0% {
+    transform: translate(0, 0);
+  }
+  100% {
+    transform: translate(var(--garden-drift-x, 12px), var(--garden-drift-y, 8px));
+  }
+}
