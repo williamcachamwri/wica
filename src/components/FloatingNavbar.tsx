@@ -24,7 +24,7 @@ export function FloatingNavbar({ inspectActive, onToggleInspect, accent, onAccen
   return (
     <nav className="floating-navbar">
       <div className="floating-navbar__brand">
-        <Link to="/">ddt</Link>
+        <Link to="/">lvk</Link>
       </div>
 
       <div className="floating-navbar__links">
