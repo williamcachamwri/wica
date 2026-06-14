@@ -751,7 +751,7 @@ html {
 /* ── Project cards ───────────────────────────────────────────────── */
 .project-card {
   position: relative;
-  background: var(--bg);
+  background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 16px;
   padding: 1.15rem;
