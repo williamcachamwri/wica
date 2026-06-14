@@ -1208,10 +1208,10 @@ html {
   margin-top: 0.75rem;
   border-top: 1px solid var(--border);
   padding-top: 0.75rem;
+  overflow: hidden;
   font-family: 'JetBrains Mono', monospace;
   font-size: 12px;
   line-height: 1.5;
-  overflow-x: auto;
 }
 
 .diff-line {
