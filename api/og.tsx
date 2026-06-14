@@ -1,4 +1,5 @@
 import { ImageResponse } from '@vercel/og'
+import { INTER_BOLD, INTER_REGULAR } from './fonts'
 
 export const config = {
   runtime: 'edge',
@@ -7,6 +8,15 @@ export const config = {
 const SITE = {
   name: 'Lê Vĩnh Khang',
   url: 'https://williamcachamwri.github.io/wica',
+}
+
+function base64ToArrayBuffer(base64: string) {
+  const binary = atob(base64)
+  const bytes = new Uint8Array(binary.length)
+  for (let i = 0; i < binary.length; i++) {
+    bytes[i] = binary.charCodeAt(i)
+  }
+  return bytes.buffer
 }
 
 export default async function handler(req: Request) {
@@ -134,17 +144,13 @@ export default async function handler(req: Request) {
       fonts: [
         {
           name: 'Inter',
-          data: await fetch(
-            'https://github.com/rsms/inter/raw/master/docs/font-files/Inter-Regular.woff2'
-          ).then((res) => res.arrayBuffer()),
+          data: base64ToArrayBuffer(INTER_REGULAR),
           weight: 400,
           style: 'normal',
         },
         {
           name: 'Inter',
-          data: await fetch(
-            'https://github.com/rsms/inter/raw/master/docs/font-files/Inter-Bold.woff2'
-          ).then((res) => res.arrayBuffer()),
+          data: base64ToArrayBuffer(INTER_BOLD),
           weight: 700,
           style: 'normal',
         },
