@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>wica — blog</title>
+    <link>https://wica.info</link>
+    <description>Notes on design, code, and slow living.</description>
+    <language>en</language>
+    <lastBuildDate>Sun, 14 Jun 2026 17:44:24 GMT</lastBuildDate>
+    <atom:link href="https://wica.info/feed.xml" rel="self" type="application/rss+xml"/>
+    <item>
+      <title>MDX Interactive Test</title>
+      <link>https://wica.info/blog/mdx-test</link>
+      <guid isPermaLink="true">https://wica.info/blog/mdx-test</guid>
+      <description>A demo of JSX components, LaTeX math, and Markdown living together.</description>
+      <pubDate>Sun, 15 Dec 2024 00:00:00 GMT</pubDate>
+    </item>
+    <item>
+      <title>Markdown &amp; MDX Feature Test</title>
+      <link>https://wica.info/blog/markdown-test</link>
+      <guid isPermaLink="true">https://wica.info/blog/markdown-test</guid>
+      <description>A full exercise of every supported Markdown feature on the blog.</description>
+      <pubDate>Sun, 01 Dec 2024 00:00:00 GMT</pubDate>
+    </item>
+    <item>
+      <title>Embracing Slow Tech</title>
+      <link>https://wica.info/blog/slow-tech</link>
+      <guid isPermaLink="true">https://wica.info/blog/slow-tech</guid>
+      <description>On resisting the urge to optimize every second and building software that respects attention.</description>
+      <pubDate>Sat, 10 Aug 2024 00:00:00 GMT</pubDate>
+    </item>
+    <item>
+      <title>Designing Systems That Breathe</title>
+      <link>https://wica.info/blog/design-systems</link>
+      <guid isPermaLink="true">https://wica.info/blog/design-systems</guid>
+      <description>Thoughts on whitespace, rhythm, and intentional constraints in UI design.</description>
+      <pubDate>Wed, 22 May 2024 00:00:00 GMT</pubDate>
+    </item>
+    <item>
+      <title>The Quiet Joy of Small Tools</title>
+      <link>https://wica.info/blog/quiet-tools</link>
+      <guid isPermaLink="true">https://wica.info/blog/quiet-tools</guid>
+      <description>Why I prefer building tiny, focused utilities over large platforms.</description>
+      <pubDate>Fri, 15 Mar 2024 00:00:00 GMT</pubDate>
+    </item>
+  </channel>
+</rss>

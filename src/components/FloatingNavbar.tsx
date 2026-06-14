@@ -30,6 +30,7 @@ export function FloatingNavbar({ inspectActive, onToggleInspect, accent, onAccen
       <div className="floating-navbar__links">
         <Link to="/" className={isActive('/') ? 'active' : ''}>home</Link>
         <Link to="/blog" className={isActive('/blog') ? 'active' : ''}>blog</Link>
+        <Link to="/guestbook" className={isActive('/guestbook') ? 'active' : ''}>guestbook</Link>
         <Link to="/universe" className={isActive('/universe') ? 'active' : ''}>universe</Link>
       </div>
 

@@ -42,9 +42,14 @@ export default function BlogList() {
                     <h2 className="blog-item__title">
                       {post.title}
                     </h2>
-                    <time className="blog-item__date" dateTime={post.date}>
-                      {formatDate(post.date)}
-                    </time>
+                    <div className="blog-item__meta">
+                      <time className="blog-item__date" dateTime={post.date}>
+                        {formatDate(post.date)}
+                      </time>
+                      {post.readTime && (
+                        <span className="blog-item__readtime">{post.readTime} read</span>
+                      )}
+                    </div>
                   </div>
                   <p className="blog-item__summary">{post.summary}</p>
                   <span className="blog-item__arrow" aria-hidden="true">
@@ -61,7 +66,7 @@ export default function BlogList() {
         </section>
 
         <footer className="text-sm text-subtle text-center">
-          <p>built with patience &middot; styled with restraint</p>
+          <p>built with patience · styled with restraint</p>
         </footer>
       </main>
     </div>

@@ -11,7 +11,7 @@ const ogDir = path.join(publicDir, 'og')
 
 const SITE = {
   name: 'Lê Vĩnh Khang',
-  url: 'https://wica.pages.dev',
+  url: 'https://wica.info',
 }
 
 const PAGES = [

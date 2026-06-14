@@ -142,7 +142,17 @@ export default function BlogPost() {
           <h1 className="name-title text-[clamp(1.75rem,5vw,2.5rem)] font-bold tracking-[-0.02em] leading-[1.15]">
             {post.meta.title}
           </h1>
-          <time className="block mt-3 text-sm text-subtle font-mono">{formatDate(post.meta.date)}</time>
+          <div className="mt-3 text-sm text-subtle font-mono">
+            <time dateTime={post.meta.date}>{formatDate(post.meta.date)}</time>
+            {(() => {
+              const wc = post.meta.wordCount
+              if (wc) {
+                const rt = post.meta.readTime || `${Math.max(1, Math.round(wc / 200))} min`
+                return <div className="mt-0.5 text-xs opacity-60">{wc} words · {rt} read</div>
+              }
+              return null
+            })()}
+          </div>
         </section>
 
         <article className="prose mb-16">
@@ -159,10 +169,9 @@ export default function BlogPost() {
         </article>
 
         <footer className="text-sm text-subtle text-center">
-          <p>built with patience &middot; styled with restraint</p>
+          <p>built with patience · styled with restraint</p>
         </footer>
       </main>
     </div>
   )
 }
-

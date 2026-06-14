@@ -10,4 +10,12 @@ export default defineConfig({
     tailwindcss(),
     mdx(),
   ],
+  server: {
+    proxy: {
+      '/api': {
+        target: 'https://wica.pages.dev',
+        changeOrigin: true,
+      },
+    },
+  },
 })

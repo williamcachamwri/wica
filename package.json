@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "vite",
     "generate:og": "tsx scripts/generate-og.mjs",
-    "build": "npm run generate:og && vite build",
+    "generate:rss": "tsx scripts/generate-rss.mjs",
+    "build": "npm run generate:og && npm run generate:rss && vite build",
     "lint": "eslint .",
     "preview": "vite preview"
   },

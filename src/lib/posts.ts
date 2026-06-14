@@ -22,6 +22,14 @@ function parseFrontmatter(raw: string): { frontmatter: Record<string, string>; c
   return { frontmatter, content: match[2].trim() }
 }
 
+function countWords(text: string): number {
+  return text.split(/\s+/).filter(Boolean).length
+}
+
+function estimateReadTime(wordCount: number): string {
+  return `${Math.max(1, Math.round(wordCount / 200))} min`
+}
+
 export async function fetchPost(slug: string): Promise<ParsedPost> {
   const response = await fetch(`/posts/${slug}.md`)
   if (!response.ok) {
@@ -29,6 +37,8 @@ export async function fetchPost(slug: string): Promise<ParsedPost> {
   }
   const raw = await response.text()
   const { frontmatter, content } = parseFrontmatter(raw)
+  const wordCount = countWords(content)
+  const readTime = estimateReadTime(wordCount)
 
   return {
     meta: {
@@ -36,6 +46,8 @@ export async function fetchPost(slug: string): Promise<ParsedPost> {
       title: frontmatter.title || slug,
       date: frontmatter.date || '',
       summary: frontmatter.summary || '',
+      wordCount,
+      readTime,
     },
     content,
   }

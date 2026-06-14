@@ -6,6 +6,7 @@ import { FloatingNavbar } from './components/FloatingNavbar'
 import { Inspector } from './components/Inspector'
 import BlogList from './pages/BlogList'
 import BlogPost from './pages/BlogPost'
+import Guestbook from './pages/Guestbook'
 import Universe from './pages/Universe'
 import NotFound from './pages/NotFound'
 import Home from './pages/Home'
@@ -20,7 +21,7 @@ function getInitialTheme(): Theme {
   if (typeof window === 'undefined') return 'light'
   const saved = localStorage.getItem(THEME_KEY) as Theme | null
   if (saved === 'light' || saved === 'dark') return saved
-  return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+  return 'light'
 }
 
 const pageVariants = {
@@ -69,6 +70,7 @@ function AnimatedRoutes() {
           <Route path="/" element={<Home />} />
           <Route path="/blog" element={<BlogList />} />
           <Route path="/blog/:slug" element={<BlogPost />} />
+          <Route path="/guestbook" element={<Guestbook />} />
           <Route path="/universe" element={<Universe />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
@@ -87,10 +89,9 @@ export default function App() {
 
   useEffect(() => {
     const saved = localStorage.getItem('ddt-accent')
-    if (saved) {
-      setAccent(saved)
-      document.documentElement.style.setProperty('--accent', saved)
-    }
+    const color = saved || DEFAULT_ACCENT
+    setAccent(color)
+    document.documentElement.style.setProperty('--accent', color)
   }, [])
 
   useEffect(() => {

@@ -11,7 +11,7 @@ interface SEOProps {
 
 function getBaseUrl() {
   if (typeof window !== 'undefined') return window.location.origin
-  return 'https://wica.pages.dev'
+  return 'https://wica.info'
 }
 
 const SITE = {

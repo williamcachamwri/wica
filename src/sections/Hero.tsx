@@ -3,6 +3,7 @@ import { CyclingTypewriter } from '../components/CyclingTypewriter'
 import { InlineLink } from '../components/InlineLink'
 import { SpriteWithFirework } from '../components/SpriteWithFirework'
 import { AnimatedName } from '../components/AnimatedName'
+import { NowPlaying } from '../components/NowPlaying'
 import { sprites } from '../data/sprites'
 
 interface HeroProps {
@@ -43,6 +44,7 @@ export function Hero({ typewriterStart }: HeroProps) {
           <AnimatedName>Lê Vĩnh Khang</AnimatedName>
         </h1>
         <span className="block mt-2 text-muted text-lg">Developer & maker</span>
+        <NowPlaying />
       </div>
 
       <div className="space-y-4 text-[17px] leading-[1.7] text-text-secondary max-w-[620px] mb-10">
@@ -54,7 +56,6 @@ export function Hero({ typewriterStart }: HeroProps) {
         </p>
       </div>
 
-      {/* Contact — simple, near header */}
       <div className="text-[17px] leading-[1.7] text-text-secondary">
         <p>
           Get in touch{' '}
@@ -65,6 +66,9 @@ export function Hero({ typewriterStart }: HeroProps) {
         <p className="flex flex-wrap gap-x-4 gap-y-1 mt-1 text-[15px]">
           <Link to="/blog" className="subtle-link">
             blog ›
+          </Link>
+          <Link to="/guestbook" className="subtle-link">
+            guestbook ›
           </Link>
           <Link to="/universe" className="subtle-link">
             universe ›
