@@ -64,4 +64,3 @@ export function SpriteWithFirework({ children, delay }: SpriteWithFireworkProps)
     </span>
   )
 }
-/* 1407faca */

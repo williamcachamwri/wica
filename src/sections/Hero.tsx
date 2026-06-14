@@ -73,4 +73,3 @@ export function Hero({ typewriterStart }: HeroProps) {
     </section>
   )
 }
-/* a3515d01 */

@@ -39,4 +39,3 @@ export function ProjectCard({ project }: ProjectCardProps) {
     </article>
   )
 }
-/* 121066a5 */

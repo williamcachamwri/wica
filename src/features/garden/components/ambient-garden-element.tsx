@@ -21,4 +21,3 @@ export function AmbientGardenElement({ idSeed, element, scale }: AmbientGardenEl
     </div>
   );
 }
-/* 756bc967 */

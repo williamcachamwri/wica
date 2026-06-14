@@ -16,4 +16,3 @@ export function Memories() {
     </section>
   )
 }
-/* f512c282 */

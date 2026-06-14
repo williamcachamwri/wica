@@ -10,4 +10,3 @@ export function PhotoCard({ src, caption, rotate }: PhotoCardProps) {
     </figure>
   )
 }
-/* 0c7b5a01 */

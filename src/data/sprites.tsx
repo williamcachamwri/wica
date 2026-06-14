@@ -14,4 +14,3 @@ export const sprites: SpriteItem[] = [
   { id: "cat", el: <CatSprite />, delay: 0 },
   { id: "bonsai", el: <BonsaiSprite />, delay: 0.18 },
 ];
-/* 3f37161f */

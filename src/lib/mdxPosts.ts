@@ -12,4 +12,3 @@ export const mdxPosts: PostMeta[] = Object.values(modules).map((mod) => mod.meta
 export function getMdxPost(slug: string): MdxModule | undefined {
   return Object.values(modules).find((mod) => mod.meta.slug === slug)
 }
-/* 5215babe */

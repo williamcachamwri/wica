@@ -11,4 +11,3 @@ export default defineConfig({
     mdx(),
   ],
 })
-/* 722c0a1e */

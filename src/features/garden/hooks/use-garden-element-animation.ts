@@ -50,4 +50,3 @@ export function useGardenElementAnimation(config: GardenElementConfig): PixelFra
   if (prefersReducedMotion) return frames[0];
   return frames[index] ?? frames[0];
 }
-/* d4587455 */

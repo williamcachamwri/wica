@@ -39,4 +39,3 @@ export type GardenObject = {
   scale?: number;
   element?: GardenElementType;
 };
-/* f805724a */

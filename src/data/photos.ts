@@ -9,4 +9,3 @@ const basePhotos: Photo[] = [
 ]
 
 export const photos: Photo[] = [...basePhotos, ...basePhotos]
-/* 4a4bde63 */

@@ -60,4 +60,3 @@ export const PixelRenderer = memo(function PixelRenderer({
     </div>
   );
 });
-/* 3a2a8ce9 */

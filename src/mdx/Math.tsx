@@ -27,4 +27,3 @@ export function Math({ children, block = false }: MathProps) {
     />
   )
 }
-/* 78683e38 */

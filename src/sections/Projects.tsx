@@ -14,4 +14,3 @@ export function Projects() {
     </section>
   )
 }
-/* 928eec8c */

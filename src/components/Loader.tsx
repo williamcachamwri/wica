@@ -24,4 +24,3 @@ export function Loader({ onDone }: LoaderProps) {
     </div>
   )
 }
-/* 3adbe90c */

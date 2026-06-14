@@ -399,4 +399,3 @@ const GardenObjectRenderer = memo(({ obj }: { obj: GardenObject }) => {
 
   return null;
 });
-/* dc1d36d5 */
