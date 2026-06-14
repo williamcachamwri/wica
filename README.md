@@ -4,13 +4,13 @@
 </p>
 
 <p align="center">
-  <code>Vite 5</code>
-  <code>React 19</code>
-  <code>TypeScript</code>
-  <code>Tailwind v4</code>
-  <code>Framer Motion</code>
-  <code>MDX</code>
-  <code>KaTeX</code>
+  <a href="https://vite.dev"><img src="https://img.shields.io/badge/Vite-^5.4-646CFF?logo=vite&logoColor=white&style=flat-square" alt="Vite"></a>
+  <a href="https://react.dev"><img src="https://img.shields.io/badge/React-^19-61DAFB?logo=react&logoColor=white&style=flat-square" alt="React"></a>
+  <a href="https://www.typescriptlang.org"><img src="https://img.shields.io/badge/TypeScript-^5.7-3178C6?logo=typescript&logoColor=white&style=flat-square" alt="TypeScript"></a>
+  <a href="https://tailwindcss.com"><img src="https://img.shields.io/badge/Tailwind_v4-0F172A?logo=tailwindcss&logoColor=white&style=flat-square" alt="Tailwind CSS"></a>
+  <a href="https://www.framer.com/motion"><img src="https://img.shields.io/badge/Framer_Motion-0055FF?logo=framer&logoColor=white&style=flat-square" alt="Framer Motion"></a>
+  <a href="https://mdxjs.com"><img src="https://img.shields.io/badge/MDX-1B1F24?logo=mdx&logoColor=white&style=flat-square" alt="MDX"></a>
+  <a href="https://katex.org"><img src="https://img.shields.io/badge/KaTeX-008080?logo=latex&logoColor=white&style=flat-square" alt="KaTeX"></a>
 </p>
 
 <p align="center">
