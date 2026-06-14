@@ -9,6 +9,36 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const publicDir = path.resolve(__dirname, '../public')
 const ogDir = path.join(publicDir, 'og')
 
+const SITE = {
+  name: 'Lê Vĩnh Khang',
+  url: 'https://williamcachamwri.github.io/wica',
+}
+
+const PAGES = [
+  {
+    slug: 'home',
+    title: 'wica — minimalist developer portfolio',
+    description: 'A personal portfolio by Lê Vĩnh Khang. Notes on design, code, and slow living.',
+    subtitle: 'built with patience · styled with restraint',
+    isHome: true,
+  },
+  {
+    slug: 'blog',
+    title: 'Blog',
+    description: 'Notes on design, code, and slow living.',
+  },
+  {
+    slug: 'universe',
+    title: 'Universe',
+    description: 'An interactive pixel black hole. Light bends, comets drift, and a lone astronaut watches from afar.',
+  },
+  {
+    slug: '404',
+    title: 'Lost in space',
+    description: 'The page you are looking for does not exist.',
+  },
+]
+
 function extractMdxMeta(filePath) {
   const raw = fs.readFileSync(filePath, 'utf-8')
   const match = raw.match(/export\s+const\s+meta\s*=\s*({[\s\S]*?})/)
@@ -29,30 +59,18 @@ function getAllPosts() {
   return [...posts, ...mdxPosts].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
 }
 
-const SITE = {
-  name: 'Lê Vĩnh Khang',
-  url: 'https://williamcachamwri.github.io/wica',
-}
-
-async function fetchFont() {
-  const cssUrl = 'https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap'
-  const css = await fetch(cssUrl).then((r) => r.text())
-  const urls = [...css.matchAll(/url\(([^)]+)\)/g)].map((m) => m[1])
-  const regularUrl = urls.find((u) => u.includes('Inter-Regular')) || urls[0]
-  const boldUrl = urls.find((u) => u.includes('Inter-Bold')) || urls[urls.length - 1]
-
+async function loadFonts() {
   const [regular, bold] = await Promise.all([
-    fetch(regularUrl).then((r) => r.arrayBuffer()),
-    fetch(boldUrl).then((r) => r.arrayBuffer()),
+    fetch('https://fonts.gstatic.com/s/inter/v20/UcCO3FwrK3iLTeHuS_nVMrMxCp50SjIw2boKoduKmMEVuLyfMZg.ttf').then((r) => r.arrayBuffer()),
+    fetch('https://fonts.gstatic.com/s/inter/v20/UcCO3FwrK3iLTeHuS_nVMrMxCp50SjIw2boKoduKmMEVuFuYMZg.ttf').then((r) => r.arrayBuffer()),
   ])
-
   return [
     { name: 'Inter', data: Buffer.from(regular), weight: 400, style: 'normal' },
     { name: 'Inter', data: Buffer.from(bold), weight: 700, style: 'normal' },
   ]
 }
 
-function ogTemplate({ title, description, subtitle, isHome = false }) {
+function ogTemplate({ title, description, subtitle, isHome }) {
   return {
     type: 'div',
     props: {
@@ -101,7 +119,7 @@ function ogTemplate({ title, description, subtitle, isHome = false }) {
         {
           type: 'div',
           props: {
-            style: { display: 'flex', alignItems: 'center', gap: '16px', zIndex: 1 },
+            style: { display: 'flex', alignItems: 'center', gap: '16px' },
             children: [
               {
                 type: 'div',
@@ -134,7 +152,7 @@ function ogTemplate({ title, description, subtitle, isHome = false }) {
         {
           type: 'div',
           props: {
-            style: { display: 'flex', flexDirection: 'column', zIndex: 1, maxWidth: '1000px' },
+            style: { display: 'flex', flexDirection: 'column', maxWidth: '1000px' },
             children: [
               {
                 type: 'div',
@@ -180,7 +198,6 @@ function ogTemplate({ title, description, subtitle, isHome = false }) {
           type: 'div',
           props: {
             style: {
-              zIndex: 1,
               display: 'flex',
               justifyContent: 'space-between',
               alignItems: 'center',
@@ -210,18 +227,21 @@ async function generatePNG(node, fonts, outPath) {
 
 async function main() {
   fs.mkdirSync(ogDir, { recursive: true })
-  const fonts = await fetchFont()
+  const fonts = await loadFonts()
 
-  await generatePNG(
-    ogTemplate({
-      isHome: true,
-      title: 'Lê Vĩnh Khang',
-      description: 'Developer & maker. Building tiny web toys and thoughtful interfaces.',
-      subtitle: 'built with patience · styled with restraint',
-    }),
-    fonts,
-    path.join(publicDir, 'og-image.png'),
-  )
+  for (const page of PAGES) {
+    const outName = page.slug === 'home' ? 'og-image.png' : `og/${page.slug}.png`
+    await generatePNG(
+      ogTemplate({
+        title: page.title,
+        description: page.description,
+        subtitle: page.subtitle,
+        isHome: page.isHome,
+      }),
+      fonts,
+      path.join(publicDir, outName),
+    )
+  }
 
   for (const post of getAllPosts()) {
     await generatePNG(

@@ -6,16 +6,13 @@
   "scripts": {
     "dev": "vite",
     "generate:og": "tsx scripts/generate-og.mjs",
-    "build": "vite build",
-    "build:static": "npm run generate:og && vite build",
+    "build": "npm run generate:og && vite build",
     "lint": "eslint .",
     "preview": "vite preview"
   },
   "dependencies": {
     "@mdx-js/react": "^3.1.1",
     "@mdx-js/rollup": "^3.1.1",
-    "@resvg/resvg-js": "^2.6.2",
-    "@vercel/og": "^0.11.1",
     "framer-motion": "^12.40.0",
     "react": "^19.2.6",
     "react-dom": "^19.2.6",
@@ -26,11 +23,11 @@
     "rehype-katex": "^7.0.1",
     "rehype-raw": "^7.0.0",
     "remark-gfm": "^4.0.1",
-    "remark-math": "^6.0.0",
-    "satori": "^0.26.0"
+    "remark-math": "^6.0.0"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
+    "@resvg/resvg-js": "^2.6.2",
     "@tailwindcss/vite": "^4.3.1",
     "@types/katex": "^0.16.8",
     "@types/node": "^25.9.3",
@@ -41,6 +38,7 @@
     "eslint-plugin-react-hooks": "^7.1.1",
     "eslint-plugin-react-refresh": "^0.5.2",
     "globals": "^17.6.0",
+    "satori": "^0.26.0",
     "tailwindcss": "^4.3.1",
     "tsx": "^4.22.4",
     "typescript": "^6.0.3",

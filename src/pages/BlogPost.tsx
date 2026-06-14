@@ -128,11 +128,6 @@ export default function BlogPost() {
           pathname={`/blog/${slug}`}
           type="article"
           publishedTime={post.meta.date}
-          subtitle={new Date(post.meta.date).toLocaleDateString('en-US', {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric',
-          })}
         />
       )}
       <div className="grain" aria-hidden="true" />

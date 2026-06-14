@@ -206,26 +206,30 @@ npm run preview
 
 ## deployment
 
-### Vercel (recommended)
-
-The project includes a Vercel Edge Function at `/api/og` that dynamically generates OpenGraph images.
+Any static host works (GitHub Pages, Netlify, Cloudflare Pages, Vercel static, etc.).
 
 ```bash
-npm i -g vercel
-vercel
+npm run build
 ```
 
-`vercel.json` is already configured. The `build` script runs `vite build` only; OG images are generated on-demand via `/api/og?title=...&description=...`.
+The `build` script automatically:
 
-### Static hosting (GitHub Pages, etc.)
+1. Runs `npm run generate:og` to create OpenGraph images
+2. Runs `vite build` to produce the static site
 
-If you deploy to a static host without serverless functions, pre-generate OG images before building:
+Generated OG images are placed in:
 
-```bash
-npm run build:static
-```
+- `public/og-image.png` — homepage
+- `public/og/blog.png` — blog list
+- `public/og/universe.png` — universe page
+- `public/og/404.png` — 404 page
+- `public/og/{slug}.png` — each blog post
 
-This runs `npm run generate:og` to create `public/og-image.png` and `public/og/{slug}.png`, then builds the site.
+### adding new pages or posts
+
+When you add a new page, add an entry to `scripts/generate-og.mjs` in the `PAGES` array.
+
+When you add a new blog post (`.md` in `public/posts/` or `.mdx` in `src/posts/`), the build script will automatically detect it and generate `public/og/{slug}.png`.
 
 <br>
 

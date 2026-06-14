@@ -7,7 +7,6 @@ interface SEOProps {
   image?: string
   type?: 'website' | 'article'
   publishedTime?: string
-  subtitle?: string
 }
 
 const SITE = {
@@ -18,23 +17,15 @@ const SITE = {
   twitter: '@williamcachamwri',
 }
 
-function buildOgUrl({
-  title,
-  description,
-  subtitle,
-  isHome,
-}: {
-  title: string
-  description: string
-  subtitle?: string
-  isHome?: boolean
-}) {
-  const params = new URLSearchParams()
-  params.set('title', title)
-  params.set('description', description)
-  if (subtitle) params.set('subtitle', subtitle)
-  if (isHome) params.set('home', 'true')
-  return `${SITE.url}/api/og?${params.toString()}`
+function getOgImage(pathname: string, title?: string) {
+  if (!pathname || pathname === '/') return '/og-image.png'
+  if (pathname === '/blog') return '/og/blog.png'
+  if (pathname === '/universe') return '/og/universe.png'
+  if (pathname.startsWith('/blog/')) {
+    const slug = pathname.replace('/blog/', '')
+    return `/og/${slug}.png`
+  }
+  return '/og-image.png'
 }
 
 export function SEO({
@@ -44,18 +35,10 @@ export function SEO({
   image,
   type = 'website',
   publishedTime,
-  subtitle,
 }: SEOProps) {
   const fullTitle = title ? `${title} · wica` : SITE.title
   const url = `${SITE.url}${pathname}`
-  const ogImage =
-    image ||
-    buildOgUrl({
-      title: fullTitle,
-      description,
-      subtitle,
-      isHome: !title,
-    })
+  const ogImage = image ? (image.startsWith('http') ? image : `${SITE.url}${image}`) : `${SITE.url}${getOgImage(pathname, title)}`
 
   return (
     <Helmet>
