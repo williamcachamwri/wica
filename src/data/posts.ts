@@ -5,6 +5,7 @@ export interface PostMeta {
   summary: string
   wordCount?: number
   readTime?: string
+  tags?: string[]
 }
 
 export const posts: PostMeta[] = [
@@ -15,6 +16,7 @@ export const posts: PostMeta[] = [
     summary: 'A full exercise of every supported Markdown feature on the blog.',
     wordCount: 117,
     readTime: '1 min',
+    tags: ['meta', 'writing'],
   },
   {
     slug: 'quiet-tools',
@@ -23,6 +25,7 @@ export const posts: PostMeta[] = [
     summary: 'Why I prefer building tiny, focused utilities over large platforms.',
     wordCount: 255,
     readTime: '2 min',
+    tags: ['code', 'philosophy'],
   },
   {
     slug: 'design-systems',
@@ -31,6 +34,7 @@ export const posts: PostMeta[] = [
     summary: 'Thoughts on whitespace, rhythm, and intentional constraints in UI design.',
     wordCount: 194,
     readTime: '1 min',
+    tags: ['design', 'ui'],
   },
   {
     slug: 'slow-tech',
@@ -39,5 +43,6 @@ export const posts: PostMeta[] = [
     summary: 'On resisting the urge to optimize every second and building software that respects attention.',
     wordCount: 263,
     readTime: '2 min',
+    tags: ['philosophy', 'code'],
   },
 ]

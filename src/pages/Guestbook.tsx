@@ -1,4 +1,5 @@
 import { useEffect, useState, useRef, useCallback } from 'react'
+import { Link } from 'react-router-dom'
 import { SEO } from '../components/SEO'
 import { ToastContainer, showToast } from '../components/Toast'
 
@@ -29,6 +30,17 @@ function formatDate(date: string) {
     hour: '2-digit',
     minute: '2-digit',
   })
+}
+
+function getInitials(name: string) {
+  return name.charAt(0).toUpperCase()
+}
+
+function colorFromName(name: string) {
+  const colors = ['#2563eb', '#7c3aed', '#db2777', '#dc2626', '#ea580c', '#ca8a04', '#16a34a', '#0891b2', '#6366f1', '#ec4899']
+  let h = 0
+  for (let i = 0; i < name.length; i++) h = name.charCodeAt(i) + ((h << 5) - h)
+  return colors[Math.abs(h) % colors.length]
 }
 
 const SITE_KEY = '0x4AAAAAADkpDYfY0xHNwred'
@@ -130,58 +142,80 @@ export default function Guestbook() {
 
       <main id="main" className="max-w-[620px] mx-auto px-6 pt-16 md:pt-24 pb-20">
         <section className="mb-10">
+          <Link to="/" className="inline-link text-sm mb-6 inline-block">
+            ‹ back home
+          </Link>
           <h1 className="name-title text-[clamp(1.75rem,6vw,2.5rem)] font-bold tracking-[-0.03em] leading-[1.1]">
             Guestbook
           </h1>
-          <p className="mt-2 text-muted text-lg">Leave a trace — a thought, a joke, a hello.</p>
+          <p className="mt-2 text-muted text-lg">
+            Leave a trace — a thought, a joke, a hello. <br />
+            <span className="text-sm">
+              {entries.length > 0
+                ? `${entries.length} message${entries.length !== 1 ? 's' : ''} so far`
+                : 'No messages yet. Be the first.'}
+            </span>
+          </p>
         </section>
 
         <section className="mb-14">
           <form onSubmit={handleSubmit} className={`guestbook-form ${justSent ? 'guestbook-form--sent' : ''}`}>
-            <label className="guestbook-form__label" htmlFor="msg">
-              Leave a message
-            </label>
-            <div className="guestbook-form__row">
-              <textarea
-                id="msg"
-                value={message}
-                onChange={(e) => setMessage(e.target.value)}
-                placeholder="Write something…"
-                maxLength={280}
-                rows={2}
-                disabled={sending}
-                className="guestbook-form__input"
-              />
-              <button
-                type="submit"
-                disabled={sending || !message.trim()}
-                className="guestbook-form__btn"
-              >
-                {sending ? (
-                  <span className="guestbook-form__spinner" />
-                ) : justSent ? (
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                    <polyline points="20 6 9 17 4 12" />
-                  </svg>
-                ) : (
-                  'Send'
-                )}
-              </button>
-            </div>
-            <div className="guestbook-form__footer">
-              <div ref={turnstileRef} className="guestbook-form__captcha" />
-              <span className={`guestbook-form__count ${message.length >= 260 ? 'guestbook-form__count--warn' : ''}`}>
-                {message.length}/280
-              </span>
+            <div className="guestbook-form__card">
+              <label className="guestbook-form__label" htmlFor="msg">
+                Drop a note
+              </label>
+              <div className="guestbook-form__field">
+                <textarea
+                  id="msg"
+                  value={message}
+                  onChange={(e) => setMessage(e.target.value)}
+                  placeholder="Write something…"
+                  maxLength={280}
+                  rows={3}
+                  disabled={sending}
+                  className="guestbook-form__input"
+                />
+                <div className="guestbook-form__toolbar">
+                  <div ref={turnstileRef} className="guestbook-form__captcha" />
+                  <div className="guestbook-form__actions">
+                    <span className={`guestbook-form__count ${message.length >= 260 ? 'guestbook-form__count--warn' : ''}`}>
+                      {message.length}/280
+                    </span>
+                    <button
+                      type="submit"
+                      disabled={sending || !message.trim()}
+                      className="guestbook-form__btn"
+                    >
+                      {sending ? (
+                        <span className="guestbook-form__spinner" />
+                      ) : justSent ? (
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                          <polyline points="20 6 9 17 4 12" />
+                        </svg>
+                      ) : (
+                        <>
+                          Send
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="guestbook-form__btn-icon">
+                            <line x1="22" y1="2" x2="11" y2="13" />
+                            <polygon points="22 2 15 22 11 13 2 9 22 2" />
+                          </svg>
+                        </>
+                      )}
+                    </button>
+                  </div>
+                </div>
+              </div>
             </div>
           </form>
         </section>
 
         <section className="guestbook-entries">
           {loading ? (
-            <p className="text-muted text-sm">Loading…</p>
-          ) : entries.length === 0 ? (
-            <p className="text-muted text-sm">No messages yet. Be the first.</p>
+            <div className="guestbook-loading">
+              <span className="guestbook-loading__dot" />
+              <span className="guestbook-loading__dot" />
+              <span className="guestbook-loading__dot" />
+            </div>
           ) : (
             entries.map((entry, i) => (
               <a
@@ -190,12 +224,21 @@ export default function Guestbook() {
                 target="_blank"
                 rel="noopener noreferrer"
                 className="guestbook-entry"
-                style={{ animationDelay: `${i * 30}ms` }}
+                style={{ animationDelay: `${i * 35}ms` }}
               >
-                <p className="guestbook-entry__message">{entry.message}</p>
-                <div className="guestbook-entry__meta">
-                  <span className="guestbook-entry__author">— {entry.author}</span>
-                  <span className="guestbook-entry__date">{formatDate(entry.date)}</span>
+                <div
+                  className="guestbook-entry__avatar"
+                  style={{ backgroundColor: colorFromName(entry.author) }}
+                >
+                  {getInitials(entry.author)}
+                </div>
+                <div className="guestbook-entry__body">
+                  <p className="guestbook-entry__message">{entry.message}</p>
+                  <div className="guestbook-entry__meta">
+                    <span className="guestbook-entry__author">{entry.author}</span>
+                    <span className="guestbook-entry__dot">·</span>
+                    <span className="guestbook-entry__date">{formatDate(entry.date)}</span>
+                  </div>
                 </div>
               </a>
             ))

@@ -3,7 +3,9 @@ import { BrowserRouter, Route, Routes, useLocation } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import { CustomCursor } from './components/CustomCursor'
 import { FloatingNavbar } from './components/FloatingNavbar'
+import { InspectFloating } from './components/InspectFloating'
 import { Inspector } from './components/Inspector'
+import { NowPlayingSticky } from './components/NowPlayingSticky'
 import BlogList from './pages/BlogList'
 import Home from './pages/Home'
 import './App.css'
@@ -186,8 +188,6 @@ export default function App() {
         transition={{ type: 'spring', stiffness: 260, damping: 24 }}
       >
         <FloatingNavbar
-          inspectActive={inspectActive}
-          onToggleInspect={() => setInspectActive((v) => !v)}
           accent={accent}
           onAccentChange={handleAccentChange}
           theme={theme}
@@ -197,6 +197,8 @@ export default function App() {
 
       <CustomCursor />
       <Inspector active={inspectActive} />
+      <InspectFloating active={inspectActive} onToggle={() => setInspectActive((v) => !v)} />
+      <NowPlayingSticky />
       <AnimatedRoutes />
     </BrowserRouter>
   )

@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import { InlineLink } from '../components/InlineLink'
 import { NowPlaying } from '../components/NowPlaying'
+import { BuildInfo } from '../components/BuildInfo'
 
 export function Footer() {
   return (
@@ -27,6 +28,7 @@ export function Footer() {
       <div className="footer__bottom">
         <p>built with patience · styled with restraint</p>
         <NowPlaying />
+        <BuildInfo />
       </div>
     </footer>
   )

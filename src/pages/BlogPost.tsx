@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
@@ -29,12 +29,24 @@ function formatDate(date: string) {
   })
 }
 
+function getRelated(currentSlug: string, currentTags?: string[]): PostMeta[] {
+  const others = allPosts.filter((p) => p.slug !== currentSlug)
+  if (!currentTags || currentTags.length === 0) return others.slice(0, 2)
+  const scored = others.map((p) => ({
+    post: p,
+    score: p.tags ? p.tags.filter((t) => currentTags.includes(t)).length : 0,
+  }))
+  scored.sort((a, b) => b.score - a.score || new Date(b.post.date).getTime() - new Date(a.post.date).getTime())
+  return scored.slice(0, 2).map((s) => s.post)
+}
+
 export default function BlogPost() {
   const { slug } = useParams<{ slug: string }>()
   const [post, setPost] = useState<{ meta: PostMeta; content: string } | null>(null)
   const [MdxComponent, setMdxComponent] = useState<React.ComponentType | null>(null)
   const [error, setError] = useState(false)
   const [progress, setProgress] = useState(0)
+  const relatedPosts = useMemo(() => post?.meta ? getRelated(post.meta.slug, post.meta.tags) : [], [post?.meta])
 
   useEffect(() => {
     if (!slug) return
@@ -44,8 +56,9 @@ export default function BlogPost() {
       setMdxComponent(() => mdx.default)
       setPost({ meta: mdx.meta, content: '' })
       setError(false)
-      if (mdx.content?.includes('$')) loadCss('https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css')
-      if (mdx.content?.includes('```')) loadCss('https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css')
+      const content = mdx.meta.summary
+      if (content?.includes('$')) loadCss('https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css')
+      if (content?.includes('```')) loadCss('https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css')
       return
     }
 
@@ -156,6 +169,13 @@ export default function BlogPost() {
           <h1 className="name-title text-[clamp(1.75rem,5vw,2.5rem)] font-bold tracking-[-0.02em] leading-[1.15]">
             {post.meta.title}
           </h1>
+          {post.meta.tags && (
+            <div className="flex gap-2 mt-3 flex-wrap">
+              {post.meta.tags.map((t) => (
+                <span key={t} className="blog-item__tag">{t}</span>
+              ))}
+            </div>
+          )}
           <div className="mt-3 text-sm text-subtle font-mono">
             <time dateTime={post.meta.date}>{formatDate(post.meta.date)}</time>
             {(() => {
@@ -181,6 +201,21 @@ export default function BlogPost() {
             </ReactMarkdown>
           )}
         </article>
+
+        {relatedPosts.length > 0 && (
+          <section className="mb-16 related-posts">
+            <h2 className="related-posts__title">Related posts</h2>
+            <div className="related-posts__list">
+              {relatedPosts.map((rp) => (
+                <Link key={rp.slug} to={`/blog/${rp.slug}`} className="related-posts__card">
+                  <h3 className="related-posts__card-title">{rp.title}</h3>
+                  <p className="related-posts__card-summary">{rp.summary}</p>
+                  <span className="related-posts__card-date">{formatDate(rp.date)}</span>
+                </Link>
+              ))}
+            </div>
+          </section>
+        )}
 
         <footer className="text-sm text-subtle text-center">
           <p>built with patience · styled with restraint</p>
