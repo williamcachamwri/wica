@@ -1,11 +1,16 @@
 import { Link, useLocation } from 'react-router-dom'
 import { InlineLink } from '../components/InlineLink'
+import { SEO } from '../components/SEO'
 
 export default function NotFound() {
   const location = useLocation()
 
   return (
     <div className="app-shell app-shell--in">
+      <SEO
+        title="404 — Lost in space"
+        description="The page you are looking for does not exist."
+      />
       <div className="grain" aria-hidden="true" />
 
       <main className="max-w-[680px] mx-auto px-6 pt-16 md:pt-24 pb-20 text-center">

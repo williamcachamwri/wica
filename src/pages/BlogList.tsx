@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import { SEO } from '../components/SEO'
 import { SectionDivider } from '../components/SectionDivider'
 import { allPosts } from '../data/allPosts'
 
@@ -13,6 +14,11 @@ function formatDate(date: string) {
 export default function BlogList() {
   return (
     <div className="app-shell app-shell--in">
+      <SEO
+        title="Blog"
+        description="Notes on design, code, and slow living."
+        pathname="/blog"
+      />
       <div className="grain" aria-hidden="true" />
 
       <main id="main" className="max-w-[720px] mx-auto px-6 pt-16 md:pt-24 pb-20">

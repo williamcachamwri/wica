@@ -1,4 +1,5 @@
 import { Loader } from '../components/Loader'
+import { SEO } from '../components/SEO'
 import { Footer } from '../sections/Footer'
 import { Hero } from '../sections/Hero'
 import { Memories } from '../sections/Memories'
@@ -22,6 +23,7 @@ export default function Home() {
 
   return (
     <>
+      <SEO pathname="/" />
       {loading && <Loader onDone={() => setLoading(false)} />}
 
       <div className={`app-shell ${loaded ? 'app-shell--in' : 'app-shell--out'}`}>

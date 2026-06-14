@@ -6,6 +6,7 @@ import remarkMath from 'remark-math'
 import rehypeHighlight from 'rehype-highlight'
 import rehypeKatex from 'rehype-katex'
 import rehypeRaw from 'rehype-raw'
+import { SEO } from '../components/SEO'
 import { ToastContainer, showToast } from '../components/Toast'
 import { allPosts } from '../data/allPosts'
 import type { PostMeta } from '../data/allPosts'
@@ -120,6 +121,16 @@ export default function BlogPost() {
 
   return (
     <div className="app-shell app-shell--in">
+      {post && (
+        <SEO
+          title={post.meta.title}
+          description={post.meta.summary}
+          pathname={`/blog/${slug}`}
+          image={`/og/${slug}.png`}
+          type="article"
+          publishedTime={post.meta.date}
+        />
+      )}
       <div className="grain" aria-hidden="true" />
       <div className="reading-progress" style={{ transform: `scaleX(${progress / 100})` }} aria-hidden="true" />
       <ToastContainer />

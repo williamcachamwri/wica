@@ -1,11 +1,17 @@
 import { Link } from 'react-router-dom'
 import { InlineLink } from '../components/InlineLink'
+import { SEO } from '../components/SEO'
 import { PixelGardenCanvas } from '../features/garden/components/pixel-garden-canvas'
 import { GARDEN_OBJECTS } from '../features/garden/utils/garden-world-config'
 
 export default function Universe() {
   return (
     <div className="app-shell app-shell--in">
+      <SEO
+        title="Universe"
+        description="An interactive pixel black hole. Light bends, comets drift, and a lone astronaut watches from afar."
+        pathname="/universe"
+      />
       <div className="grain" aria-hidden="true" />
 
       <a href="#main" className="skip-link">
