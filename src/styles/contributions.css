@@ -1,52 +1,15 @@
 /* ── GitHub contributions heatmap ────────────────────────────────── */
 .github-contributions {
+  position: relative;
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
 }
 
-.contrib-grid-wrapper {
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: thin;
-  width: 100%;
-  padding-bottom: 4px;
-}
-
-.contrib-grid-wrapper::-webkit-scrollbar {
-  height: 4px;
-}
-
-.contrib-grid-wrapper::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.contrib-grid-wrapper::-webkit-scrollbar-thumb {
-  background: var(--border-strong);
-  border-radius: 2px;
-}
-
-.contrib-months {
-  display: grid;
-  grid-auto-flow: column;
-  grid-template-rows: 1fr;
-  gap: 3px;
-  padding-left: 0;
-  height: 14px;
-}
-
-.contrib-month {
-  font-family: "JetBrains Mono", monospace;
-  font-size: 11px;
-  color: var(--text-subtle);
-  line-height: 1;
-}
-
 .contrib-grid {
   display: grid;
-  grid-auto-flow: column;
-  grid-template-rows: repeat(7, 11px);
-  gap: 3px;
+  grid-template-rows: 12px repeat(7, 9px);
+  gap: 2px;
   width: fit-content;
   max-width: 100%;
 }
@@ -60,9 +23,18 @@
   50% { opacity: 0.08; }
 }
 
+.contrib-month {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 9px;
+  color: var(--text-subtle);
+  line-height: 1;
+  align-self: end;
+  padding-bottom: 2px;
+}
+
 .contrib-cell {
-  width: 11px;
-  height: 11px;
+  width: 9px;
+  height: 9px;
   border-radius: 2px;
   background: var(--code-bg);
   cursor: pointer;
@@ -82,7 +54,7 @@
 }
 
 .contrib-cell:hover {
-  transform: scale(1.3);
+  transform: scale(1.4);
   z-index: 2;
   outline: 1px solid var(--border-strong);
   outline-offset: 1px;
@@ -111,6 +83,34 @@
   background: var(--code-bg);
 }
 
+.contrib-tooltip {
+  position: fixed;
+  z-index: 9999;
+  padding: 0.4rem 0.6rem;
+  background: var(--text-primary);
+  color: var(--surface);
+  border-radius: 6px;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 10.5px;
+  line-height: 1.4;
+  white-space: nowrap;
+  pointer-events: none;
+  transform: translate(-50%, -100%);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+  animation: contrib-tooltip-in 0.15s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes contrib-tooltip-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, calc(-100% + 4px));
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -100%);
+  }
+}
+
 .contrib-footer {
   display: flex;
   align-items: center;
@@ -137,7 +137,7 @@
 
 .contrib-legend__cells {
   display: flex;
-  gap: 3px;
+  gap: 2px;
 }
 
 .contrib-legend__cells .contrib-cell {
@@ -150,65 +150,4 @@
 .contrib-legend__cells .contrib-cell:hover {
   transform: none;
   outline: none;
-}
-
-.contrib-skeleton__title {
-  width: 180px;
-  height: 12px;
-  border-radius: 6px;
-  background: var(--code-bg);
-}
-
-.contrib-skeleton__text {
-  width: 220px;
-  height: 10px;
-  border-radius: 5px;
-  background: var(--code-bg);
-}
-
-.contrib-skeleton__legend {
-  width: 120px;
-  height: 10px;
-  border-radius: 5px;
-  background: var(--code-bg);
-}
-
-@media (max-width: 640px) {
-  .github-contributions {
-    position: relative;
-  }
-
-  .contrib-grid-wrapper {
-    scrollbar-width: none;
-    mask-image: linear-gradient(
-      to right,
-      transparent 0%,
-      black 4%,
-      black 96%,
-      transparent 100%
-    );
-    -webkit-mask-image: linear-gradient(
-      to right,
-      transparent 0%,
-      black 4%,
-      black 96%,
-      transparent 100%
-    );
-  }
-
-  .contrib-grid-wrapper::-webkit-scrollbar {
-    display: none;
-  }
-
-  .contrib-grid {
-    padding: 0 0.5rem;
-  }
-
-  .contrib-months {
-    padding-left: 0.5rem;
-  }
-
-  .contrib-footer {
-    padding: 0 0.5rem;
-  }
 }

@@ -15,6 +15,13 @@ interface ContributionsData {
   weeks: Week[]
 }
 
+interface TooltipState {
+  x: number
+  y: number
+  text: string
+  visible: boolean
+}
+
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 const WEEKDAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 
@@ -57,6 +64,7 @@ export function GithubContributions() {
   const [data, setData] = useState<ContributionsData | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(false)
+  const [tooltip, setTooltip] = useState<TooltipState>({ x: 0, y: 0, text: '', visible: false })
 
   useEffect(() => {
     let mounted = true
@@ -96,23 +104,31 @@ export function GithubContributions() {
     return getMonthLabels(data.weeks)
   }, [data])
 
+  const handleMouseEnter = (e: React.MouseEvent, day: Day) => {
+    setTooltip({
+      x: e.clientX,
+      y: e.clientY - 8,
+      text: `${day.count} contributions · ${formatDate(day.date)} · ${WEEKDAYS[day.weekday]}`,
+      visible: true,
+    })
+  }
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    setTooltip((prev) => ({ ...prev, x: e.clientX, y: e.clientY - 8 }))
+  }
+
+  const handleMouseLeave = () => {
+    setTooltip((prev) => ({ ...prev, visible: false }))
+  }
+
   if (error) return null
   if (loading || !data) {
     return (
       <div className="github-contributions" aria-busy="true" aria-label="Loading GitHub contributions">
-        <div className="contrib-header">
-          <div className="contrib-skeleton__title" />
-        </div>
-        <div className="contrib-grid-wrapper">
         <div className="contrib-grid contrib-grid--skeleton">
-            {Array.from({ length: 196 }).map((_, i) => (
-              <div key={i} className="contrib-cell contrib-cell--skeleton" />
-            ))}
-          </div>
-      </div>
-        <div className="contrib-footer">
-          <div className="contrib-skeleton__text" />
-          <div className="contrib-skeleton__legend" />
+          {Array.from({ length: 371 }).map((_, i) => (
+            <div key={i} className="contrib-cell contrib-cell--skeleton" />
+          ))}
         </div>
       </div>
     )
@@ -122,37 +138,44 @@ export function GithubContributions() {
 
   return (
     <div className="github-contributions">
-      <div className="contrib-months" aria-hidden="true">
+      <div
+        className="contrib-grid"
+        role="img"
+        aria-label={`GitHub contribution heatmap, ${data.total} contributions in the past year`}
+        style={{ gridTemplateColumns: `repeat(${data.weeks.length + 1}, 9px)` }}
+      >
         {monthLabels.map((m, i) => (
           <span
             key={`${m.label}-${i}`}
             className="contrib-month"
-            style={{ gridColumn: m.column + 1 }}
+            style={{ gridColumn: m.column + 2, gridRow: 1 }}
           >
             {m.label}
           </span>
         ))}
-      </div>
 
-      <div className="contrib-grid-wrapper">
-        <div className="contrib-grid" role="img" aria-label={`GitHub contribution heatmap, ${data.total} contributions in the past year`}>
-          {data.weeks.map((week, weekIndex) =>
-            WEEKDAYS.map((_, weekday) => {
-              const day = week.days.find((d) => d.weekday === weekday)
-              if (!day) return null
-              const level = getLevel(day.count, maxCount)
-              return (
-                <div
-                  key={`${weekIndex}-${weekday}`}
-                  className="contrib-cell"
-                  data-level={level}
-                  title={`${day.count} contributions · ${formatDate(day.date)}`}
-                  style={{ animationDelay: `${weekIndex * 0.012}s` }}
-                />
-              )
-            })
-          )}
-        </div>
+        {data.weeks.map((week, weekIndex) =>
+          WEEKDAYS.map((_, weekday) => {
+            const day = week.days.find((d) => d.weekday === weekday)
+            if (!day) return null
+            const level = getLevel(day.count, maxCount)
+            return (
+              <div
+                key={`${weekIndex}-${weekday}`}
+                className="contrib-cell"
+                data-level={level}
+                style={{
+                  gridColumn: weekIndex + 2,
+                  gridRow: weekday + 2,
+                  animationDelay: `${weekIndex * 0.012}s`,
+                }}
+                onMouseEnter={(e) => handleMouseEnter(e, day)}
+                onMouseMove={handleMouseMove}
+                onMouseLeave={handleMouseLeave}
+              />
+            )
+          })
+        )}
       </div>
 
       <div className="contrib-footer">
@@ -169,6 +192,15 @@ export function GithubContributions() {
           <span>More</span>
         </div>
       </div>
+
+      {tooltip.visible && (
+        <div
+          className="contrib-tooltip"
+          style={{ left: tooltip.x, top: tooltip.y, position: 'fixed' }}
+        >
+          {tooltip.text}
+        </div>
+      )}
     </div>
   )
 }
