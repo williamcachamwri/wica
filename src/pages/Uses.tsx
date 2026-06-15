@@ -29,11 +29,11 @@ const CATEGORIES: UsesCategory[] = [
   {
     label: 'Software',
     items: [
-      { name: 'VS Code', description: 'Editor of choice', href: 'https://code.visualstudio.com', icon: 'editor', badge: 'favorite' },
+      { name: 'VS Code', description: 'Editor of choice', href: 'https://code.visualstudio.com', icon: 'vscode', badge: 'favorite' },
       { name: 'iTerm2', description: 'Terminal', href: 'https://iterm2.com', icon: 'terminal' },
-      { name: 'Figma', description: 'Design & prototypes', href: 'https://figma.com', icon: 'design' },
-      { name: 'Notion', description: 'Notes & planning', href: 'https://notion.so', icon: 'notes' },
-      { name: 'Spotify', description: 'Background noise', href: 'https://spotify.com', icon: 'music' },
+      { name: 'Figma', description: 'Design & prototypes', href: 'https://figma.com', icon: 'figma' },
+      { name: 'Notion', description: 'Notes & planning', href: 'https://notion.so', icon: 'notion' },
+      { name: 'Spotify', description: 'Background noise', href: 'https://spotify.com', icon: 'spotify' },
     ],
   },
   {
@@ -49,9 +49,9 @@ const CATEGORIES: UsesCategory[] = [
     label: 'Workflow',
     items: [
       { name: 'GitHub', description: 'Code & project hosting', href: 'https://github.com', icon: 'github' },
-      { name: 'Cloudflare Pages', description: 'Hosting', href: 'https://pages.cloudflare.com', icon: 'cloud' },
-      { name: 'Vite', description: 'Build tool', href: 'https://vitejs.dev', icon: 'buildtool' },
-      { name: 'Obsidian', description: 'Knowledge base', href: 'https://obsidian.md', icon: 'knowledge' },
+      { name: 'Cloudflare Pages', description: 'Hosting', href: 'https://pages.cloudflare.com', icon: 'cloudflare' },
+      { name: 'Vite', description: 'Build tool', href: 'https://vitejs.dev', icon: 'vite' },
+      { name: 'Obsidian', description: 'Knowledge base', href: 'https://obsidian.md', icon: 'obsidian' },
     ],
   },
 ]
