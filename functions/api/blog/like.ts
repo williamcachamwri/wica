@@ -51,16 +51,6 @@ function getDiscussionTitle(slug: string, title: string): string {
   return `[blog-post:${slug}] ${title}`
 }
 
-function parseLikeCount(body: string): number {
-  const match = body.match(/<!--blog:likes:(\d+)-->/)
-  return match ? parseInt(match[1], 10) : 0
-}
-
-function serializeBody(baseBody: string, likes: number): string {
-  const cleaned = baseBody.replace(/<!--blog:likes:\d+-->/g, '').trim()
-  return `${cleaned}\n\n<!--blog:likes:${likes}-->`
-}
-
 function getCookieToken(request: Request): string | null {
   const cookie = request.headers.get('cookie')
   if (!cookie) return null
@@ -135,7 +125,7 @@ export async function onRequest(context: { request: Request; env: Env }): Promis
           repositoryId: "${REPO_ID}",
           categoryId: "${CATEGORY_ID}",
           title: ${JSON.stringify(discussionTitle)},
-          body: ${JSON.stringify(serializeBody(`Comments and likes for "${title}"`, 0))}
+          body: ${JSON.stringify(`Comments and likes for "${title}"`)}
         }) {
           discussion {
             id
@@ -187,7 +177,6 @@ export async function onRequest(context: { request: Request; env: Env }): Promis
     const countQuery = `query {
       node(id: "${discussion.id}") {
         ... on Discussion {
-          body
           reactions(first: 100) {
             nodes { content }
           }
@@ -201,25 +190,7 @@ export async function onRequest(context: { request: Request; env: Env }): Promis
       body: JSON.stringify({ query: countQuery }),
     })
     const countJson = (await countRes.json()) as GitHubResponse
-    const node = countJson.data?.node
-    const heartCount = (node?.reactions?.nodes || []).filter((r) => r.content === 'HEART').length
-
-    // Persist the like count into the discussion body so GET /comment can read it
-    const updatedBody = serializeBody(node?.body || discussion.body, heartCount)
-    const updateMutation = `mutation {
-      updateDiscussion(input: {
-        discussionId: "${discussion.id}",
-        body: ${JSON.stringify(updatedBody)}
-      }) {
-        discussion { id }
-      }
-    }`
-
-    await fetch(GITHUB_GRAPHQL, {
-      method: 'POST',
-      headers: headers(env.GITHUB_TOKEN),
-      body: JSON.stringify({ query: updateMutation }),
-    })
+    const heartCount = (countJson.data?.node?.reactions?.nodes || []).filter((r) => r.content === 'HEART').length
 
     return new Response(JSON.stringify({ liked: true, count: heartCount }), {
       status: 200,

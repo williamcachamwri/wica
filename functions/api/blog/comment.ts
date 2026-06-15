@@ -25,6 +25,7 @@ interface GitHubResponse {
               url: string
             }>
           }
+          reactions?: { nodes?: Array<{ content: string }> }
         }>
       }
     }
@@ -126,6 +127,9 @@ export async function onRequest(context: { request: Request; env: Env }): Promis
                   url
                 }
               }
+              reactions(first: 100) {
+                nodes { content }
+              }
             }
           }
         }
@@ -142,9 +146,9 @@ export async function onRequest(context: { request: Request; env: Env }): Promis
       const discussions = json.data?.repository?.discussions?.nodes || []
       const discussion = discussions.find((d) => d.title === discussionTitle)
       const comments = discussion?.comments?.nodes?.map(formatComment) || []
-      const likes = (discussion?.body.match(/<!--blog:likes:(\d+)-->/) || [null, '0'])[1]
+      const likes = (discussion?.reactions?.nodes || []).filter((r) => r.content === 'HEART').length
 
-      return new Response(JSON.stringify({ comments, discussionId: discussion?.id, likes: parseInt(likes, 10) }), {
+      return new Response(JSON.stringify({ comments, discussionId: discussion?.id, likes }), {
         headers: {
           'Content-Type': 'application/json',
           'Access-Control-Allow-Origin': '*',
