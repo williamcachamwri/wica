@@ -41,6 +41,7 @@ export function FloatingNavbar({ accent, onAccentChange, theme, onToggleTheme }:
         aria-label={expanded ? 'Collapse navbar' : 'Expand navbar'}
       >
         <motion.svg
+          className="navbar-expand-btn__chevron"
           width="16" height="16" viewBox="0 0 24 24"
           fill="none" stroke="currentColor" strokeWidth="2.5"
           strokeLinecap="round" strokeLinejoin="round"
@@ -49,6 +50,16 @@ export function FloatingNavbar({ accent, onAccentChange, theme, onToggleTheme }:
         >
           <polyline points="18 15 12 9 6 15" />
         </motion.svg>
+        <svg
+          className="navbar-expand-btn__hamburger"
+          width="16" height="16" viewBox="0 0 24 24"
+          fill="none" stroke="currentColor" strokeWidth="2.5"
+          strokeLinecap="round" strokeLinejoin="round"
+        >
+          <line x1="4" y1="6" x2="20" y2="6" />
+          <line x1="4" y1="12" x2="20" y2="12" />
+          <line x1="4" y1="18" x2="20" y2="18" />
+        </svg>
       </button>
 
       <div className="floating-navbar__body">
@@ -72,17 +83,17 @@ export function FloatingNavbar({ accent, onAccentChange, theme, onToggleTheme }:
             />
           ))}
         </div>
-
-        <button
-          type="button"
-          className="theme-toggle"
-          onClick={onToggleTheme}
-          title={theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode'}
-          aria-label={theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode'}
-        >
-          <span className="theme-toggle__icon">{theme === 'light' ? '☾' : '☼'}</span>
-        </button>
       </div>
+
+      <button
+        type="button"
+        className="theme-toggle"
+        onClick={onToggleTheme}
+        title={theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode'}
+        aria-label={theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode'}
+      >
+        <span className="theme-toggle__icon">{theme === 'light' ? '☾' : '☼'}</span>
+      </button>
     </nav>
   )
 }
