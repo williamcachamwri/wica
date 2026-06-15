@@ -21,7 +21,11 @@ interface Entry {
   author: string
   date: string
   url: string
+  reactions: Record<string, number>
 }
+
+const ALLOWED_REACTIONS = ['👍', '❤️', '😄', '🚀', '👀']
+const SITE_KEY = '0x4AAAAAADkpDYfY0xHNwred'
 
 function formatDate(date: string) {
   return new Date(date).toLocaleDateString('en-US', {
@@ -43,13 +47,12 @@ function avatarClassFromName(name: string) {
   return `avatar-tint-${Math.abs(h) % 6}`
 }
 
-const SITE_KEY = '0x4AAAAAADkpDYfY0xHNwred'
-
 export default function Guestbook() {
   const [entries, setEntries] = useState<Entry[]>([])
   const [loading, setLoading] = useState(true)
   const [sending, setSending] = useState(false)
   const [message, setMessage] = useState('')
+  const [author, setAuthor] = useState('')
   const [justSent, setJustSent] = useState(false)
   const turnstileRef = useRef<HTMLDivElement>(null)
   const widgetId = useRef<string | null>(null)
@@ -89,6 +92,21 @@ export default function Guestbook() {
       .catch(() => setLoading(false))
   }, [])
 
+  const handleReact = async (entryId: string, emoji: string) => {
+    try {
+      const res = await fetch('/api/guestbook', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ discussionId: entryId, emoji }),
+      })
+      if (!res.ok) throw new Error('Failed to react')
+      const updated = (await res.json()) as Entry
+      setEntries((prev) => prev.map((e) => (e.id === entryId ? updated : e)))
+    } catch {
+      showToast('Failed to react')
+    }
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     const text = message.trim()
@@ -110,17 +128,22 @@ export default function Guestbook() {
       const res = await fetch('/api/guestbook', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: text, turnstileToken }),
+        body: JSON.stringify({
+          message: text,
+          author: author.trim() || 'anonymous',
+          turnstileToken,
+        }),
       })
       if (!res.ok) {
         const data = await res.json()
         throw new Error(data.error || 'Failed to send')
       }
       setMessage('')
+      setAuthor('')
       setJustSent(true)
       window.turnstile.reset(widgetId.current)
       setTimeout(() => setJustSent(false), 2000)
-      const entry = await res.json()
+      const entry = (await res.json()) as Entry
       setEntries((prev) => [entry, ...prev])
       showToast('Sent!')
     } catch (err) {
@@ -163,6 +186,16 @@ export default function Guestbook() {
           <form onSubmit={handleSubmit} className={`guestbook-form ${justSent ? 'guestbook-form--sent' : ''}`}>
             <div className="guestbook-form__card">
               <div className="guestbook-form__field">
+                <input
+                  id="name"
+                  type="text"
+                  value={author}
+                  onChange={(e) => setAuthor(e.target.value)}
+                  placeholder="Your name"
+                  maxLength={32}
+                  disabled={sending}
+                  className="guestbook-form__input guestbook-form__input--name"
+                />
                 <textarea
                   id="msg"
                   value={message}
@@ -255,6 +288,26 @@ export default function Guestbook() {
                       <span className="guestbook-entry__author">{entry.author}</span>
                       <span className="guestbook-entry__dot">·</span>
                       <span className="guestbook-entry__date">{formatDate(entry.date)}</span>
+                    </div>
+                    <div className="guestbook-entry__reactions">
+                      {ALLOWED_REACTIONS.map((emoji) => (
+                        <button
+                          key={emoji}
+                          type="button"
+                          className="guestbook-entry__reaction"
+                          onClick={(e) => {
+                            e.preventDefault()
+                            e.stopPropagation()
+                            handleReact(entry.id, emoji)
+                          }}
+                          aria-label={`React with ${emoji}`}
+                        >
+                          <span className="guestbook-entry__reaction-emoji">{emoji}</span>
+                          {entry.reactions[emoji] > 0 && (
+                            <span className="guestbook-entry__reaction-count">{entry.reactions[emoji]}</span>
+                          )}
+                        </button>
+                      ))}
                     </div>
                   </div>
                 </a>
