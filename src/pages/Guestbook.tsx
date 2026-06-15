@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef, useCallback } from 'react'
 import { Link } from 'react-router-dom'
 import { SEO } from '../components/SEO'
+import { SectionDivider } from '../components/SectionDivider'
 import { ToastContainer, showToast } from '../components/Toast'
 
 declare global {
@@ -36,11 +37,10 @@ function getInitials(name: string) {
   return name.charAt(0).toUpperCase()
 }
 
-function colorFromName(name: string) {
-  const colors = ['#2563eb', '#7c3aed', '#db2777', '#dc2626', '#ea580c', '#ca8a04', '#16a34a', '#0891b2', '#6366f1', '#ec4899']
+function avatarClassFromName(name: string) {
   let h = 0
   for (let i = 0; i < name.length; i++) h = name.charCodeAt(i) + ((h << 5) - h)
-  return colors[Math.abs(h) % colors.length]
+  return `avatar-tint-${Math.abs(h) % 6}`
 }
 
 const SITE_KEY = '0x4AAAAAADkpDYfY0xHNwred'
@@ -148,7 +148,7 @@ export default function Guestbook() {
           <h1 className="name-title text-[clamp(1.75rem,6vw,2.5rem)] font-bold tracking-[-0.03em] leading-[1.1]">
             Guestbook
           </h1>
-          <p className="mt-2 text-muted text-lg">
+          <p className="mt-2 text-muted text-lg leading-[1.7]">
             Leave a trace — a thought, a joke, a hello. <br />
             <span className="text-sm">
               {entries.length > 0
@@ -159,11 +159,9 @@ export default function Guestbook() {
         </section>
 
         <section className="mb-14">
+          <SectionDivider label="Drop a note" />
           <form onSubmit={handleSubmit} className={`guestbook-form ${justSent ? 'guestbook-form--sent' : ''}`}>
             <div className="guestbook-form__card">
-              <label className="guestbook-form__label" htmlFor="msg">
-                Drop a note
-              </label>
               <div className="guestbook-form__field">
                 <textarea
                   id="msg"
@@ -184,7 +182,7 @@ export default function Guestbook() {
                     <button
                       type="submit"
                       disabled={sending || !message.trim()}
-                      className="guestbook-form__btn"
+                      className={`guestbook-form__btn ${justSent ? 'guestbook-form__btn--sent' : ''}`}
                     >
                       {sending ? (
                         <span className="guestbook-form__spinner" />
@@ -209,40 +207,60 @@ export default function Guestbook() {
           </form>
         </section>
 
-        <section className="guestbook-entries">
-          {loading ? (
-            <div className="guestbook-loading">
-              <span className="guestbook-loading__dot" />
-              <span className="guestbook-loading__dot" />
-              <span className="guestbook-loading__dot" />
-            </div>
-          ) : (
-            entries.map((entry, i) => (
-              <a
-                key={entry.id}
-                href={entry.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="guestbook-entry"
-                style={{ animationDelay: `${i * 35}ms` }}
-              >
-                <div
-                  className="guestbook-entry__avatar"
-                  style={{ backgroundColor: colorFromName(entry.author) }}
-                >
-                  {getInitials(entry.author)}
-                </div>
-                <div className="guestbook-entry__body">
-                  <p className="guestbook-entry__message">{entry.message}</p>
-                  <div className="guestbook-entry__meta">
-                    <span className="guestbook-entry__author">{entry.author}</span>
-                    <span className="guestbook-entry__dot">·</span>
-                    <span className="guestbook-entry__date">{formatDate(entry.date)}</span>
+        <section>
+          <SectionDivider label="Wall of messages" />
+          <div className="guestbook-entries">
+            {loading ? (
+              <div className="guestbook-skeleton" aria-busy="true" aria-label="Loading messages">
+                <div className="guestbook-skeleton__item">
+                  <div className="guestbook-skeleton__avatar" />
+                  <div className="guestbook-skeleton__content">
+                    <div className="guestbook-skeleton__line" />
+                    <div className="guestbook-skeleton__line guestbook-skeleton__line--short" />
+                    <div className="guestbook-skeleton__line guestbook-skeleton__line--meta" />
                   </div>
                 </div>
-              </a>
-            ))
-          )}
+                <div className="guestbook-skeleton__item">
+                  <div className="guestbook-skeleton__avatar" />
+                  <div className="guestbook-skeleton__content">
+                    <div className="guestbook-skeleton__line" />
+                    <div className="guestbook-skeleton__line guestbook-skeleton__line--meta" />
+                  </div>
+                </div>
+                <div className="guestbook-skeleton__item">
+                  <div className="guestbook-skeleton__avatar" />
+                  <div className="guestbook-skeleton__content">
+                    <div className="guestbook-skeleton__line" />
+                    <div className="guestbook-skeleton__line guestbook-skeleton__line--short" />
+                    <div className="guestbook-skeleton__line guestbook-skeleton__line--meta" />
+                  </div>
+                </div>
+              </div>
+            ) : (
+              entries.map((entry, i) => (
+                <a
+                  key={entry.id}
+                  href={entry.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="guestbook-entry"
+                  style={{ animationDelay: `${i * 45}ms` }}
+                >
+                  <div className={`guestbook-entry__avatar ${avatarClassFromName(entry.author)}`}>
+                    {getInitials(entry.author)}
+                  </div>
+                  <div className="guestbook-entry__body">
+                    <p className="guestbook-entry__message">{entry.message}</p>
+                    <div className="guestbook-entry__meta">
+                      <span className="guestbook-entry__author">{entry.author}</span>
+                      <span className="guestbook-entry__dot">·</span>
+                      <span className="guestbook-entry__date">{formatDate(entry.date)}</span>
+                    </div>
+                  </div>
+                </a>
+              ))
+            )}
+          </div>
         </section>
       </main>
     </div>
