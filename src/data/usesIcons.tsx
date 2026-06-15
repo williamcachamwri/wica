@@ -69,44 +69,10 @@ const PlantIcon = () => (
   </svg>
 )
 
-// Brand logos
+// Brand logos — inline SVGs
 const GithubIcon = () => (
   <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
     <path d="M12 2C6.477 2 2 6.477 2 12c0 4.42 2.87 8.17 6.84 9.5.5.08.66-.23.66-.5v-1.69c-2.77.6-3.36-1.34-3.36-1.34-.46-1.16-1.11-1.47-1.11-1.47-.91-.62.07-.6.07-.6 1 .07 1.53 1.03 1.53 1.03.87 1.52 2.34 1.08 2.91.83.09-.65.35-1.09.63-1.34-2.22-.25-4.55-1.11-4.55-4.92 0-1.11.38-2 1.03-2.71-.1-.25-.45-1.29.1-2.64 0 0 .84-.27 2.75 1.02.79-.22 1.65-.33 2.5-.33.85 0 1.71.11 2.5.33 1.91-1.29 2.75-1.02 2.75-1.02.55 1.35.2 2.39.1 2.64.65.71 1.03 1.6 1.03 2.71 0 3.82-2.34 4.66-4.57 4.91.36.31.69.92.69 1.85V21c0 .27.16.59.67.5C19.14 20.16 22 16.42 22 12A10 10 0 0 0 12 2z" />
-  </svg>
-)
-
-const CloudflareIcon = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-    <path d="M17.5 19.5c2.485 0 4.5-1.79 4.5-4s-2.015-4-4.5-4c-.21 0-.415.018-.615.05C16.56 7.9 14.23 5.5 11.4 5.5c-2.93 0-5.34 2.13-5.84 4.93C2.77 10.83 1 12.94 1 15.5c0 2.76 2.24 5 5 5h11.5z" fill="#F48120" />
-    <path d="M17.5 19.5c2.485 0 4.5-1.79 4.5-4s-2.015-4-4.5-4c-.21 0-.415.018-.615.05C16.56 7.9 14.23 5.5 11.4 5.5c-2.93 0-5.34 2.13-5.84 4.93C2.77 10.83 1 12.94 1 15.5c0 2.76 2.24 5 5 5h11.5z" fill="url(#cf-gradient)" opacity="0.8" />
-    <defs>
-      <linearGradient id="cf-gradient" x1="1" y1="5.5" x2="22" y2="20.5" gradientUnits="userSpaceOnUse">
-        <stop stopColor="#F48120" />
-        <stop offset="1" stopColor="#FAAD3F" />
-      </linearGradient>
-    </defs>
-  </svg>
-)
-
-const ViteIcon = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-    <path d="M23.67 2.87 12.85 22.1a.57.57 0 0 1-.99.05L.32 2.88a.56.56 0 0 1 .55-.83l11.2 2.02a.56.56 0 0 0 .2 0l10.85-2.02a.56.56 0 0 1 .55.82z" fill="#646CFF" />
-    <path d="m17.04 1.32-7.6 1.51-5.2-1.03a.55.55 0 0 0-.57.84l9.04 15.93L17.6 2.16a.55.55 0 0 0-.56-.84z" fill="#CFCFFF" />
-    <path d="m14.36 2.47-5.95 1.18-4.08-.8a.44.44 0 0 0-.45.66l7.07 12.45 7.35-12.7a.44.44 0 0 0-.44-.66l-3.5.67z" fill="#FFD62A" />
-  </svg>
-)
-
-const ObsidianIcon = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-    <path d="M12 2 3 7v10l9 5 9-5V7l-9-5z" fill="#7C3AED" />
-    <path d="M12 2v20M3 7l9 5 9-5" stroke="#fff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-  </svg>
-)
-
-const VsCodeIcon = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-    <path d="M17.5 0 10 7.5 5.5 4 2 6.5v11L5.5 20l4.5-3.5L17.5 24 23 21V3l-5.5-3zM5.5 16.5V7.5l3.5 2.5-3.5 6.5zM17 14.5l-5-3.5 5-3.5v7z" fill="#007ACC" />
   </svg>
 )
 
@@ -127,11 +93,20 @@ const SpotifyIcon = () => (
   </svg>
 )
 
-const NotionIcon = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-    <path d="M4.46 3.5 15.5.5c.4-.1.75.1.85.5l2 4.5c.1.3 0 .6-.3.8l-2.5 1.5 2 9.5c.1.5-.2 1-.7 1.1l-11 2.5c-.4.1-.8-.1-.9-.5l-2-4.5c-.1-.3 0-.7.3-.8l2.5-1.5-2-9.5c-.1-.5.2-1 .71-1.1zM16 2.3 5.5 5c-.2.1-.3.2-.3.4l2 9.5c.1.3.3.4.6.4l10.5-2.4c.3-.1.4-.3.4-.6l-2-9.5c-.1-.3-.3-.4-.6-.5z" />
-  </svg>
-)
+// Brand logos — image assets
+function LogoIcon({ src, alt }: { src: string; alt: string }) {
+  return (
+    <span className="uses-logo">
+      <img src={src} alt={alt} loading="lazy" decoding="async" />
+    </span>
+  )
+}
+
+const VsCodeIcon = () => <LogoIcon src="/icons/vscode.jpg" alt="VS Code" />
+const CloudflareIcon = () => <LogoIcon src="/icons/cloudflare.png" alt="Cloudflare" />
+const ViteIcon = () => <LogoIcon src="/icons/vite.png" alt="Vite" />
+const ObsidianIcon = () => <LogoIcon src="/icons/obsidian.png" alt="Obsidian" />
+const NotionIcon = () => <LogoIcon src="/icons/notion.png" alt="Notion" />
 
 export const USES_ICONS: Record<string, () => JSX.Element> = {
   laptop: LaptopIcon,
