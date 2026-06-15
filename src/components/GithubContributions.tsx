@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 
 interface Day {
@@ -67,10 +67,20 @@ export function GithubContributions() {
   const [error, setError] = useState(false)
   const [tooltip, setTooltip] = useState<TooltipState>({ x: 0, y: 0, text: '', visible: false })
   const [mounted, setMounted] = useState(false)
+  const scrollRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     setMounted(true)
   }, [])
+
+  useEffect(() => {
+    if (!data || !scrollRef.current) return
+    const el = scrollRef.current
+    const isMobile = window.innerWidth <= 640
+    if (isMobile) {
+      el.scrollLeft = el.scrollWidth
+    }
+  }, [data])
 
   useEffect(() => {
     let mounted = true
@@ -146,7 +156,7 @@ export function GithubContributions() {
 
   return (
     <div className="github-contributions">
-      <div className="contrib-scroll">
+      <div ref={scrollRef} className="contrib-scroll">
         <div
           className="contrib-grid"
           role="img"
