@@ -269,6 +269,7 @@
     top: calc(100% + 0.5rem);
     left: 50%;
     width: min(280px, calc(100vw - 2rem));
+    max-width: none;
     flex-direction: column;
     align-items: stretch;
     gap: 0.5rem;
@@ -291,6 +292,7 @@
   }
 
   .floating-navbar--expanded .floating-navbar__body {
+    max-width: none;
     opacity: 1;
     visibility: visible;
     pointer-events: auto;
