@@ -26,6 +26,16 @@
   --cursor-ring: rgba(17, 17, 17, 0.35);
   --icon-box-bg: #fafafa;
 
+  /* Diff colors — GitHub-inspired, tinted against surface */
+  --diff-add: #16a34a;
+  --diff-add-bg: color-mix(in srgb, #16a34a 10%, var(--surface));
+  --diff-del: #dc2626;
+  --diff-del-bg: color-mix(in srgb, #dc2626 10%, var(--surface));
+  --diff-mod: #2563eb;
+  --diff-mod-bg: color-mix(in srgb, #2563eb 10%, var(--surface));
+  --diff-rename: #d97706;
+  --diff-rename-bg: color-mix(in srgb, #d97706 10%, var(--surface));
+
   --navbar-bg: rgba(255, 255, 255, 0.88);
   --navbar-border: rgba(229, 229, 229, 0.8);
   --link-hover-bg: rgba(0, 0, 0, 0.03);
@@ -69,6 +79,16 @@
   --loader-bg: #000000;
   --cursor-ring: rgba(255, 255, 255, 0.25);
   --icon-box-bg: #2e2e3e;
+
+  /* Diff colors — GitHub-inspired, tinted against surface */
+  --diff-add: #4ade80;
+  --diff-add-bg: color-mix(in srgb, #4ade80 12%, var(--surface));
+  --diff-del: #f87171;
+  --diff-del-bg: color-mix(in srgb, #f87171 12%, var(--surface));
+  --diff-mod: #60a5fa;
+  --diff-mod-bg: color-mix(in srgb, #60a5fa 12%, var(--surface));
+  --diff-rename: #fbbf24;
+  --diff-rename-bg: color-mix(in srgb, #fbbf24 12%, var(--surface));
 
   --navbar-bg: rgba(19, 19, 26, 0.88);
   --navbar-border: rgba(63, 63, 70, 0.8);

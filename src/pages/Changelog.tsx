@@ -182,24 +182,25 @@ export default function Changelog() {
         <Link to="/" className="inline-link text-sm mb-6 inline-block">‹ back home</Link>
 
         <div className="changelog-header">
-          <span className="changelog-badge">{data.sha}</span>
-          <span className="changelog-author">{data.author}</span>
-          <span className="changelog-date">{new Date(data.date).toLocaleDateString('en-US', {
-            year: 'numeric', month: 'long', day: 'numeric',
-          })}</span>
-        </div>
-
-        <div className="changelog-stats">
-          <span className="changelog-stat changelog-stat--add">+{data.totalAdditions}</span>
-          <span className="changelog-stat changelog-stat--del">-{data.totalDeletions}</span>
-          <span className="changelog-stat changelog-stat--files">{data.files.length} {data.files.length === 1 ? 'file' : 'files'}</span>
+          <div className="changelog-header__row">
+            <span className="changelog-badge">{data.sha}</span>
+            <span className="changelog-author">{data.author}</span>
+            <span className="changelog-date">{new Date(data.date).toLocaleDateString('en-US', {
+              year: 'numeric', month: 'long', day: 'numeric',
+            })}</span>
+          </div>
+          <div className="changelog-stats">
+            <span className="changelog-stat changelog-stat--add">+{data.totalAdditions}</span>
+            <span className="changelog-stat changelog-stat--del">-{data.totalDeletions}</span>
+            <span className="changelog-stat changelog-stat--files">{data.files.length} {data.files.length === 1 ? 'file' : 'files'}</span>
+          </div>
         </div>
 
         <pre className="changelog-message">{data.message}</pre>
 
         <div className="changelog-files">
           {data.files.map((file, i) => (
-            <div key={file.filename} className="changelog-file">
+            <div key={file.filename} className="changelog-file" style={{ '--i': i } as React.CSSProperties}>
               <button
                 type="button"
                 className="changelog-file__head"

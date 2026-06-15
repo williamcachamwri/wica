@@ -19,7 +19,7 @@
 .changelog-skeleton__file {
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 12px;
+  border-radius: 14px;
   padding: 1rem 1.15rem;
 }
 
@@ -46,7 +46,7 @@
 .changelog-skeleton__stat {
   width: 48px;
   height: 16px;
-  border-radius: 4px;
+  border-radius: 999px;
   background: var(--code-bg);
 }
 
@@ -88,7 +88,7 @@
 .changelog-skeleton__file-status {
   width: 48px;
   height: 16px;
-  border-radius: 4px;
+  border-radius: 6px;
   background: var(--code-bg);
   flex-shrink: 0;
 }
@@ -106,11 +106,46 @@
   background: var(--code-bg);
 }
 
+/* ── Real content ────────────────────────────────────────────────── */
+@keyframes changelogFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 .changelog-header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 1rem 1.15rem;
+  margin-bottom: 1rem;
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.03),
+    0 1px 2px rgba(0, 0, 0, 0.02);
+  opacity: 0;
+  transform: translateY(8px);
+  animation: changelogFadeIn 0.4s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.dark .changelog-header {
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.15),
+    0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.changelog-header__row {
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  margin-bottom: 1rem;
+  flex-wrap: wrap;
 }
 
 .changelog-badge {
@@ -125,6 +160,12 @@
   color: var(--accent);
 }
 
+.changelog-author {
+  font-size: 13px;
+  color: var(--text);
+  font-weight: 500;
+}
+
 .changelog-date {
   font-size: 13px;
   color: var(--text-subtle);
@@ -132,24 +173,35 @@
 
 .changelog-stats {
   display: flex;
-  gap: 0.75rem;
-  margin-bottom: 1.5rem;
-  font-size: 13px;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.changelog-stat {
+  font-size: 11px;
+  font-weight: 600;
   font-family: 'JetBrains Mono', monospace;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: var(--code-bg);
 }
 
 .changelog-stat--add {
-  color: #16a34a;
+  color: var(--diff-add);
 }
 
 .changelog-stat--del {
-  color: #dc2626;
+  color: var(--diff-del);
+}
+
+.changelog-stat--files {
+  color: var(--text-subtle);
 }
 
 .changelog-message {
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 8px;
+  border-radius: 14px;
   padding: 1rem 1.25rem;
   font-family: 'JetBrains Mono', monospace;
   font-size: 13px;
@@ -157,6 +209,18 @@
   white-space: pre-wrap;
   margin-bottom: 2rem;
   overflow-x: auto;
+  opacity: 0;
+  transform: translateY(8px);
+  animation: changelogFadeIn 0.4s cubic-bezier(0.22, 1, 0.36, 1) 0.05s forwards;
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.03),
+    0 1px 2px rgba(0, 0, 0, 0.02);
+}
+
+.dark .changelog-message {
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.15),
+    0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
 .changelog-files {
@@ -167,9 +231,56 @@
 
 .changelog-file {
   padding: 0.75rem 1rem;
-  border-radius: 8px;
+  border-radius: 14px;
   border: 1px solid var(--border);
   background: var(--surface);
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.03),
+    0 1px 2px rgba(0, 0, 0, 0.02);
+  opacity: 0;
+  transform: translateY(8px);
+  animation: changelogFadeIn 0.4s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  animation-delay: calc(0.05s * var(--i, 0));
+  transition:
+    transform 0.3s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.3s ease,
+    border-color 0.3s ease;
+}
+
+.dark .changelog-file {
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.15),
+    0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+@media (hover: hover) {
+  .changelog-file:hover {
+    transform: translateY(-2px);
+    border-color: var(--border-strong);
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.05);
+  }
+}
+
+.changelog-file__head {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  width: 100%;
+  cursor: pointer;
+  border: none;
+  background: none;
+  padding: 0.2rem;
+  margin: -0.2rem;
+  font: inherit;
+  text-align: left;
+  border-radius: 8px;
+  transition: background 0.2s ease;
+}
+
+@media (hover: hover) {
+  .changelog-file__head:hover {
+    background: var(--code-bg);
+  }
 }
 
 .changelog-file__status {
@@ -178,28 +289,28 @@
   text-transform: uppercase;
   letter-spacing: 0.04em;
   padding: 0.1rem 0.4rem;
-  border-radius: 4px;
+  border-radius: 6px;
   flex-shrink: 0;
 }
 
 .changelog-file__status--added {
-  background: color-mix(in srgb, #16a34a 10%, transparent);
-  color: #16a34a;
+  background: var(--diff-add-bg);
+  color: var(--diff-add);
 }
 
 .changelog-file__status--modified {
-  background: color-mix(in srgb, #2563eb 10%, transparent);
-  color: #2563eb;
+  background: var(--diff-mod-bg);
+  color: var(--diff-mod);
 }
 
 .changelog-file__status--removed {
-  background: color-mix(in srgb, #dc2626 10%, transparent);
-  color: #dc2626;
+  background: var(--diff-del-bg);
+  color: var(--diff-del);
 }
 
 .changelog-file__status--renamed {
-  background: color-mix(in srgb, #d97706 10%, transparent);
-  color: #d97706;
+  background: var(--diff-rename-bg);
+  color: var(--diff-rename);
 }
 
 .changelog-file__path {
@@ -225,34 +336,11 @@
 }
 
 .changelog-bar--add {
-  background: #16a34a;
+  background: var(--diff-add);
 }
 
 .changelog-bar--del {
-  background: #dc2626;
-}
-
-.changelog-author {
-  font-size: 13px;
-  color: var(--text);
-  font-weight: 500;
-}
-
-.changelog-stat--files {
-  color: var(--text-subtle);
-}
-
-.changelog-file__head {
-  display: flex;
-  align-items: center;
-  gap: 0.6rem;
-  width: 100%;
-  cursor: pointer;
-  border: none;
-  background: none;
-  padding: 0;
-  font: inherit;
-  text-align: left;
+  background: var(--diff-del);
 }
 
 .changelog-file__expand {
@@ -281,15 +369,15 @@
 }
 
 .diff-line--add {
-  background: color-mix(in srgb, #16a34a 8%, transparent);
+  background: var(--diff-add-bg);
 }
 
 .diff-line--del {
-  background: color-mix(in srgb, #dc2626 8%, transparent);
+  background: var(--diff-del-bg);
 }
 
 .diff-line--hunk {
-  background: color-mix(in srgb, #2563eb 6%, transparent);
+  background: var(--diff-mod-bg);
   color: var(--text-muted);
 }
 
