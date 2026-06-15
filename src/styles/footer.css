@@ -36,15 +36,6 @@
   font-size: 14px;
 }
 
-.footer__links {
-  display: inline-flex;
-  align-items: center;
-  color: var(--text-subtle);
-  opacity: 0.4;
-  text-decoration: none;
-  transition: opacity 0.2s ease, color 0.2s ease;
-}
-
 .footer__rss {
   display: inline-flex;
   align-items: center;
@@ -130,7 +121,28 @@
   font-size: inherit;
 }
 
-@media (min-width: 640px) {
+@media (max-width: 640px) {
+  .footer__top {
+    gap: 0.75rem;
+  }
+
+  .footer__links {
+    gap: 0.75rem;
+    font-size: 13px;
+  }
+
+  .footer__bottom {
+    gap: 0.4rem;
+    font-size: 12px;
+  }
+
+  .footer__inspired {
+    display: block;
+    margin-top: 0.15rem;
+  }
+}
+
+@media (min-width: 641px) {
   .footer__top {
     flex-direction: row;
     justify-content: space-between;

@@ -6,12 +6,19 @@
   gap: 0.5rem;
 }
 
+.contrib-scroll {
+  width: 100%;
+  overflow-x: auto;
+  padding-bottom: 0.5rem;
+  -webkit-overflow-scrolling: touch;
+}
+
 .contrib-grid {
   display: grid;
   grid-template-rows: 12px repeat(7, 9px);
   gap: 2px;
   width: fit-content;
-  max-width: 100%;
+  min-width: 100%;
 }
 
 .contrib-grid--skeleton {

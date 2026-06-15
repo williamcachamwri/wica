@@ -126,12 +126,22 @@
 }
 
 @media (max-width: 640px) {
+  .photo-desk {
+    padding: 1rem 0 1.5rem;
+  }
+
   .polaroid {
-    width: 130px;
-    margin-left: -22px;
+    width: 92px;
+    margin-left: -18px;
+    padding: 5px 5px 16px 5px;
   }
 
   .polaroid img {
-    height: 100px;
+    height: 72px;
+  }
+
+  .polaroid figcaption {
+    font-size: 0.8rem;
+    margin-top: 6px;
   }
 }

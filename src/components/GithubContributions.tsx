@@ -131,10 +131,12 @@ export function GithubContributions() {
   if (loading || !data) {
     return (
       <div className="github-contributions" aria-busy="true" aria-label="Loading GitHub contributions">
-        <div className="contrib-grid contrib-grid--skeleton">
-          {Array.from({ length: 371 }).map((_, i) => (
-            <div key={i} className="contrib-cell contrib-cell--skeleton" />
-          ))}
+        <div className="contrib-scroll">
+          <div className="contrib-grid contrib-grid--skeleton">
+            {Array.from({ length: 371 }).map((_, i) => (
+              <div key={i} className="contrib-cell contrib-cell--skeleton" />
+            ))}
+          </div>
         </div>
       </div>
     )
@@ -144,12 +146,13 @@ export function GithubContributions() {
 
   return (
     <div className="github-contributions">
-      <div
-        className="contrib-grid"
-        role="img"
-        aria-label={`GitHub contribution heatmap, ${data.total} contributions in the past year`}
-        style={{ gridTemplateColumns: `repeat(${data.weeks.length + 1}, 9px)` }}
-      >
+      <div className="contrib-scroll">
+        <div
+          className="contrib-grid"
+          role="img"
+          aria-label={`GitHub contribution heatmap, ${data.total} contributions in the past year`}
+          style={{ gridTemplateColumns: `repeat(${data.weeks.length + 1}, 9px)` }}
+        >
         {monthLabels.map((m, i) => (
           <span
             key={`${m.label}-${i}`}
@@ -183,6 +186,7 @@ export function GithubContributions() {
             )
           })
         )}
+        </div>
       </div>
 
       <div className="contrib-footer">

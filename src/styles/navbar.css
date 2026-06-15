@@ -227,41 +227,95 @@
   transform: translateZ(0);
 }
 
-/* ── Mobile navbar adjustments ──────────────────────────────────── */
+/* ── Mobile navbar: compact pill with dropdown ──────────────────── */
 @media (max-width: 640px) {
+  .navbar-wrapper {
+    top: 0.75rem;
+  }
+
   .floating-navbar {
-    gap: 0.4rem;
-    padding: 0.45rem 0.5rem 0.45rem 0.85rem;
+    position: relative;
+    gap: 0.35rem;
+    padding: 0.45rem 0.55rem 0.45rem 0.9rem;
+    max-width: calc(100vw - 1.5rem);
   }
 
   .floating-navbar__brand a {
-    font-size: 13px;
-    padding-right: 0.5rem;
+    font-size: 14px;
+    padding-right: 0;
+    border-right: none;
+  }
+
+  .floating-navbar--collapsed .navbar-expand-btn {
+    order: 1;
+  }
+
+  .floating-navbar__body {
+    position: absolute;
+    top: calc(100% + 0.5rem);
+    left: 0;
+    right: 0;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
+    padding: 0.75rem 0.9rem;
+    background: var(--navbar-bg);
+    border: 1px solid var(--navbar-border);
+    border-radius: 18px;
+    box-shadow: 0 16px 32px rgba(0, 0, 0, 0.08);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    max-width: 0;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(-8px) scale(0.96);
+    transform-origin: top center;
+    transition:
+      max-width 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+      opacity 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+      transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .floating-navbar--expanded .floating-navbar__body {
+    max-width: none;
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0) scale(1);
+  }
+
+  .floating-navbar__links {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.15rem;
   }
 
   .floating-navbar__links a {
-    padding: 0.35rem 0.55rem;
-    font-size: 12px;
+    padding: 0.55rem 0.7rem;
+    font-size: 14px;
+    text-align: center;
   }
 
   .floating-navbar__palette {
-    gap: 0.2rem;
-    padding-left: 0.3rem;
+    justify-content: center;
+    padding-left: 0;
+    padding-top: 0.4rem;
+    border-left: none;
+    border-top: 1px solid var(--border);
   }
 
   .color-dot {
-    width: 14px;
-    height: 14px;
+    width: 18px;
+    height: 18px;
   }
 
   .theme-toggle {
-    padding: 0.35rem 0.5rem;
-    margin-left: 0.1rem;
+    padding: 0.4rem 0.65rem;
+    margin-left: 0;
   }
 
   .inspect-toggle {
-    padding: 0.3rem 0.5rem;
-    margin-left: 0.1rem;
+    padding: 0.35rem 0.55rem;
+    margin-left: 0;
   }
 
   .inspect-toggle__label {

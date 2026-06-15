@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 
 const ACCENT_COLORS = [
@@ -22,8 +22,13 @@ export function FloatingNavbar({ accent, onAccentChange, theme, onToggleTheme }:
   const isActive = (path: string) => location.pathname === path
   const [expanded, setExpanded] = useState(true)
 
+  useEffect(() => {
+    const isMobile = window.innerWidth <= 640
+    setExpanded(!isMobile)
+  }, [])
+
   return (
-    <nav className={`floating-navbar${expanded ? ' floating-navbar--expanded' : ''}`}>
+    <nav className={`floating-navbar${expanded ? ' floating-navbar--expanded' : ' floating-navbar--collapsed'}`}>
       <div className="floating-navbar__brand">
         <Link to="/">lvk</Link>
       </div>
