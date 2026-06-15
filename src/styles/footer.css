@@ -152,6 +152,61 @@
   color: var(--accent);
 }
 
+.lighthouse-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 10px;
+  font-family: var(--font-mono);
+  font-weight: 600;
+}
+
+.lighthouse-badge--loading {
+  color: var(--text-subtle);
+}
+
+.lighthouse-score {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 2px 5px;
+  border-radius: 4px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+}
+
+.lighthouse-score__label {
+  opacity: 0.7;
+}
+
+.lighthouse-score__value {
+  min-width: 1.1em;
+  text-align: center;
+}
+
+.lighthouse-score--good {
+  color: #16a34a;
+  border-color: color-mix(in srgb, #16a34a 30%, var(--border));
+  background: color-mix(in srgb, #16a34a 8%, var(--surface));
+}
+
+.lighthouse-score--avg {
+  color: #d97706;
+  border-color: color-mix(in srgb, #d97706 30%, var(--border));
+  background: color-mix(in srgb, #d97706 8%, var(--surface));
+}
+
+.lighthouse-score--bad {
+  color: #dc2626;
+  border-color: color-mix(in srgb, #dc2626 30%, var(--border));
+  background: color-mix(in srgb, #dc2626 8%, var(--surface));
+}
+
+.lighthouse-score--na {
+  opacity: 0.5;
+}
+
 @media (max-width: 640px) {
   .footer__top {
     gap: 0.75rem;

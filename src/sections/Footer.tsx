@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom'
 import { InlineLink } from '../components/InlineLink'
 import { NowPlaying } from '../components/NowPlaying'
 import { BuildInfo } from '../components/BuildInfo'
+import { LighthouseBadge } from '../components/LighthouseBadge'
 
 export function Footer() {
   return (
@@ -35,6 +36,7 @@ export function Footer() {
         </p>
         <NowPlaying />
         <BuildInfo />
+        <LighthouseBadge />
       </div>
     </footer>
   )
