@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { createPortal } from 'react-dom'
 
 let toastId = 0
 const listeners = new Set<(toasts: ToastItem[]) => void>()
@@ -25,8 +26,10 @@ export function showToast(message: string) {
 
 export function ToastContainer() {
   const [items, setItems] = useState<ToastItem[]>([])
+  const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
+    setMounted(true)
     listeners.add(setItems)
     setItems([...toasts])
     return () => {
@@ -34,13 +37,16 @@ export function ToastContainer() {
     }
   }, [])
 
-  return (
+  if (!mounted) return null
+
+  return createPortal(
     <div className="toast-container" aria-live="polite" aria-atomic="true">
       {items.map((toast) => (
         <div key={toast.id} className="toast">
           {toast.message}
         </div>
       ))}
-    </div>
+    </div>,
+    document.body
   )
 }
