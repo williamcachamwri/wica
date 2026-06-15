@@ -1,7 +1,7 @@
 const GITHUB_GRAPHQL = 'https://api.github.com/graphql'
+const GITHUB_API = 'https://api.github.com'
 const REPO_ID = 'R_kgDOS6MeVw'
 const CATEGORY_ID = 'DIC_kwDOS6MeV84C_Jgv'
-const LIKE_EMOJI = '❤️'
 
 interface Env {
   GITHUB_TOKEN: string
@@ -17,7 +17,13 @@ interface GitHubResponse {
           body: string
           url: string
           createdAt: string
-          reactions?: { nodes?: Array<{ content: string; user?: { login: string } }> }
+          reactions?: {
+            nodes?: Array<{
+              id: string
+              content: string
+              user?: { login: string }
+            }>
+          }
         }>
       }
     }
@@ -33,7 +39,14 @@ interface GitHubResponse {
     addReaction?: {
       reaction?: { id: string }
     }
-    viewer?: { login: string }
+    removeReaction?: {
+      reaction?: { id: string }
+    }
+    node?: {
+      reactions?: {
+        nodes?: Array<{ content: string }>
+      }
+    }
   }
   errors?: Array<{ message: string }>
 }
@@ -58,6 +71,23 @@ function getCookieToken(request: Request): string | null {
   return match ? decodeURIComponent(match[1]) : null
 }
 
+async function getViewerLogin(token: string): Promise<string | null> {
+  try {
+    const res = await fetch(`${GITHUB_API}/user`, {
+      headers: {
+        Accept: 'application/vnd.github.v3+json',
+        Authorization: `Bearer ${token}`,
+        'User-Agent': 'wica-blog/1.0',
+      },
+    })
+    if (!res.ok) return null
+    const data = (await res.json()) as { login: string }
+    return data.login
+  } catch {
+    return null
+  }
+}
+
 export async function onRequest(context: { request: Request; env: Env }): Promise<Response> {
   const { request, env } = context
 
@@ -71,6 +101,14 @@ export async function onRequest(context: { request: Request; env: Env }): Promis
   const token = getCookieToken(request)
   if (!token) {
     return new Response(JSON.stringify({ error: 'Not authenticated' }), {
+      status: 401,
+      headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+    })
+  }
+
+  const viewerLogin = await getViewerLogin(token)
+  if (!viewerLogin) {
+    return new Response(JSON.stringify({ error: 'Failed to identify user' }), {
       status: 401,
       headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
     })
@@ -97,6 +135,7 @@ export async function onRequest(context: { request: Request; env: Env }): Promis
             createdAt
             reactions(first: 100) {
               nodes {
+                id
                 content
                 user { login }
               }
@@ -149,28 +188,49 @@ export async function onRequest(context: { request: Request; env: Env }): Promis
       discussion = { ...created, reactions: { nodes: [] } }
     }
 
-    // Add reaction using the user's token
-    const reactionMutation = `mutation {
-      addReaction(input: {
-        subjectId: "${discussion.id}",
-        content: HEART
-      }) {
-        reaction { id }
-      }
-    }`
+    const existingReaction = (discussion.reactions?.nodes || []).find(
+      (r) => r.content === 'HEART' && r.user?.login === viewerLogin
+    )
 
-    const reactionRes = await fetch(GITHUB_GRAPHQL, {
-      method: 'POST',
-      headers: headers(token),
-      body: JSON.stringify({ query: reactionMutation }),
-    })
-    const reactionJson = (await reactionRes.json()) as GitHubResponse
-    if (reactionJson.errors) {
-      // Likely already reacted
-      return new Response(JSON.stringify({ error: 'Already liked' }), {
-        status: 409,
-        headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+    let liked: boolean
+
+    if (existingReaction) {
+      // Unlike: remove existing reaction
+      const removeMutation = `mutation {
+        removeReaction(input: {
+          reactionId: "${existingReaction.id}"
+        }) {
+          reaction { id }
+        }
+      }`
+
+      const removeRes = await fetch(GITHUB_GRAPHQL, {
+        method: 'POST',
+        headers: headers(token),
+        body: JSON.stringify({ query: removeMutation }),
       })
+      const removeJson = (await removeRes.json()) as GitHubResponse
+      if (removeJson.errors) throw new Error(removeJson.errors[0]?.message || 'GitHub API error')
+      liked = false
+    } else {
+      // Like: add reaction
+      const reactionMutation = `mutation {
+        addReaction(input: {
+          subjectId: "${discussion.id}",
+          content: HEART
+        }) {
+          reaction { id }
+        }
+      }`
+
+      const reactionRes = await fetch(GITHUB_GRAPHQL, {
+        method: 'POST',
+        headers: headers(token),
+        body: JSON.stringify({ query: reactionMutation }),
+      })
+      const reactionJson = (await reactionRes.json()) as GitHubResponse
+      if (reactionJson.errors) throw new Error(reactionJson.errors[0]?.message || 'GitHub API error')
+      liked = true
     }
 
     // Refetch reactions to get accurate count
@@ -192,7 +252,7 @@ export async function onRequest(context: { request: Request; env: Env }): Promis
     const countJson = (await countRes.json()) as GitHubResponse
     const heartCount = (countJson.data?.node?.reactions?.nodes || []).filter((r) => r.content === 'HEART').length
 
-    return new Response(JSON.stringify({ liked: true, count: heartCount }), {
+    return new Response(JSON.stringify({ liked, count: heartCount }), {
       status: 200,
       headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
     })

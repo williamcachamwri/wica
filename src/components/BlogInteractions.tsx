@@ -18,6 +18,7 @@ interface Comment {
 export function BlogInteractions({ slug, title }: BlogInteractionsProps) {
   const [comments, setComments] = useState<Comment[]>([])
   const [likes, setLikes] = useState(0)
+  const [liked, setLiked] = useState(false)
   const [loading, setLoading] = useState(true)
   const [commentBody, setCommentBody] = useState('')
   const [submitting, setSubmitting] = useState(false)
@@ -42,6 +43,10 @@ export function BlogInteractions({ slug, title }: BlogInteractionsProps) {
       const data = (await res.json()) as { comments: Comment[]; likes: number }
       setComments(data.comments)
       setLikes(data.likes)
+      if (user) {
+        const hasLiked = await checkLiked()
+        setLiked(hasLiked)
+      }
     } catch {
       showToast('Failed to load comments')
     } finally {
@@ -53,6 +58,26 @@ export function BlogInteractions({ slug, title }: BlogInteractionsProps) {
     loadComments()
     checkAuth()
   }, [slug, title])
+
+  useEffect(() => {
+    if (user) {
+      checkLiked().then(setLiked)
+    } else {
+      setLiked(false)
+    }
+  }, [user, slug, title])
+
+  const checkLiked = async (): Promise<boolean> => {
+    if (!user) return false
+    try {
+      const res = await fetch(`/api/blog/like/status?slug=${encodeURIComponent(slug)}&title=${encodeURIComponent(title)}`)
+      if (!res.ok) return false
+      const data = (await res.json()) as { liked: boolean }
+      return data.liked
+    } catch {
+      return false
+    }
+  }
 
   const handleLogin = () => {
     const redirect = encodeURIComponent(`${window.location.pathname}${window.location.search}`)
@@ -75,19 +100,13 @@ export function BlogInteractions({ slug, title }: BlogInteractionsProps) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ slug, title }),
       })
-      if (!res.ok) {
-        if (res.status === 409) {
-          await loadComments()
-          showToast('You already liked this post')
-          return
-        }
-        throw new Error('Failed to like')
-      }
-      const data = (await res.json()) as { count: number }
+      if (!res.ok) throw new Error('Failed to like')
+      const data = (await res.json()) as { liked: boolean; count: number }
       setLikes(data.count)
-      showToast('Liked!')
+      setLiked(data.liked)
+      showToast(data.liked ? 'Liked!' : 'Unliked')
     } catch {
-      showToast('Failed to like')
+      showToast('Failed to update like')
     }
   }
 
@@ -123,10 +142,10 @@ export function BlogInteractions({ slug, title }: BlogInteractionsProps) {
           onClick={handleLike}
           aria-label="Like this post"
         >
-          <svg width="16" height="16" viewBox="0 0 24 24" fill={likes > 0 ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill={liked ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
           </svg>
-          {likes > 0 ? likes : 'Like'}
+          {liked ? 'Liked' : likes > 0 ? likes : 'Like'}
         </button>
 
         {user ? (
