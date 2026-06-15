@@ -67,6 +67,7 @@ export function GithubContributions() {
   const [error, setError] = useState(false)
   const [tooltip, setTooltip] = useState<TooltipState>({ x: 0, y: 0, text: '', visible: false })
   const [mounted, setMounted] = useState(false)
+  const [gridVisible, setGridVisible] = useState(false)
   const scrollRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -80,6 +81,24 @@ export function GithubContributions() {
     if (isMobile) {
       el.scrollLeft = el.scrollWidth
     }
+  }, [data])
+
+  useEffect(() => {
+    const el = scrollRef.current
+    if (!el) return
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setGridVisible(true)
+          observer.disconnect()
+        }
+      },
+      { threshold: 0.15 }
+    )
+
+    observer.observe(el)
+    return () => observer.disconnect()
   }, [data])
 
   useEffect(() => {
@@ -158,7 +177,7 @@ export function GithubContributions() {
     <div className="github-contributions">
       <div ref={scrollRef} className="contrib-scroll">
         <div
-          className="contrib-grid"
+          className={`contrib-grid ${gridVisible ? 'contrib-grid--visible' : ''}`}
           role="img"
           aria-label={`GitHub contribution heatmap, ${data.total} contributions in the past year`}
           style={{ gridTemplateColumns: `repeat(${data.weeks.length + 1}, 9px)` }}
