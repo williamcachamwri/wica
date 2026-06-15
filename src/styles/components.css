@@ -186,7 +186,7 @@
 /* ── Toast ───────────────────────────────────────────────────────── */
 .toast-container {
   position: fixed !important;
-  bottom: 1.5rem !important;
+  bottom: 5.5rem !important;
   right: 1.5rem !important;
   top: auto !important;
   left: auto !important;
@@ -195,6 +195,13 @@
   flex-direction: column;
   gap: 0.5rem;
   pointer-events: none;
+}
+
+@media (max-width: 640px) {
+  .toast-container {
+    bottom: 5rem !important;
+    right: 1rem !important;
+  }
 }
 
 .toast {
