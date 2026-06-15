@@ -42,10 +42,13 @@ export function LighthouseBadge() {
     async function fetchScores() {
       try {
         const res = await fetch('/api/lighthouse?url=https://wica.info&strategy=mobile')
-        if (!res.ok) return
         const json = await res.json()
-        if (mounted && json.scores) {
-          setData({ scores: json.scores, fetchTime: json.fetchTime })
+        if (mounted) {
+          if (json.scores) {
+            setData({ scores: json.scores, fetchTime: json.fetchTime })
+          } else if (json.error) {
+            setData({ scores: { performance: null, accessibility: null, bestPractices: null, seo: null }, error: json.error })
+          }
         }
       } catch {
         // ignore
