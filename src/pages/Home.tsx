@@ -1,6 +1,7 @@
 import { Loader } from '../components/Loader'
 import { SEO } from '../components/SEO'
 import { Footer } from '../sections/Footer'
+import { GithubActivity } from '../sections/GithubActivity'
 import { Hero } from '../sections/Hero'
 import { Memories } from '../sections/Memories'
 import { Projects } from '../sections/Projects'
@@ -36,6 +37,7 @@ export default function Home() {
         <main id="main" className="max-w-[680px] mx-auto px-6 pt-16 md:pt-24 pb-20">
           <Hero typewriterStart={!loading} />
           <Projects />
+          <GithubActivity />
           <Memories />
           <Footer />
         </main>

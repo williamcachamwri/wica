@@ -24,6 +24,7 @@ import './styles/components.css'
 import './styles/inspect.css'
 import './styles/lightbox.css'
 import './styles/blog-interactions.css'
+import './styles/contributions.css'
 
 const BlogPost = lazy(() => import('./pages/BlogPost'))
 const Guestbook = lazy(() => import('./pages/Guestbook'))
