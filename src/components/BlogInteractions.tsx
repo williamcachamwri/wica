@@ -77,6 +77,7 @@ export function BlogInteractions({ slug, title }: BlogInteractionsProps) {
       })
       if (!res.ok) {
         if (res.status === 409) {
+          await loadComments()
           showToast('You already liked this post')
           return
         }

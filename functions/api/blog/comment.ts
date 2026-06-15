@@ -117,7 +117,7 @@ export async function onRequest(context: { request: Request; env: Env }): Promis
               body
               url
               createdAt
-              comments(first: 50, orderBy: {field: CREATED_AT, direction: DESC}) {
+              comments(first: 50) {
                 nodes {
                   id
                   author { login avatarUrl }

@@ -89,7 +89,7 @@ export async function onRequest(context: { request: Request; env: Env }): Promis
   const authUrl = new URL('https://github.com/login/oauth/authorize')
   authUrl.searchParams.set('client_id', env.GITHUB_CLIENT_ID)
   authUrl.searchParams.set('redirect_uri', `${url.origin}/api/auth/github`)
-  authUrl.searchParams.set('scope', 'read:user')
+  authUrl.searchParams.set('scope', 'read:user public_repo')
   authUrl.searchParams.set('state', redirect)
 
   return new Response(null, {
