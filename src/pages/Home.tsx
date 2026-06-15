@@ -36,8 +36,8 @@ export default function Home() {
 
         <main id="main" className="max-w-[680px] mx-auto px-6 pt-16 md:pt-24 pb-20">
           <Hero typewriterStart={!loading} />
-          <Projects />
           <GithubActivity />
+          <Projects />
           <Memories />
           <Footer />
         </main>

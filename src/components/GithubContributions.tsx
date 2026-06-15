@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import { createPortal } from 'react-dom'
 
 interface Day {
   date: string
@@ -65,6 +66,11 @@ export function GithubContributions() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(false)
   const [tooltip, setTooltip] = useState<TooltipState>({ x: 0, y: 0, text: '', visible: false })
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   useEffect(() => {
     let mounted = true
@@ -160,19 +166,20 @@ export function GithubContributions() {
             if (!day) return null
             const level = getLevel(day.count, maxCount)
             return (
-              <div
-                key={`${weekIndex}-${weekday}`}
-                className="contrib-cell"
-                data-level={level}
-                style={{
-                  gridColumn: weekIndex + 2,
-                  gridRow: weekday + 2,
-                  animationDelay: `${weekIndex * 0.012}s`,
-                }}
-                onMouseEnter={(e) => handleMouseEnter(e, day)}
-                onMouseMove={handleMouseMove}
-                onMouseLeave={handleMouseLeave}
-              />
+                <div
+                  key={`${weekIndex}-${weekday}`}
+                  className="contrib-cell"
+                  data-level={level}
+                  title={`${day.count} contributions · ${formatDate(day.date)} · ${WEEKDAYS[day.weekday]}`}
+                  style={{
+                    gridColumn: weekIndex + 2,
+                    gridRow: weekday + 2,
+                    animationDelay: `${weekIndex * 0.012}s`,
+                  }}
+                  onMouseEnter={(e) => handleMouseEnter(e, day)}
+                  onMouseMove={handleMouseMove}
+                  onMouseLeave={handleMouseLeave}
+                />
             )
           })
         )}
@@ -193,13 +200,14 @@ export function GithubContributions() {
         </div>
       </div>
 
-      {tooltip.visible && (
+      {mounted && tooltip.visible && createPortal(
         <div
           className="contrib-tooltip"
-          style={{ left: tooltip.x, top: tooltip.y, position: 'fixed' }}
+          style={{ left: tooltip.x, top: tooltip.y }}
         >
           {tooltip.text}
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   )
