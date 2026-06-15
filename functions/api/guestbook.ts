@@ -313,7 +313,9 @@ export async function onRequest(context: { request: Request; env: Env }): Promis
     }
 
     const nodes = json.data?.repository?.discussions?.nodes || []
-    const data = nodes.map(formatDiscussion)
+    const data = nodes
+      .filter((node) => !node.title.startsWith('[blog-post:'))
+      .map(formatDiscussion)
 
     return new Response(JSON.stringify(data), {
       headers: {
