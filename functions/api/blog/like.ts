@@ -198,7 +198,8 @@ export async function onRequest(context: { request: Request; env: Env }): Promis
       // Unlike: remove existing reaction
       const removeMutation = `mutation {
         removeReaction(input: {
-          reactionId: "${existingReaction.id}"
+          subjectId: "${discussion.id}",
+          content: HEART
         }) {
           reaction { id }
         }
