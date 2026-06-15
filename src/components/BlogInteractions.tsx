@@ -138,7 +138,7 @@ export function BlogInteractions({ slug, title }: BlogInteractionsProps) {
       <div className="blog-interactions__header">
         <button
           type="button"
-          className="blog-interactions__like"
+          className={`blog-interactions__like ${liked ? 'blog-interactions__like--liked' : ''}`}
           onClick={handleLike}
           aria-label="Like this post"
         >

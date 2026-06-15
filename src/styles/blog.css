@@ -34,6 +34,18 @@
   transform: scale(0.94);
 }
 
+.blog-post__action--copied {
+  border-color: #16a34a;
+  color: #16a34a;
+  animation: action-pop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes action-pop {
+  0% { transform: scale(1); }
+  40% { transform: scale(1.12); }
+  100% { transform: scale(1); }
+}
+
 /* ── Blog tags ─────────────────────────────────────────────────── */
 .blog-item__tags {
   display: flex;

@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
+
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import remarkMath from 'remark-math'
@@ -35,10 +36,11 @@ function getPostUrl(slug: string) {
   return `${window.location.origin}/blog/${slug}`
 }
 
-async function copyLink(url: string) {
+async function copyLink(url: string, onDone?: () => void) {
   try {
     await navigator.clipboard.writeText(url)
     showToast('Link copied')
+    onDone?.()
   } catch {
     showToast('Failed to copy')
   }
@@ -73,6 +75,7 @@ export default function BlogPost() {
   const [MdxComponent, setMdxComponent] = useState<React.ComponentType | null>(null)
   const [error, setError] = useState(false)
   const [progress, setProgress] = useState(0)
+  const [copied, setCopied] = useState(false)
   const relatedPosts = useMemo(() => post?.meta ? getRelated(post.meta.slug, post.meta.tags) : [], [post?.meta])
 
   useEffect(() => {
@@ -217,15 +220,27 @@ export default function BlogPost() {
           <div className="blog-post__actions">
             <button
               type="button"
-              className="blog-post__action"
-              onClick={() => copyLink(getPostUrl(slug || ''))}
+              className={`blog-post__action ${copied ? 'blog-post__action--copied' : ''}`}
+              onClick={() => {
+                if (copied) return
+                copyLink(getPostUrl(slug || ''), () => {
+                  setCopied(true)
+                  setTimeout(() => setCopied(false), 1500)
+                })
+              }}
               aria-label="Copy link"
             >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
-                <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
-              </svg>
-              Copy link
+              {copied ? (
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="20 6 9 17 4 12" />
+                </svg>
+              ) : (
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+                  <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+                </svg>
+              )}
+              {copied ? 'Copied' : 'Copy link'}
             </button>
             <button
               type="button"

@@ -42,6 +42,23 @@
   transform: scale(0.94);
 }
 
+.blog-interactions__like--liked {
+  border-color: #e11d48;
+  color: #e11d48;
+}
+
+.blog-interactions__like--liked svg {
+  animation: heart-pop 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes heart-pop {
+  0% { transform: scale(1); }
+  25% { transform: scale(1.35); }
+  50% { transform: scale(0.9); }
+  75% { transform: scale(1.15); }
+  100% { transform: scale(1); }
+}
+
 .blog-interactions__auth-link {
   font-family: "JetBrains Mono", monospace;
   font-size: 12px;

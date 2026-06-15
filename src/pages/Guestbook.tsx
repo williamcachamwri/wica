@@ -54,6 +54,7 @@ export default function Guestbook() {
   const [message, setMessage] = useState('')
   const [author, setAuthor] = useState('')
   const [justSent, setJustSent] = useState(false)
+  const [activeReaction, setActiveReaction] = useState<string | null>(null)
   const turnstileRef = useRef<HTMLDivElement>(null)
   const widgetId = useRef<string | null>(null)
 
@@ -93,6 +94,8 @@ export default function Guestbook() {
   }, [])
 
   const handleReact = async (entryId: string, emoji: string) => {
+    setActiveReaction(`${entryId}-${emoji}`)
+    setTimeout(() => setActiveReaction(null), 400)
     try {
       const res = await fetch('/api/guestbook', {
         method: 'POST',
@@ -293,7 +296,7 @@ export default function Guestbook() {
                         <button
                           key={emoji}
                           type="button"
-                          className="guestbook-entry__reaction"
+                          className={`guestbook-entry__reaction ${activeReaction === `${entry.id}-${emoji}` ? 'guestbook-entry__reaction--active' : ''}`}
                           onClick={(e) => {
                             e.preventDefault()
                             e.stopPropagation()
