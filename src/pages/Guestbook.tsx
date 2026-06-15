@@ -2,7 +2,7 @@ import { useEffect, useState, useRef, useCallback } from 'react'
 import { Link } from 'react-router-dom'
 import { SEO } from '../components/SEO'
 import { SectionDivider } from '../components/SectionDivider'
-import { ToastContainer, showToast } from '../components/Toast'
+import { showToast } from '../components/Toast'
 
 declare global {
   interface Window {
@@ -161,7 +161,6 @@ export default function Guestbook() {
         pathname="/guestbook"
       />
       <div className="grain" aria-hidden="true" />
-      <ToastContainer />
 
       <main id="main" className="max-w-[620px] mx-auto px-6 pt-16 md:pt-24 pb-20">
         <section className="mb-10">

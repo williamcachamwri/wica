@@ -185,10 +185,12 @@
 
 /* ── Toast ───────────────────────────────────────────────────────── */
 .toast-container {
-  position: fixed;
-  bottom: 1.5rem;
-  right: 1.5rem;
-  z-index: 9999;
+  position: fixed !important;
+  bottom: 1.5rem !important;
+  right: 1.5rem !important;
+  top: auto !important;
+  left: auto !important;
+  z-index: 9999 !important;
   display: flex;
   flex-direction: column;
   gap: 0.5rem;

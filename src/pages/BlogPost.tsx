@@ -7,7 +7,7 @@ import rehypeHighlight from 'rehype-highlight'
 import rehypeKatex from 'rehype-katex'
 import rehypeRaw from 'rehype-raw'
 import { SEO } from '../components/SEO'
-import { ToastContainer, showToast } from '../components/Toast'
+import { showToast } from '../components/Toast'
 import { allPosts } from '../data/allPosts'
 import type { PostMeta } from '../data/allPosts'
 import { BlogInteractions } from '../components/BlogInteractions'
@@ -186,7 +186,6 @@ export default function BlogPost() {
       )}
       <div className="grain" aria-hidden="true" />
       <div className="reading-progress" style={{ transform: `scaleX(${progress / 100})` }} aria-hidden="true" />
-      <ToastContainer />
 
       <main id="main" className="max-w-[680px] mx-auto px-6 pt-16 md:pt-24 pb-20">
         <section className="mb-10">
