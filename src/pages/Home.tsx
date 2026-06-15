@@ -4,6 +4,7 @@ import { Footer } from '../sections/Footer'
 import { GithubActivity } from '../sections/GithubActivity'
 import { Hero } from '../sections/Hero'
 import { Insights } from '../sections/Insights'
+import { LighthouseSection } from '../sections/LighthouseSection'
 import { Memories } from '../sections/Memories'
 import { Projects } from '../sections/Projects'
 import { useEffect, useState } from 'react'
@@ -40,6 +41,7 @@ export default function Home() {
           <GithubActivity />
           <Projects />
           <Insights />
+          <LighthouseSection />
           <Memories />
           <Footer />
         </main>
