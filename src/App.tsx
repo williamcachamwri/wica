@@ -7,6 +7,7 @@ import { InspectFloating } from './components/InspectFloating'
 import { Inspector } from './components/Inspector'
 import { NowPlayingSticky } from './components/NowPlayingSticky'
 import { ToastContainer } from './components/Toast'
+import { initSound, isMuted, toggleMuted, playClick, playSoftClick } from './lib/sound'
 import BlogList from './pages/BlogList'
 import Home from './pages/Home'
 import './styles/base.css'
@@ -31,6 +32,7 @@ const BlogPost = lazy(() => import('./pages/BlogPost'))
 const Guestbook = lazy(() => import('./pages/Guestbook'))
 const Universe = lazy(() => import('./pages/Universe'))
 const Changelog = lazy(() => import('./pages/Changelog'))
+const Uses = lazy(() => import('./pages/Uses'))
 const NotFound = lazy(() => import('./pages/NotFound'))
 
 const DEFAULT_ACCENT = '#2563eb'
@@ -95,6 +97,7 @@ function AnimatedRoutes() {
             <Route path="/guestbook" element={<Guestbook />} />
             <Route path="/universe" element={<Universe />} />
             <Route path="/changelog/:sha" element={<Changelog />} />
+            <Route path="/uses" element={<Uses />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </Suspense>
@@ -109,7 +112,13 @@ export default function App() {
   const [navbarReady, setNavbarReady] = useState(false)
   const [accent, setAccent] = useState(DEFAULT_ACCENT)
   const [theme, setTheme] = useState<Theme>(getInitialTheme)
+  const [soundMuted, setSoundMuted] = useState(true)
   const transitionTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  useEffect(() => {
+    initSound()
+    setSoundMuted(isMuted())
+  }, [])
 
   useEffect(() => {
     const saved = localStorage.getItem('ddt-accent')
@@ -150,10 +159,33 @@ export default function App() {
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [])
 
+  useEffect(() => {
+    const handleClick = (e: MouseEvent) => {
+      const target = e.target as HTMLElement
+      const isLink = target.closest('a, button, [role="button"], [data-cursor-hover]')
+      const isNavbarToggle = target.closest('.navbar-expand-btn, .theme-toggle, .color-dot')
+      if (!isLink) return
+      if (isNavbarToggle) {
+        playSoftClick()
+      } else {
+        playClick()
+      }
+    }
+
+    window.addEventListener('click', handleClick, { passive: true })
+    return () => window.removeEventListener('click', handleClick)
+  }, [])
+
   const handleAccentChange = (color: string) => {
     setAccent(color)
     document.documentElement.style.setProperty('--accent', color)
     localStorage.setItem('ddt-accent', color)
+  }
+
+  const handleToggleSound = () => {
+    const next = toggleMuted()
+    setSoundMuted(!next)
+    if (next) playClick()
   }
 
   const toggleTheme = () => {
@@ -211,6 +243,8 @@ export default function App() {
           onAccentChange={handleAccentChange}
           theme={theme}
           onToggleTheme={toggleTheme}
+          soundMuted={soundMuted}
+          onToggleSound={handleToggleSound}
         />
       </motion.div>
 

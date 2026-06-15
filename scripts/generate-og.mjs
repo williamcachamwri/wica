@@ -37,6 +37,11 @@ const PAGES = [
     title: 'Lost in space',
     description: 'The page you are looking for does not exist.',
   },
+  {
+    slug: 'uses',
+    title: 'Uses',
+    description: 'Tools, gear, and software I use every day.',
+  },
 ]
 
 function extractMdxMeta(filePath) {

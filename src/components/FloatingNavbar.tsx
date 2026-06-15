@@ -15,9 +15,11 @@ interface FloatingNavbarProps {
   onAccentChange: (color: string) => void
   theme: 'light' | 'dark'
   onToggleTheme: () => void
+  soundMuted?: boolean
+  onToggleSound?: () => void
 }
 
-export function FloatingNavbar({ accent, onAccentChange, theme, onToggleTheme }: FloatingNavbarProps) {
+export function FloatingNavbar({ accent, onAccentChange, theme, onToggleTheme, soundMuted = true, onToggleSound }: FloatingNavbarProps) {
   const location = useLocation()
   const isActive = (path: string) => location.pathname === path
   const [expanded, setExpanded] = useState(true)
@@ -68,6 +70,7 @@ export function FloatingNavbar({ accent, onAccentChange, theme, onToggleTheme }:
           <Link to="/blog" className={isActive('/blog') ? 'active' : ''}>blog</Link>
           <Link to="/guestbook" className={isActive('/guestbook') ? 'active' : ''}>guestbook</Link>
           <Link to="/universe" className={isActive('/universe') ? 'active' : ''}>universe</Link>
+          <Link to="/uses" className={isActive('/uses') ? 'active' : ''}>uses</Link>
         </div>
 
         <div className="floating-navbar__palette" aria-label="Accent color">
@@ -83,6 +86,19 @@ export function FloatingNavbar({ accent, onAccentChange, theme, onToggleTheme }:
             />
           ))}
         </div>
+
+        {onToggleSound && (
+          <button
+            type="button"
+            className={`sound-toggle ${soundMuted ? 'sound-toggle--muted' : ''}`}
+            onClick={onToggleSound}
+            title={soundMuted ? 'Unmute UI sounds' : 'Mute UI sounds'}
+            aria-label={soundMuted ? 'Unmute UI sounds' : 'Mute UI sounds'}
+          >
+            <span className="sound-toggle__icon">{soundMuted ? '◼' : '◗'}</span>
+            <span className="sound-toggle__label">{soundMuted ? 'sound off' : 'sound on'}</span>
+          </button>
+        )}
       </div>
 
       <button
