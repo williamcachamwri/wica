@@ -27,13 +27,13 @@ export function BuildInfo() {
 
     async function fetchCommit() {
       try {
-        const res = await fetch('https://api.github.com/repos/williamcachamwri/wica/commits/main')
+        const res = await fetch('/api/latest-commit')
         if (!res.ok) return
         const json = await res.json()
         if (mounted && json.sha) {
           setInfo({
-            sha: json.sha.slice(0, 7),
-            date: json.commit?.committer?.date || json.commit?.author?.date || '',
+            sha: json.sha,
+            date: json.date || '',
           })
         }
       } catch {
