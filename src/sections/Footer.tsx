@@ -26,7 +26,13 @@ export function Footer() {
         </nav>
       </div>
       <div className="footer__bottom">
-        <p>built with patience · styled with restraint</p>
+        <p>
+          built with patience · styled with restraint
+          <span className="footer__inspired">
+            {' '}· inspired by{' '}
+            <InlineLink href="https://trongduong.com">duongductrong</InlineLink>
+          </span>
+        </p>
         <NowPlaying />
         <BuildInfo />
       </div>

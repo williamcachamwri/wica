@@ -308,6 +308,10 @@ When you add a new blog post (`.md` in `public/posts/` or `.mdx` in `src/posts/`
 
 ---
 
+## acknowledgements
+
+- Design inspired by [Duong Duc Trong](https://trongduong.com) — thank you for the clean, thoughtful reference.
+
 ## author
 
 **L&ecirc; V&itilde;nh Khang**

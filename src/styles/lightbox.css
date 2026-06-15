@@ -54,13 +54,25 @@
   box-shadow:
     0 24px 60px rgba(0, 0, 0, 0.35),
     0 0 0 1px rgba(255, 255, 255, 0.08);
+  animation: lightbox-image-in 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes lightbox-image-in {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 .lightbox__caption {
   margin-top: 0.85rem;
   font-family: "Caveat", "Kalam", cursive;
   font-size: 1.25rem;
-  color: rgba(255, 255, 255, 0.85);
+  color: var(--text-inverted, rgba(255, 255, 255, 0.9));
   text-align: center;
 }
 
@@ -73,10 +85,10 @@
   justify-content: center;
   width: 40px;
   height: 40px;
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  border: 1px solid var(--border-inverted, rgba(255, 255, 255, 0.18));
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.08);
-  color: rgba(255, 255, 255, 0.9);
+  background: var(--surface-inverted, rgba(255, 255, 255, 0.08));
+  color: var(--text-inverted, rgba(255, 255, 255, 0.9));
   cursor: pointer;
   transition:
     background 0.2s cubic-bezier(0.22, 1, 0.36, 1),
@@ -86,18 +98,17 @@
 
 .lightbox__close:hover,
 .lightbox__nav:hover {
-  background: rgba(255, 255, 255, 0.15);
-  border-color: rgba(255, 255, 255, 0.3);
-}
-
-.lightbox__close:active,
-.lightbox__nav:active {
-  transform: scale(0.92);
+  background: var(--surface-inverted-hover, rgba(255, 255, 255, 0.15));
+  border-color: var(--border-inverted-hover, rgba(255, 255, 255, 0.35));
 }
 
 .lightbox__close {
   top: 1rem;
   right: 1rem;
+}
+
+.lightbox__close:active {
+  transform: scale(0.92);
 }
 
 .lightbox__nav--prev {
@@ -110,6 +121,11 @@
   right: 1rem;
   top: 50%;
   transform: translateY(-50%);
+}
+
+.lightbox__nav--prev:hover,
+.lightbox__nav--next:hover {
+  transform: translateY(-50%) scale(1.08);
 }
 
 .lightbox__nav--prev:active,

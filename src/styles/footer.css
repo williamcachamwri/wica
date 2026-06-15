@@ -98,6 +98,10 @@
   gap: 0.5rem;
 }
 
+.footer__inspired {
+  opacity: 0.7;
+}
+
 .footer__bottom .nowplaying {
   margin-top: 0;
 }

@@ -1,4 +1,5 @@
 import { useEffect, useCallback } from 'react'
+import { createPortal } from 'react-dom'
 
 interface LightboxProps {
   src: string
@@ -22,7 +23,7 @@ export function Lightbox({ src, caption, onClose, onPrev, onNext, hasPrev, hasNe
     return () => document.removeEventListener('keydown', handleKeyDown)
   }, [handleKeyDown])
 
-  return (
+  return createPortal(
     <div
       className="lightbox"
       role="dialog"
@@ -57,7 +58,7 @@ export function Lightbox({ src, caption, onClose, onPrev, onNext, hasPrev, hasNe
       )}
 
       <figure className="lightbox__content" onClick={(e) => e.stopPropagation()}>
-        <img src={src} alt={caption} className="lightbox__image" />
+        <img key={src} src={src} alt={caption} className="lightbox__image" />
         <figcaption className="lightbox__caption">{caption}</figcaption>
       </figure>
 
@@ -73,6 +74,7 @@ export function Lightbox({ src, caption, onClose, onPrev, onNext, hasPrev, hasNe
           </svg>
         </button>
       )}
-    </div>
+    </div>,
+    document.body
   )
 }

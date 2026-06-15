@@ -35,6 +35,13 @@
   --loader-line: rgba(255, 255, 255, 0.9);
   --loader-line-glow: rgba(255, 255, 255, 0.4);
   --prose-link-underline: rgba(26, 26, 26, 0.3);
+
+  /* Lightbox overlay is always dark, so inverted tokens are always light */
+  --text-inverted: rgba(255, 255, 255, 0.9);
+  --surface-inverted: rgba(255, 255, 255, 0.08);
+  --surface-inverted-hover: rgba(255, 255, 255, 0.15);
+  --border-inverted: rgba(255, 255, 255, 0.18);
+  --border-inverted-hover: rgba(255, 255, 255, 0.35);
 }
 
 .dark {
