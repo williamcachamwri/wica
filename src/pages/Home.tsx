@@ -36,7 +36,7 @@ export default function Home() {
         </a>
 
         <main id="main" className="max-w-[680px] mx-auto px-6 pt-16 md:pt-24 pb-20">
-          <Hero typewriterStart={!loading} />
+          <Hero typewriterStart={!loading} nameStartDelay={1.5} />
           <GithubActivity />
           <Projects />
           <Insights />

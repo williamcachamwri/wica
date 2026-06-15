@@ -8,9 +8,10 @@ import { sprites } from '../data/sprites'
 
 interface HeroProps {
   typewriterStart: boolean
+  nameStartDelay?: number
 }
 
-export function Hero({ typewriterStart }: HeroProps) {
+export function Hero({ typewriterStart, nameStartDelay }: HeroProps) {
   return (
     <section className="mb-12">
       <div className="flex items-center gap-4 mb-6">
@@ -41,7 +42,7 @@ export function Hero({ typewriterStart }: HeroProps) {
 
       <div className="mb-6">
         <h1 className="name-title name-title--hero text-[clamp(2rem,7vw,3.75rem)] font-bold tracking-[-0.03em] leading-[1.08]">
-          <AnimatedName>Lê Vĩnh Khang</AnimatedName>
+          <AnimatedName startDelay={nameStartDelay}>Lê Vĩnh Khang</AnimatedName>
         </h1>
         <span className="block mt-2 text-muted text-lg">Developer & maker</span>
         <NowPlaying />
