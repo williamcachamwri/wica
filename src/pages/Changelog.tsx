@@ -61,7 +61,7 @@ export default function Changelog() {
 
     async function fetchCommit() {
       try {
-        const res = await fetch(`https://api.github.com/repos/williamcachamwri/wica/commits/${sha}`)
+        const res = await fetch(`/api/commit/${sha}`)
         if (!res.ok) throw new Error()
         const json = await res.json()
         if (!mounted) return
