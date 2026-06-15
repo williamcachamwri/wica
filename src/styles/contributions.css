@@ -5,6 +5,27 @@
   gap: 0.5rem;
 }
 
+.contrib-grid-wrapper {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  width: 100%;
+  padding-bottom: 4px;
+}
+
+.contrib-grid-wrapper::-webkit-scrollbar {
+  height: 4px;
+}
+
+.contrib-grid-wrapper::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.contrib-grid-wrapper::-webkit-scrollbar-thumb {
+  background: var(--border-strong);
+  border-radius: 2px;
+}
+
 .contrib-months {
   display: grid;
   grid-auto-flow: column;
@@ -158,8 +179,6 @@
   }
 
   .contrib-grid-wrapper {
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
     mask-image: linear-gradient(
       to right,

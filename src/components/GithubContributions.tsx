@@ -103,11 +103,13 @@ export function GithubContributions() {
         <div className="contrib-header">
           <div className="contrib-skeleton__title" />
         </div>
+        <div className="contrib-grid-wrapper">
         <div className="contrib-grid contrib-grid--skeleton">
-          {Array.from({ length: 196 }).map((_, i) => (
-            <div key={i} className="contrib-cell contrib-cell--skeleton" />
-          ))}
-        </div>
+            {Array.from({ length: 196 }).map((_, i) => (
+              <div key={i} className="contrib-cell contrib-cell--skeleton" />
+            ))}
+          </div>
+      </div>
         <div className="contrib-footer">
           <div className="contrib-skeleton__text" />
           <div className="contrib-skeleton__legend" />
@@ -132,23 +134,25 @@ export function GithubContributions() {
         ))}
       </div>
 
-      <div className="contrib-grid" role="img" aria-label={`GitHub contribution heatmap, ${data.total} contributions in the past year`}>
-        {data.weeks.map((week, weekIndex) =>
-          WEEKDAYS.map((_, weekday) => {
-            const day = week.days.find((d) => d.weekday === weekday)
-            if (!day) return null
-            const level = getLevel(day.count, maxCount)
-            return (
-              <div
-                key={`${weekIndex}-${weekday}`}
-                className="contrib-cell"
-                data-level={level}
-                title={`${day.count} contributions · ${formatDate(day.date)}`}
-                style={{ animationDelay: `${weekIndex * 0.012}s` }}
-              />
-            )
-          })
-        )}
+      <div className="contrib-grid-wrapper">
+        <div className="contrib-grid" role="img" aria-label={`GitHub contribution heatmap, ${data.total} contributions in the past year`}>
+          {data.weeks.map((week, weekIndex) =>
+            WEEKDAYS.map((_, weekday) => {
+              const day = week.days.find((d) => d.weekday === weekday)
+              if (!day) return null
+              const level = getLevel(day.count, maxCount)
+              return (
+                <div
+                  key={`${weekIndex}-${weekday}`}
+                  className="contrib-cell"
+                  data-level={level}
+                  title={`${day.count} contributions · ${formatDate(day.date)}`}
+                  style={{ animationDelay: `${weekIndex * 0.012}s` }}
+                />
+              )
+            })
+          )}
+        </div>
       </div>
 
       <div className="contrib-footer">
