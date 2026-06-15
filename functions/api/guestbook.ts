@@ -180,7 +180,7 @@ export async function onRequest(context: { request: Request; env: Env }): Promis
 
         const updateMutation = `mutation {
           updateDiscussion(input: {
-            id: "${node.id}",
+            discussionId: "${node.id}",
             body: ${JSON.stringify(serializeBody(parsed.message, parsed.author, parsed.reactions))}
           }) {
             discussion {
