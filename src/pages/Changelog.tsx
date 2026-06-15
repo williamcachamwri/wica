@@ -116,8 +116,54 @@ export default function Changelog() {
   if (!data) {
     return (
       <div className="app-shell app-shell--in">
-        <main className="max-w-[680px] mx-auto px-6 pt-16 md:pt-24 pb-20">
-          <p className="text-muted">Loading…</p>
+        <main className="max-w-[760px] mx-auto px-6 pt-16 md:pt-24 pb-20">
+          <Link to="/" className="inline-link text-sm mb-6 inline-block">‹ back home</Link>
+          <div className="changelog-skeleton" aria-busy="true" aria-label="Loading changelog">
+            <div className="changelog-skeleton__header">
+              <div className="changelog-skeleton__badge" />
+              <div className="changelog-skeleton__line changelog-skeleton__line--short" />
+              <div className="changelog-skeleton__line changelog-skeleton__line--short" />
+            </div>
+            <div className="changelog-skeleton__stats">
+              <div className="changelog-skeleton__stat" />
+              <div className="changelog-skeleton__stat" />
+              <div className="changelog-skeleton__stat" />
+            </div>
+            <div className="changelog-skeleton__message">
+              <div className="changelog-skeleton__line" />
+              <div className="changelog-skeleton__line" />
+              <div className="changelog-skeleton__line changelog-skeleton__line--short" />
+            </div>
+            <div className="changelog-skeleton__files">
+              <div className="changelog-skeleton__file">
+                <div className="changelog-skeleton__file-head">
+                  <div className="changelog-skeleton__file-status" />
+                  <div className="changelog-skeleton__line" />
+                </div>
+                <div className="changelog-skeleton__bars">
+                  <div className="changelog-skeleton__bar" />
+                </div>
+              </div>
+              <div className="changelog-skeleton__file">
+                <div className="changelog-skeleton__file-head">
+                  <div className="changelog-skeleton__file-status" />
+                  <div className="changelog-skeleton__line" />
+                </div>
+                <div className="changelog-skeleton__bars">
+                  <div className="changelog-skeleton__bar" />
+                </div>
+              </div>
+              <div className="changelog-skeleton__file">
+                <div className="changelog-skeleton__file-head">
+                  <div className="changelog-skeleton__file-status" />
+                  <div className="changelog-skeleton__line" />
+                </div>
+                <div className="changelog-skeleton__bars">
+                  <div className="changelog-skeleton__bar" />
+                </div>
+              </div>
+            </div>
+          </div>
         </main>
       </div>
     )
