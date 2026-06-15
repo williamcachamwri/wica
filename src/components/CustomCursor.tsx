@@ -15,9 +15,10 @@ export function CustomCursor() {
   const ringPosRef = useRef({ x: -100, y: -100 })
   const [hovering, setHovering] = useState(false)
   const [clicking, setClicking] = useState(false)
-  const [hidden, setHidden] = useState(false)
-  const [ripples, setRipples] = useState<Ripple[]>([])
-  const rafRef = useRef<number>()
+    const [hidden, setHidden] = useState(false)
+    const [ripples, setRipples] = useState<Ripple[]>([])
+    const [crosshair, setCrosshair] = useState(false)
+    const rafRef = useRef<number>()
 
   useEffect(() => {
     // Skip on touch devices
@@ -33,9 +34,11 @@ export function CustomCursor() {
 
     const handleOver = (e: MouseEvent) => {
       const target = e.target as HTMLElement
+      const isCrosshair = target.closest('[data-cursor-crosshair]') !== null
       const isInteractive =
         target.closest('a, button, [role="button"], input, textarea, select, [data-cursor-hover]') !== null
-      setHovering(isInteractive)
+      setCrosshair(isCrosshair)
+      setHovering(isInteractive && !isCrosshair)
     }
 
     const handleDown = () => {
@@ -91,7 +94,7 @@ export function CustomCursor() {
     return null
   }
 
-  const cursorState = `${hovering ? 'custom-cursor--hover' : ''} ${clicking ? 'custom-cursor--click' : ''} ${hidden ? 'custom-cursor--hidden' : ''}`
+  const cursorState = `${hovering ? 'custom-cursor--hover' : ''} ${clicking ? 'custom-cursor--click' : ''} ${hidden || crosshair ? 'custom-cursor--hidden' : ''}`
 
   return (
     <>

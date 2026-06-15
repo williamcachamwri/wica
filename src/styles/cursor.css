@@ -10,6 +10,10 @@
   select {
     cursor: none;
   }
+
+  [data-cursor-crosshair="true"] {
+    cursor: crosshair !important;
+  }
 }
 
 .custom-cursor {

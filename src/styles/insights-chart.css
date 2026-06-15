@@ -1,0 +1,387 @@
+/* ── Insights Chart ───────────────────────────────────────────────── */
+
+.insights-chart {
+  position: relative;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  overflow: hidden;
+  margin: 1.5rem 0;
+}
+
+.insights-chart__fig {
+  position: absolute;
+  right: 1rem;
+  bottom: 0.75rem;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-subtle);
+  opacity: 0.4;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.insights-mock-toggle {
+  position: absolute;
+  top: 0.85rem;
+  right: 1rem;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text-subtle);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 0.3rem 0.75rem;
+  cursor: pointer;
+  z-index: 2;
+  transition: color 0.2s ease, border-color 0.2s ease, background 0.2s ease, transform 0.15s ease;
+}
+
+.insights-mock-toggle:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 6%, var(--surface));
+  transform: translateY(-1px);
+}
+
+.insights-chart__header {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+  padding: 1.25rem 1.25rem 0.75rem;
+}
+
+.insights-chart__title {
+  font-family: var(--font-sans);
+  font-size: clamp(1.5rem, 4vw, 2rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--text);
+  line-height: 1.1;
+}
+
+.insights-chart__range {
+  font-size: 0.9rem;
+  color: var(--text-subtle);
+  font-weight: 500;
+}
+
+.insights-chart__divider {
+  height: 1px;
+  background: var(--border);
+}
+
+.insights-chart__stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.insights-chart__stat {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 1rem 1.25rem;
+  border-right: 1px solid var(--border);
+}
+
+.insights-chart__stat:last-child {
+  border-right: none;
+}
+
+.insights-chart__stat-label {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.insights-chart__stat-value {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.insights-chart__chart {
+  position: relative;
+  width: 100%;
+  height: 280px;
+  padding: 0.75rem 1.25rem 2.5rem;
+}
+
+.insights-chart__svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.insights-chart__gridline {
+  stroke: var(--border-strong);
+  stroke-width: 1;
+  stroke-dasharray: 4 4;
+  opacity: 0.55;
+}
+
+.insights-chart__gridline--vertical {
+  stroke: var(--border-strong);
+  stroke-dasharray: 3 3;
+  opacity: 0.4;
+}
+
+.dark .insights-chart__gridline {
+  opacity: 0.38;
+}
+
+.dark .insights-chart__gridline--vertical {
+  opacity: 0.28;
+}
+
+.insights-chart__line {
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: stroke-dashoffset 1s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.insights-chart__line--sessions {
+  stroke: var(--text-subtle);
+  stroke-width: 2;
+  transition-delay: 150ms;
+}
+
+.insights-chart__line--visitors {
+  stroke: var(--accent);
+  stroke-width: 2.5;
+}
+
+.insights-chart__hover {
+  pointer-events: none;
+  will-change: transform;
+  transition: transform 0.18s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.15s ease;
+  animation: insights-fade-in 0.15s ease forwards;
+}
+
+.insights-chart__cursor-line {
+  stroke: var(--border-strong);
+  stroke-width: 1;
+}
+
+.insights-chart__dot {
+  stroke: var(--surface);
+  stroke-width: 2;
+  pointer-events: none;
+  animation: insights-dot-in 0.25s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+.insights-chart__dot--sessions {
+  fill: var(--text-subtle);
+}
+
+.insights-chart__dot--visitors {
+  fill: var(--accent);
+  animation-delay: 40ms;
+}
+
+@keyframes insights-dot-in {
+  from {
+    opacity: 0;
+    transform: scale(0);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.insights-chart__pill {
+  position: absolute;
+  bottom: 0.6rem;
+  transform: translateX(-50%) translateY(10px) scale(0.92);
+  opacity: 0;
+  background: var(--surface-elevated, var(--surface));
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 0.4rem 0.9rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  white-space: nowrap;
+  pointer-events: none;
+  will-change: left, transform;
+  transition:
+    left 0.18s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1),
+    opacity 0.2s ease;
+}
+
+.insights-chart__pill--visible {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0) scale(1);
+}
+
+.insights-chart__tooltip {
+  position: absolute;
+  transform: translate(10px, calc(-100% + 8px)) scale(0.96);
+  background: var(--text-primary);
+  color: var(--surface);
+  border-radius: 10px;
+  padding: 0.5rem 0.75rem;
+  font-size: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  pointer-events: none;
+  opacity: 0;
+  min-width: 120px;
+  z-index: 10;
+  will-change: left, top, transform;
+  transition:
+    left 0.18s cubic-bezier(0.22, 1, 0.36, 1),
+    top 0.18s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1),
+    opacity 0.18s ease;
+}
+
+.insights-chart__tooltip--left {
+  transform: translate(calc(-100% - 10px), calc(-100% + 8px)) scale(0.96);
+}
+
+.insights-chart__tooltip--visible {
+  opacity: 1;
+  transform: translate(10px, -100%) scale(1);
+}
+
+.insights-chart__tooltip--visible.insights-chart__tooltip--left {
+  transform: translate(calc(-100% - 10px), -100%) scale(1);
+}
+
+.insights-chart__tooltip-date {
+  font-weight: 700;
+  margin-bottom: 0.35rem;
+  color: var(--surface);
+  font-size: 11px;
+}
+
+.insights-chart__tooltip-row {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-bottom: 0.15rem;
+}
+
+.insights-chart__tooltip-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.insights-chart__tooltip-dot--visitors {
+  background: var(--accent);
+}
+
+.insights-chart__tooltip-dot--sessions {
+  background: var(--text-subtle);
+}
+
+.insights-chart__tooltip-label {
+  flex: 1;
+  color: color-mix(in srgb, var(--surface) 80%, transparent);
+}
+
+.insights-chart__tooltip-value {
+  font-weight: 700;
+  color: var(--surface);
+}
+
+@keyframes insights-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* ── Skeleton loading ─────────────────────────────────────────────── */
+.insights-chart--skeleton {
+  pointer-events: none;
+}
+
+.insights-chart--skeleton .insights-chart__header,
+.insights-chart--skeleton .insights-chart__stat,
+.insights-chart--skeleton .insights-chart__chart {
+  animation: insights-pulse 1.6s ease-in-out infinite;
+}
+
+.skeleton-line {
+  height: 0.75rem;
+  background: var(--border);
+  border-radius: 4px;
+  width: 60%;
+  margin-bottom: 0.5rem;
+}
+
+.skeleton-line--title {
+  width: 40%;
+  height: 1.75rem;
+}
+
+.skeleton-line--value {
+  width: 70%;
+  height: 1.25rem;
+}
+
+.skeleton-chart {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    var(--border) 0%,
+    color-mix(in srgb, var(--border) 70%, var(--surface)) 50%,
+    var(--border) 100%
+  );
+  background-size: 200% 100%;
+  border-radius: 8px;
+  animation: insights-shimmer 1.6s ease-in-out infinite;
+}
+
+@keyframes insights-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+
+@keyframes insights-shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* ── Mobile ───────────────────────────────────────────────────────── */
+@media (max-width: 600px) {
+  .insights-chart__stats {
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .insights-chart__stat {
+    flex: 0 0 45%;
+    scroll-snap-align: start;
+    border-right: 1px solid var(--border);
+  }
+
+  .insights-chart__chart {
+    height: 200px;
+  }
+
+  .insights-chart__tooltip {
+    min-width: 110px;
+    padding: 0.45rem 0.65rem;
+    font-size: 11px;
+  }
+}
+
+/* ── Crosshair cursor region ──────────────────────────────────────── */
+[data-cursor-crosshair="true"] {
+  cursor: crosshair !important;
+}

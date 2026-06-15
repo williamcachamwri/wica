@@ -3,6 +3,7 @@ import { SEO } from '../components/SEO'
 import { Footer } from '../sections/Footer'
 import { GithubActivity } from '../sections/GithubActivity'
 import { Hero } from '../sections/Hero'
+import { Insights } from '../sections/Insights'
 import { Memories } from '../sections/Memories'
 import { Projects } from '../sections/Projects'
 import { useEffect, useState } from 'react'
@@ -38,6 +39,7 @@ export default function Home() {
           <Hero typewriterStart={!loading} />
           <GithubActivity />
           <Projects />
+          <Insights />
           <Memories />
           <Footer />
         </main>

@@ -1,5 +1,6 @@
 import { useState } from 'react'
 export { Math } from './Math'
+export { InsightsChart } from '../components/InsightsChart'
 
 export function Callout({ children }: { children: React.ReactNode }) {
   return (
