@@ -187,6 +187,7 @@ export async function onRequest(context: { request: Request; env: Env }): Promis
     const countQuery = `query {
       node(id: "${discussion.id}") {
         ... on Discussion {
+          body
           reactions(first: 100) {
             nodes { content }
           }
@@ -200,7 +201,25 @@ export async function onRequest(context: { request: Request; env: Env }): Promis
       body: JSON.stringify({ query: countQuery }),
     })
     const countJson = (await countRes.json()) as GitHubResponse
-    const heartCount = (countJson.data?.node?.reactions?.nodes || []).filter((r) => r.content === 'HEART').length
+    const node = countJson.data?.node
+    const heartCount = (node?.reactions?.nodes || []).filter((r) => r.content === 'HEART').length
+
+    // Persist the like count into the discussion body so GET /comment can read it
+    const updatedBody = serializeBody(node?.body || discussion.body, heartCount)
+    const updateMutation = `mutation {
+      updateDiscussion(input: {
+        discussionId: "${discussion.id}",
+        body: ${JSON.stringify(updatedBody)}
+      }) {
+        discussion { id }
+      }
+    }`
+
+    await fetch(GITHUB_GRAPHQL, {
+      method: 'POST',
+      headers: headers(env.GITHUB_TOKEN),
+      body: JSON.stringify({ query: updateMutation }),
+    })
 
     return new Response(JSON.stringify({ liked: true, count: heartCount }), {
       status: 200,
