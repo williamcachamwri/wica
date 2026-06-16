@@ -15,6 +15,50 @@ import { BlogInteractions } from '../components/BlogInteractions'
 import { Footer } from '../components/Footer'
 import { fetchPost } from '../lib/posts'
 import { getMdxPost } from '../lib/mdxPosts'
+import { Mermaid } from '../mdx/Mermaid'
+
+interface CodeProps {
+  inline?: boolean
+  className?: string
+  children?: React.ReactNode
+}
+
+function extractText(children: React.ReactNode): string {
+  if (children === null || children === undefined) return ''
+  if (typeof children === 'string') return children
+  if (typeof children === 'number') return String(children)
+  if (Array.isArray(children)) return children.map(extractText).join('')
+  if (typeof children === 'object' && 'props' in children) {
+    return extractText(children.props.children)
+  }
+  return ''
+}
+
+function CodeBlock({ inline, className, children }: CodeProps) {
+  if (inline) {
+    return <code className={className}>{children}</code>
+  }
+  const language = className?.replace('language-', '') || ''
+  if (language === 'mermaid') {
+    const text = extractText(children)
+    if (text.trim()) return <Mermaid>{text}</Mermaid>
+  }
+  return <code className={className}>{children}</code>
+}
+
+function PreBlock({ children }: { children?: React.ReactNode }) {
+  const hasMermaid = (node: React.ReactNode): boolean => {
+    if (!node) return false
+    if (Array.isArray(node)) return node.some(hasMermaid)
+    if (typeof node === 'object' && 'type' in node) {
+      if (node.type === Mermaid) return true
+      if ('props' in node && node.props.children) return hasMermaid(node.props.children)
+    }
+    return false
+  }
+  if (hasMermaid(children)) return <>{children}</>
+  return <pre>{children}</pre>
+}
 
 
 function loadCss(href: string) {
@@ -280,6 +324,7 @@ export default function BlogPost() {
             <ReactMarkdown
               remarkPlugins={[remarkGfm, remarkMath]}
               rehypePlugins={[rehypeRaw, rehypeHighlight, rehypeKatex]}
+              components={{ code: CodeBlock, pre: PreBlock }}
             >
               {post.content}
             </ReactMarkdown>

@@ -155,6 +155,64 @@
   transform: translateY(-1px);
 }
 
+/* ── Mermaid diagrams ────────────────────────────────────────────── */
+.mermaid-diagram {
+  display: flex;
+  justify-content: center;
+  margin: 2rem 0;
+  padding: 1.5rem;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--surface);
+  overflow-x: auto;
+  box-shadow:
+    inset 0 0 0 1px color-mix(in srgb, var(--accent) 4%, transparent),
+    0 8px 32px -12px color-mix(in srgb, var(--accent) 8%, transparent);
+}
+
+.mermaid-diagram::-webkit-scrollbar {
+  height: 0;
+  width: 0;
+}
+
+.mermaid-diagram svg {
+  max-width: 100%;
+  height: auto;
+}
+
+.mermaid-diagram .node rect,
+.mermaid-diagram .node circle,
+.mermaid-diagram .node ellipse,
+.mermaid-diagram .node polygon,
+.mermaid-diagram .node path {
+  stroke-width: 1.5px !important;
+}
+
+.mermaid-diagram .edgeLabel {
+  background-color: var(--surface) !important;
+  color: var(--text) !important;
+}
+
+.mermaid-diagram .label {
+  color: var(--text) !important;
+  font-family: Inter, system-ui, sans-serif !important;
+}
+
+.mermaid-error {
+  margin: 2rem 0;
+  padding: 1.25rem;
+  border: 1px solid #ef4444;
+  border-radius: 12px;
+  background: color-mix(in srgb, #ef4444 8%, var(--surface));
+  color: #ef4444;
+}
+
+.mermaid-error pre {
+  margin-top: 0.75rem;
+  font-size: 12px;
+  white-space: pre-wrap;
+}
+
 /* ── Blog search ───────────────────────────────────────────────── */
 .blog-search {
   position: relative;

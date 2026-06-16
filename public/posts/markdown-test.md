@@ -51,3 +51,15 @@ Visit the [home page](/).
 - [x] Write the post
 - [ ] Review
 - [ ] Publish
+
+## Mermaid diagram
+
+```mermaid
+flowchart TD
+    A[Start] --> B{Is it working?}
+    B -->|Yes| C[Great!]
+    B -->|No| D[Debug]
+    D --> E[Fix it]
+    E --> B
+    C --> F[Deploy]
+```
