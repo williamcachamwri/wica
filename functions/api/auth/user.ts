@@ -1,25 +1,14 @@
+import { getCookieToken } from '../../utils/auth'
+import { jsonOK, jsonError } from '../../utils/security'
+
 const GITHUB_API = 'https://api.github.com'
 
-interface Env {
-  GITHUB_TOKEN: string
-}
-
-function getCookieToken(request: Request): string | null {
-  const cookie = request.headers.get('cookie')
-  if (!cookie) return null
-  const match = cookie.match(/(?:^|;\s*)gh_token=([^;]+)/)
-  return match ? decodeURIComponent(match[1]) : null
-}
-
-export async function onRequest(context: { request: Request; env: Env }): Promise<Response> {
+export async function onRequest(context: { request: Request }): Promise<Response> {
   const { request } = context
   const token = getCookieToken(request)
 
   if (!token) {
-    return new Response(JSON.stringify({ error: 'Not authenticated' }), {
-      status: 401,
-      headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
-    })
+    return jsonError('Not authenticated', 401, request)
   }
 
   try {
@@ -32,20 +21,12 @@ export async function onRequest(context: { request: Request; env: Env }): Promis
     })
 
     if (!res.ok) {
-      return new Response(JSON.stringify({ error: 'Invalid token' }), {
-        status: 401,
-        headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
-      })
+      return jsonError('Invalid token', 401, request)
     }
 
     const data = (await res.json()) as { login: string; avatar_url: string }
-    return new Response(JSON.stringify({ login: data.login, avatar: data.avatar_url }), {
-      headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
-    })
-  } catch (err) {
-    return new Response(JSON.stringify({ error: (err as Error).message }), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
-    })
+    return jsonOK({ login: data.login, avatar: data.avatar_url }, request)
+  } catch {
+    return jsonError('Authentication error', 500, request)
   }
 }

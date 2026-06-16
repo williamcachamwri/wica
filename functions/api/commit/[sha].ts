@@ -1,7 +1,7 @@
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Methods': 'GET, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type',
+const SECURE = {
+  'X-Content-Type-Options': 'nosniff',
+  'X-Frame-Options': 'DENY',
+  'Referrer-Policy': 'strict-origin-when-cross-origin',
   'Cache-Control': 'public, max-age=60',
 }
 
@@ -18,61 +18,18 @@ const githubHeaders = {
   'Connection': 'keep-alive',
 }
 
-interface GitHubDiffEntry {
-  path: string
-  status: string
-  linesAdded: number
-  linesDeleted: number
-  diffLines?: Array<{
-    type: string
-    text: string
-  }>
-}
-
-interface GitHubCommitPayload {
-  payload?: {
-    commit?: {
-      oid: string
-      authoredDate: string
-      committedDate: string
-      shortMessageMarkdown: string
-      bodyMessageHtml?: string
-      authors?: Array<{ displayName: string }>
-      committer?: { displayName: string }
-      sha1?: string
-      sha2?: string
-    }
-    headerInfo?: {
-      additions: number
-      deletions: number
-    }
-    diffEntryData?: GitHubDiffEntry[]
-  }
-}
-
 function stripHtml(html: string): string {
-  return html
-    .replace(/<br\s*\/?>/gi, '\n')
-    .replace(/<\/div>/gi, '\n')
-    .replace(/<[^>]+>/g, '')
-    .replace(/&lt;/g, '<')
-    .replace(/&gt;/g, '>')
-    .replace(/&amp;/g, '&')
-    .replace(/&quot;/g, '"')
-    .replace(/&#39;/g, "'")
-    .replace(/&nbsp;/g, ' ')
-    .replace(/\n{3,}/g, '\n\n')
-    .trim()
+  return html.replace(/<br\s*\/?>/gi, '\n').replace(/<\/div>/gi, '\n').replace(/<[^>]+>/g, '')
+    .replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&').replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'").replace(/&nbsp;/g, ' ').replace(/\n{3,}/g, '\n\n').trim()
 }
 
-function toGitHubApiFormat(payload: GitHubCommitPayload) {
+function toGitHubApiFormat(payload: any) {
   const commit = payload.payload?.commit
   const headerInfo = payload.payload?.headerInfo
   const diffEntries = payload.payload?.diffEntryData ?? []
 
-  if (!commit) {
-    throw new Error('commit data not found in page')
-  }
+  if (!commit) throw new Error('commit data not found')
 
   const title = stripHtml(commit.shortMessageMarkdown ?? '')
   const body = stripHtml(commit.bodyMessageHtml ?? '')
@@ -80,23 +37,17 @@ function toGitHubApiFormat(payload: GitHubCommitPayload) {
   const author = commit.authors?.[0]?.displayName || commit.committer?.displayName || ''
   const date = commit.committedDate || commit.authoredDate
 
-  const files = diffEntries.map((entry) => {
-    const patchLines = entry.diffLines
-      ? entry.diffLines.map((line) => line.text)
-      : undefined
-
+  const files = diffEntries.map((entry: any) => {
+    const patchLines = entry.diffLines?.map((l: any) => l.text)
     let additions = entry.linesAdded ?? 0
     let deletions = entry.linesDeleted ?? 0
 
     if (patchLines && (additions === 0 || deletions === 0)) {
-      const calc = patchLines.reduce(
-        (acc, line) => {
-          if (line.startsWith('+') && !line.startsWith('+++')) acc.add += 1
-          else if (line.startsWith('-') && !line.startsWith('---')) acc.del += 1
-          return acc
-        },
-        { add: 0, del: 0 }
-      )
+      const calc = patchLines.reduce((acc: any, line: string) => {
+        if (line.startsWith('+') && !line.startsWith('+++')) acc.add += 1
+        else if (line.startsWith('-') && !line.startsWith('---')) acc.del += 1
+        return acc
+      }, { add: 0, del: 0 })
       if (calc.add > 0) additions = calc.add
       if (calc.del > 0) deletions = calc.del
     }
@@ -104,8 +55,7 @@ function toGitHubApiFormat(payload: GitHubCommitPayload) {
     return {
       filename: entry.path,
       status: entry.status.toLowerCase(),
-      additions,
-      deletions,
+      additions, deletions,
       changes: additions + deletions,
       patch: patchLines?.join('\n'),
       isBinary: entry.isBinary || false,
@@ -116,83 +66,39 @@ function toGitHubApiFormat(payload: GitHubCommitPayload) {
 
   return {
     sha: commit.oid,
-    commit: {
-      message,
-      author: { name: author, date },
-      committer: { name: author, date },
-    },
+    commit: { message, author: { name: author, date }, committer: { name: author, date } },
     files,
-    stats: {
-      additions: headerInfo?.additions ?? files.reduce((s, f) => s + f.additions, 0),
-      deletions: headerInfo?.deletions ?? files.reduce((s, f) => s + f.deletions, 0),
-      total: files.length,
-    },
-  }
-}
-
-async function fetchDiffLines(sha1: string, sha2: string, index: number): Promise<string[]> {
-  try {
-    const res = await fetch(
-      `https://github.com/williamcachamwri/wica/diffs/${index}/diff-lines?sha1=${sha1}&sha2=${sha2}`,
-      { headers: { ...githubHeaders, Accept: 'application/json' } }
-    )
-    if (!res.ok) return []
-    const json = await res.json() as { diffLines?: Array<{ type: string; text: string }> }
-    return (json.diffLines ?? []).map((l) => l.text)
-  } catch {
-    return []
+    stats: { additions: headerInfo?.additions ?? files.reduce((s: number, f: any) => s + f.additions, 0), deletions: headerInfo?.deletions ?? files.reduce((s: number, f: any) => s + f.deletions, 0), total: files.length },
   }
 }
 
 export const onRequest: PagesFunction = async (context) => {
-  if (context.request.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders })
-  }
-
   const sha = context.params.sha as string
 
   try {
-    const res = await fetch(`https://github.com/williamcachamwri/wica/commit/${sha}`, {
-      headers: githubHeaders,
-    })
-
-    if (!res.ok) {
-      return Response.json(
-        { error: `GitHub returned ${res.status}` },
-        { status: res.status, headers: corsHeaders }
-      )
-    }
+    const res = await fetch(`https://github.com/williamcachamwri/wica/commit/${sha}`, { headers: githubHeaders })
+    if (!res.ok) return Response.json({ error: 'Failed to fetch commit' }, { status: res.status, headers: SECURE })
 
     const html = await res.text()
     const match = html.match(/<script type="application\/json" data-target="react-app\.embeddedData">([\s\S]*?)<\/script>/)
+    if (!match) return Response.json({ error: 'Commit data not found' }, { status: 500, headers: SECURE })
 
-    if (!match) {
-      return Response.json(
-        { error: 'could not find embedded commit data' },
-        { status: 500, headers: corsHeaders }
-      )
-    }
-
-    const payload = JSON.parse(match[1]) as GitHubCommitPayload
+    const payload = JSON.parse(match[1])
     const commit = payload.payload?.commit
     const sha1 = commit?.sha1
     const sha2 = commit?.sha2 || sha
     const diffEntries = payload.payload?.diffEntryData ?? []
 
-    const backfillPromises = diffEntries.map(async (entry, i) => {
+    await Promise.all(diffEntries.map(async (entry: any, i: number) => {
       if ((entry.diffLines?.length ?? 0) > 0 || !sha1) return
-      const lines = await fetchDiffLines(sha1, sha2, i)
-      if (lines.length > 0) {
-        entry.diffLines = lines.map((text) => ({ type: '', text }))
-      }
-    })
+      const diffRes = await fetch(`https://github.com/williamcachamwri/wica/diffs/${i}/diff-lines?sha1=${sha1}&sha2=${sha2}`, { headers: { ...githubHeaders, Accept: 'application/json' } })
+      if (!diffRes.ok) return
+      const diffJson = await diffRes.json() as { diffLines?: Array<{ type: string; text: string }> }
+      if (diffJson.diffLines?.length) entry.diffLines = diffJson.diffLines
+    }))
 
-    await Promise.all(backfillPromises)
-    const data = toGitHubApiFormat(payload)
-
-    return Response.json(data, { headers: corsHeaders })
-  } catch (err) {
-    const message = err instanceof Error ? err.message : String(err)
-    return Response.json({ error: message }, { status: 500, headers: corsHeaders })
+    return Response.json(toGitHubApiFormat(payload), { headers: SECURE })
+  } catch {
+    return Response.json({ error: 'Failed to process commit' }, { status: 500, headers: SECURE })
   }
 }

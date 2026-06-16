@@ -1,6 +1,7 @@
 import fs from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
+import vm from 'node:vm'
 import satori from 'satori'
 import { Resvg } from '@resvg/resvg-js'
 
@@ -96,7 +97,7 @@ function extractMdxMeta(filePath) {
   const match = raw.match(/export\s+const\s+meta\s*=\s*({[\s\S]*?})/)
   if (!match) return null
   try {
-    return new Function(`return ${match[1]}`)()
+    return vm.runInNewContext(`(${match[1]})`, {}, { timeout: 1000 })
   } catch {
     return null
   }

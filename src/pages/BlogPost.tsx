@@ -7,6 +7,7 @@ import remarkMath from 'remark-math'
 import rehypeHighlight from 'rehype-highlight'
 import rehypeKatex from 'rehype-katex'
 import rehypeRaw from 'rehype-raw'
+import rehypeSanitize, { defaultSchema } from 'rehype-sanitize'
 import { SEO } from '../components/SEO'
 import { showToast } from '../components/Toast'
 import { allPosts } from '../data/allPosts'
@@ -16,6 +17,21 @@ import { Footer } from '../components/Footer'
 import { fetchPost } from '../lib/posts'
 import { getMdxPost } from '../lib/mdxPosts'
 import { Mermaid } from '../mdx/Mermaid'
+
+const htmlSchema = {
+  ...defaultSchema,
+  attributes: {
+    ...defaultSchema.attributes,
+    '*': [...(defaultSchema.attributes?.['*'] || []), 'className', 'class', 'id', 'style'],
+    a: [...(defaultSchema.attributes?.a || []), 'target', 'rel'],
+    iframe: ['src', 'width', 'height', 'title', 'allowfullscreen', 'frameborder', 'loading', 'allow'],
+    img: [...(defaultSchema.attributes?.img || []), 'loading'],
+  },
+  tagNames: [
+    ...(defaultSchema.tagNames || []),
+    'iframe',
+  ],
+}
 
 interface CodeProps {
   inline?: boolean
@@ -419,7 +435,7 @@ export default function BlogPost() {
           ) : (
             <ReactMarkdown
               remarkPlugins={[remarkGfm, remarkMath]}
-              rehypePlugins={[rehypeRaw, rehypeHighlight, rehypeKatex]}
+              rehypePlugins={[[rehypeRaw], [rehypeSanitize, htmlSchema], rehypeHighlight, rehypeKatex]}
               components={{ code: CodeBlock, pre: PreBlock }}
             >
               {post.content}

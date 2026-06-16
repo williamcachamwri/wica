@@ -1,66 +1,17 @@
+import { getCookieToken } from '../../utils/auth'
+import { jsonOK, jsonError } from '../../utils/security'
+
 const GITHUB_GRAPHQL = 'https://api.github.com/graphql'
 const REPO_ID = 'R_kgDOS6MeVw'
 const CATEGORY_ID = 'DIC_kwDOS6MeV84C_Jgv'
+
+const ALLOWED_ORIGINS = ['https://wica.info', 'https://wica.pages.dev', 'http://localhost:5173', 'http://127.0.0.1:5173']
 
 interface Env {
   GITHUB_TOKEN: string
 }
 
-interface GitHubResponse {
-  data?: {
-    repository?: {
-      discussions?: {
-        nodes?: Array<{
-          id: string
-          title: string
-          body: string
-          url: string
-          createdAt: string
-          comments?: {
-            nodes?: Array<{
-              id: string
-              author?: { login: string; avatarUrl?: string }
-              body: string
-              createdAt: string
-              url: string
-            }>
-          }
-          reactions?: { nodes?: Array<{ content: string }> }
-        }>
-      }
-    }
-    createDiscussion?: {
-      discussion?: {
-        id: string
-        title: string
-        body: string
-        url: string
-        createdAt: string
-      }
-    }
-    addDiscussionComment?: {
-      comment?: {
-        id: string
-        author?: { login: string; avatarUrl?: string }
-        body: string
-        createdAt: string
-        url: string
-      }
-    }
-  }
-  errors?: Array<{ message: string }>
-}
-
-interface Comment {
-  id: string
-  author: string
-  avatar?: string
-  body: string
-  date: string
-  url: string
-}
-
-function headers(token: string): Record<string, string> {
+function ghHeaders(token: string): Record<string, string> {
   return {
     Accept: 'application/vnd.github.v3+json',
     'User-Agent': 'wica-blog/1.0',
@@ -73,14 +24,7 @@ function getDiscussionTitle(slug: string, title: string): string {
   return `[blog-post:${slug}] ${title}`
 }
 
-function getCookieToken(request: Request): string | null {
-  const cookie = request.headers.get('cookie')
-  if (!cookie) return null
-  const match = cookie.match(/(?:^|;\s*)gh_token=([^;]+)/)
-  return match ? decodeURIComponent(match[1]) : null
-}
-
-function formatComment(node: { id: string; author?: { login: string; avatarUrl?: string }; body: string; createdAt: string; url: string }): Comment {
+function formatComment(node: { id: string; author?: { login: string; avatarUrl?: string }; body: string; createdAt: string; url: string }) {
   return {
     id: node.id,
     author: node.author?.login || 'anonymous',
@@ -89,6 +33,25 @@ function formatComment(node: { id: string; author?: { login: string; avatarUrl?:
     date: node.createdAt,
     url: node.url,
   }
+}
+
+async function ghFetch(query: string, token: string, variables?: Record<string, unknown>) {
+  const res = await fetch(GITHUB_GRAPHQL, {
+    method: 'POST',
+    headers: ghHeaders(token),
+    body: JSON.stringify(variables ? { query, variables } : { query }),
+  })
+  const json = (await res.json()) as { data?: unknown; errors?: Array<{ message: string }> }
+  if (json.errors) throw new Error('GitHub API error')
+  return json.data
+}
+
+function csrfCheck(request: Request): Response | null {
+  const origin = request.headers.get('Origin')
+  if (origin && !ALLOWED_ORIGINS.includes(origin)) {
+    return jsonError('Forbidden', 403, request)
+  }
+  return null
 }
 
 export async function onRequest(context: { request: Request; env: Env }): Promise<Response> {
@@ -100,184 +63,111 @@ export async function onRequest(context: { request: Request; env: Env }): Promis
   if (request.method === 'GET') {
     const slug = url.searchParams.get('slug')
     const title = url.searchParams.get('title')
-    if (!slug || !title) {
-      return new Response(JSON.stringify({ error: 'Slug and title are required' }), {
-        status: 400,
-        headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
-      })
+    if (!slug || !title || slug.length > 200 || title.length > 200) {
+      return jsonError('Invalid slug or title', 400, request)
     }
 
     try {
-      const discussionTitle = getDiscussionTitle(slug, title)
-      const query = `query {
+      const query = `query($categoryId: ID!) {
         repository(owner: "williamcachamwri", name: "wica") {
-          discussions(first: 10, orderBy: {field: CREATED_AT, direction: DESC}, categoryId: "${CATEGORY_ID}") {
+          discussions(first: 10, orderBy: {field: CREATED_AT, direction: DESC}, categoryId: $categoryId) {
             nodes {
-              id
-              title
-              body
-              url
-              createdAt
+              id title body url createdAt
               comments(first: 50) {
-                nodes {
-                  id
-                  author { login avatarUrl }
-                  body
-                  createdAt
-                  url
-                }
+                nodes { id author { login avatarUrl } body createdAt url }
               }
-              reactions(first: 100) {
-                nodes { content }
-              }
+              reactions(first: 100) { nodes { content } }
             }
           }
         }
       }`
-
-      const res = await fetch(GITHUB_GRAPHQL, {
-        method: 'POST',
-        headers: headers(env.GITHUB_TOKEN),
-        body: JSON.stringify({ query }),
-      })
-      const json = (await res.json()) as GitHubResponse
-      if (json.errors) throw new Error(json.errors[0]?.message || 'GitHub API error')
-
-      const discussions = json.data?.repository?.discussions?.nodes || []
-      const discussion = discussions.find((d) => d.title === discussionTitle)
+      const data = await ghFetch(query, env.GITHUB_TOKEN, { categoryId: CATEGORY_ID }) as any
+      const discussions = data?.repository?.discussions?.nodes || []
+      const discussion = discussions.find((d: any) => d.title === getDiscussionTitle(slug, title))
       const comments = discussion?.comments?.nodes?.map(formatComment) || []
-      const likes = (discussion?.reactions?.nodes || []).filter((r) => r.content === 'HEART').length
+      const likes = (discussion?.reactions?.nodes || []).filter((r: any) => r.content === 'HEART').length
 
-      return new Response(JSON.stringify({ comments, discussionId: discussion?.id, likes }), {
-        headers: {
-          'Content-Type': 'application/json',
-          'Access-Control-Allow-Origin': '*',
-          'Cache-Control': 'no-cache',
-        },
-      })
+      return jsonOK({ comments, discussionId: discussion?.id, likes }, request)
     } catch (err) {
-      return new Response(JSON.stringify({ error: (err as Error).message }), {
-        status: 500,
-        headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
-      })
+      return jsonError('Failed to fetch comments', 500, request)
     }
   }
 
   // POST: add comment
   if (request.method === 'POST') {
+    const csrf = csrfCheck(request)
+    if (csrf) return csrf
+
     if (!token) {
-      return new Response(JSON.stringify({ error: 'Not authenticated' }), {
-        status: 401,
-        headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
-      })
+      return jsonError('Not authenticated', 401, request)
     }
 
     try {
       const { slug, title, body } = (await request.json()) as { slug: string; title: string; body: string }
       if (!slug || !title || !body || !body.trim()) {
-        return new Response(JSON.stringify({ error: 'Slug, title and body are required' }), {
-          status: 400,
-          headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
-        })
+        return jsonError('Slug, title and body are required', 400, request)
+      }
+      if (slug.length > 200 || title.length > 200 || body.length > 5000) {
+        return jsonError('Input too long', 400, request)
       }
 
       const discussionTitle = getDiscussionTitle(slug, title)
 
-      // Find or create discussion
-      const searchQuery = `query {
+      // Find existing discussion
+      const searchQuery = `query($categoryId: ID!) {
         repository(owner: "williamcachamwri", name: "wica") {
-          discussions(first: 10, orderBy: {field: CREATED_AT, direction: DESC}, categoryId: "${CATEGORY_ID}") {
-            nodes {
-              id
-              title
-              body
-              url
-              createdAt
-            }
+          discussions(first: 10, orderBy: {field: CREATED_AT, direction: DESC}, categoryId: $categoryId) {
+            nodes { id title body url createdAt }
           }
         }
       }`
+      const searchData = await ghFetch(searchQuery, env.GITHUB_TOKEN, { categoryId: CATEGORY_ID }) as any
+      const discussions = searchData?.repository?.discussions?.nodes || []
+      let discussionId = discussions.find((d: any) => d.title === discussionTitle)?.id
 
-      const searchRes = await fetch(GITHUB_GRAPHQL, {
-        method: 'POST',
-        headers: headers(env.GITHUB_TOKEN),
-        body: JSON.stringify({ query: searchQuery }),
-      })
-      const searchJson = (await searchRes.json()) as GitHubResponse
-      if (searchJson.errors) throw new Error(searchJson.errors[0]?.message || 'GitHub API error')
-
-      const discussions = searchJson.data?.repository?.discussions?.nodes || []
-      let discussionId = discussions.find((d) => d.title === discussionTitle)?.id
-
+      // Create discussion if not found
       if (!discussionId) {
-        const createMutation = `mutation {
-          createDiscussion(input: {
-            repositoryId: "${REPO_ID}",
-            categoryId: "${CATEGORY_ID}",
-            title: ${JSON.stringify(discussionTitle)},
-            body: ${JSON.stringify(`Comments and likes for "${title}"\n\n<!--blog:likes:0-->`)}
-          }) {
-            discussion {
-              id
-              title
-              body
-              url
-              createdAt
-            }
+        const createMutation = `mutation($repoId: ID!, $categoryId: ID!, $dTitle: String!, $dBody: String!) {
+          createDiscussion(input: {repositoryId: $repoId, categoryId: $categoryId, title: $dTitle, body: $dBody}) {
+            discussion { id title body url createdAt }
           }
         }`
-
-        const createRes = await fetch(GITHUB_GRAPHQL, {
-          method: 'POST',
-          headers: headers(env.GITHUB_TOKEN),
-          body: JSON.stringify({ query: createMutation }),
-        })
-        const createJson = (await createRes.json()) as GitHubResponse
-        if (createJson.errors) throw new Error(createJson.errors[0]?.message || 'GitHub API error')
-        discussionId = createJson.data?.createDiscussion?.discussion?.id
+        const createData = await ghFetch(createMutation, env.GITHUB_TOKEN, {
+          repoId: REPO_ID,
+          categoryId: CATEGORY_ID,
+          dTitle: discussionTitle,
+          dBody: `Comments and likes for "${title}"\n\n<!--blog:likes:0-->`,
+        }) as any
+        discussionId = createData?.createDiscussion?.discussion?.id
         if (!discussionId) throw new Error('Failed to create discussion')
       }
 
-      const commentMutation = `mutation {
-        addDiscussionComment(input: {
-          discussionId: "${discussionId}",
-          body: ${JSON.stringify(body.trim())}
-        }) {
-          comment {
-            id
-            author { login avatarUrl }
-            body
-            createdAt
-            url
-          }
+      // Add comment
+      const commentMutation = `mutation($discussionId: ID!, $body: String!) {
+        addDiscussionComment(input: {discussionId: $discussionId, body: $body}) {
+          comment { id author { login avatarUrl } body createdAt url }
         }
       }`
-
-      const commentRes = await fetch(GITHUB_GRAPHQL, {
-        method: 'POST',
-        headers: headers(token),
-        body: JSON.stringify({ query: commentMutation }),
-      })
-      const commentJson = (await commentRes.json()) as GitHubResponse
-      if (commentJson.errors) throw new Error(commentJson.errors[0]?.message || 'GitHub API error')
-
-      const comment = commentJson.data?.addDiscussionComment?.comment
+      const commentData = await ghFetch(commentMutation, token, {
+        discussionId,
+        body: body.trim(),
+      }) as any
+      const comment = commentData?.addDiscussionComment?.comment
       if (!comment) throw new Error('Failed to create comment')
 
       return new Response(JSON.stringify(formatComment(comment)), {
         status: 201,
-        headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Content-Type-Options': 'nosniff',
+          'X-Frame-Options': 'DENY',
+          'Referrer-Policy': 'strict-origin-when-cross-origin',
+        },
       })
     } catch (err) {
-      return new Response(JSON.stringify({ error: (err as Error).message }), {
-        status: 500,
-        headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
-      })
+      return jsonError('Failed to post comment', 500, request)
     }
   }
 
-  return new Response(JSON.stringify({ error: 'Method not allowed' }), {
-    status: 405,
-    headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
-  })
+  return jsonError('Method not allowed', 405, request)
 }

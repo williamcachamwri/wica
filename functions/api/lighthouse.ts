@@ -1,56 +1,18 @@
-interface Env {
-  PAGESPEED_API_KEY?: string
-}
+import { jsonOK, jsonError } from '../utils/security'
 
-interface AuditMetric {
-  score: number | null
-  displayValue?: string
-  title: string
-}
+interface Env { PAGESPEED_API_KEY?: string }
 
-interface PageSpeedResponse {
-  lighthouseResult?: {
-    categories?: {
-      performance?: { score: number | null }
-      accessibility?: { score: number | null }
-      'best-practices'?: { score: number | null }
-      seo?: { score: number | null }
-    }
-    audits?: Record<string, { score: number | null; displayValue?: string; title?: string }>
-    fetchTime?: string
-  }
-  error?: { message: string }
-}
-
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Methods': 'GET, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type',
-  'Cache-Control': 'public, max-age=3600',
-}
-
+const AUDIT_KEYS = ['first-contentful-paint', 'largest-contentful-paint', 'total-blocking-time', 'cumulative-layout-shift', 'speed-index', 'interactive']
 const CATEGORIES = ['PERFORMANCE', 'ACCESSIBILITY', 'BEST_PRACTICES', 'SEO']
-
-const AUDIT_KEYS = [
-  'first-contentful-paint',
-  'largest-contentful-paint',
-  'total-blocking-time',
-  'cumulative-layout-shift',
-  'speed-index',
-  'interactive',
-]
 
 export const onRequest: PagesFunction<Env> = async (context) => {
   if (context.request.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders })
+    return new Response(null, { headers: { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Methods': 'GET, OPTIONS', 'Access-Control-Allow-Headers': 'Content-Type' } })
   }
 
   const apiKey = context.env.PAGESPEED_API_KEY
   if (!apiKey) {
-    return Response.json(
-      { error: 'Set PAGESPEED_API_KEY secret to fetch Lighthouse scores.' },
-      { status: 503, headers: corsHeaders }
-    )
+    return jsonError('PageSpeed API key not configured', 503)
   }
 
   const url = new URL(context.request.url)
@@ -61,53 +23,30 @@ export const onRequest: PagesFunction<Env> = async (context) => {
   const cacheUrl = new URL(`${target}?strategy=${strategy}`)
   cacheUrl.protocol = 'https'
   cacheUrl.hostname = 'lighthouse-cache'
-  const cacheKey = new Request(cacheUrl.toString())
-  const cached = await cache.match(cacheKey)
-  if (cached) {
-    return new Response(cached.body, {
-      headers: { ...Object.fromEntries(cached.headers), ...corsHeaders },
-    })
-  }
+  const cached = await cache.match(new Request(cacheUrl.toString()))
+  if (cached) return new Response(cached.body, { headers: { 'X-Content-Type-Options': 'nosniff', 'X-Frame-Options': 'DENY', 'Referrer-Policy': 'strict-origin-when-cross-origin', 'Cache-Control': 'public, max-age=3600', ...Object.fromEntries(cached.headers) } })
 
   try {
     const params = new URLSearchParams({ url: target, strategy, key: apiKey })
     CATEGORIES.forEach((cat) => params.append('category', cat))
 
-    const res = await fetch(
-      `https://www.googleapis.com/pagespeedonline/v5/runPagespeed?${params.toString()}`
-    )
+    const res = await fetch(`https://www.googleapis.com/pagespeedonline/v5/runPagespeed?${params.toString()}`)
+    if (!res.ok) return jsonError('PageSpeed API error', 502)
 
-    if (!res.ok) {
-      const text = await res.text()
-      return Response.json(
-        { error: `PageSpeed API returned ${res.status}: ${text}` },
-        { status: 502, headers: corsHeaders }
-      )
-    }
-
-    const json: PageSpeedResponse = await res.json()
-    if (json.error) {
-      return Response.json({ error: json.error.message }, { status: 502, headers: corsHeaders })
-    }
+    const json = (await res.json()) as any
+    if (json.error) return jsonError('PageSpeed API error', 502)
 
     const cats = json.lighthouseResult?.categories
     const audits = json.lighthouseResult?.audits || {}
 
-    const metrics: Record<string, AuditMetric> = {}
+    const metrics: Record<string, unknown> = {}
     AUDIT_KEYS.forEach((key) => {
       const a = audits[key]
-      if (a) {
-        metrics[key] = {
-          score: a.score ?? null,
-          displayValue: a.displayValue,
-          title: a.title || key,
-        }
-      }
+      if (a) metrics[key] = { score: a.score ?? null, displayValue: a.displayValue, title: a.title || key }
     })
 
     const data = {
-      url: target,
-      strategy,
+      url: target, strategy,
       fetchTime: json.lighthouseResult?.fetchTime,
       scores: {
         performance: cats?.performance?.score ?? null,
@@ -119,16 +58,10 @@ export const onRequest: PagesFunction<Env> = async (context) => {
     }
 
     const body = JSON.stringify(data)
-    const response = new Response(body, {
-      headers: { 'Content-Type': 'application/json', ...corsHeaders },
-    })
-
-    context.waitUntil(cache.put(cacheKey, response.clone()))
+    const response = jsonOK(data, context.request, { 'Cache-Control': 'public, max-age=3600' })
+    context.waitUntil(cache.put(new Request(cacheUrl.toString()), response.clone()))
     return response
-  } catch (err) {
-    return Response.json(
-      { error: err instanceof Error ? err.message : 'unknown error' },
-      { status: 500, headers: corsHeaders }
-    )
+  } catch {
+    return jsonError('Failed to fetch Lighthouse results', 500)
   }
 }

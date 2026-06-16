@@ -1,57 +1,16 @@
+import { getCookieToken } from '../../utils/auth'
+import { jsonOK, jsonError } from '../../utils/security'
+
 const GITHUB_GRAPHQL = 'https://api.github.com/graphql'
 const GITHUB_API = 'https://api.github.com'
 const REPO_ID = 'R_kgDOS6MeVw'
 const CATEGORY_ID = 'DIC_kwDOS6MeV84C_Jgv'
 
-interface Env {
-  GITHUB_TOKEN: string
-}
+const ALLOWED_ORIGINS = ['https://wica.info', 'https://wica.pages.dev', 'http://localhost:5173', 'http://127.0.0.1:5173']
 
-interface GitHubResponse {
-  data?: {
-    repository?: {
-      discussions?: {
-        nodes?: Array<{
-          id: string
-          title: string
-          body: string
-          url: string
-          createdAt: string
-          reactions?: {
-            nodes?: Array<{
-              id: string
-              content: string
-              user?: { login: string }
-            }>
-          }
-        }>
-      }
-    }
-    createDiscussion?: {
-      discussion?: {
-        id: string
-        title: string
-        body: string
-        url: string
-        createdAt: string
-      }
-    }
-    addReaction?: {
-      reaction?: { id: string }
-    }
-    removeReaction?: {
-      reaction?: { id: string }
-    }
-    node?: {
-      reactions?: {
-        nodes?: Array<{ content: string }>
-      }
-    }
-  }
-  errors?: Array<{ message: string }>
-}
+interface Env { GITHUB_TOKEN: string }
 
-function headers(token: string): Record<string, string> {
+function ghHeaders(token: string): Record<string, string> {
   return {
     Accept: 'application/vnd.github.v3+json',
     'User-Agent': 'wica-blog/1.0',
@@ -64,11 +23,15 @@ function getDiscussionTitle(slug: string, title: string): string {
   return `[blog-post:${slug}] ${title}`
 }
 
-function getCookieToken(request: Request): string | null {
-  const cookie = request.headers.get('cookie')
-  if (!cookie) return null
-  const match = cookie.match(/(?:^|;\s*)gh_token=([^;]+)/)
-  return match ? decodeURIComponent(match[1]) : null
+async function ghFetch(query: string, token: string, variables?: Record<string, unknown>) {
+  const res = await fetch(GITHUB_GRAPHQL, {
+    method: 'POST',
+    headers: ghHeaders(token),
+    body: JSON.stringify(variables ? { query, variables } : { query }),
+  })
+  const json = (await res.json()) as { data?: unknown; errors?: Array<{ message: string }> }
+  if (json.errors) throw new Error('GitHub API error')
+  return json.data
 }
 
 async function getViewerLogin(token: string): Promise<string | null> {
@@ -92,175 +55,89 @@ export async function onRequest(context: { request: Request; env: Env }): Promis
   const { request, env } = context
 
   if (request.method !== 'POST') {
-    return new Response(JSON.stringify({ error: 'Method not allowed' }), {
-      status: 405,
-      headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
-    })
+    return jsonError('Method not allowed', 405, request)
+  }
+
+  const origin = request.headers.get('Origin')
+  if (origin && !ALLOWED_ORIGINS.includes(origin)) {
+    return jsonError('Forbidden', 403, request)
   }
 
   const token = getCookieToken(request)
   if (!token) {
-    return new Response(JSON.stringify({ error: 'Not authenticated' }), {
-      status: 401,
-      headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
-    })
+    return jsonError('Not authenticated', 401, request)
   }
 
   const viewerLogin = await getViewerLogin(token)
   if (!viewerLogin) {
-    return new Response(JSON.stringify({ error: 'Failed to identify user' }), {
-      status: 401,
-      headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
-    })
+    return jsonError('Failed to identify user', 401, request)
   }
 
   try {
     const { slug, title } = (await request.json()) as { slug: string; title: string }
-    if (!slug || !title) {
-      return new Response(JSON.stringify({ error: 'Slug and title are required' }), {
-        status: 400,
-        headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
-      })
+    if (!slug || !title || slug.length > 200 || title.length > 200) {
+      return jsonError('Invalid slug or title', 400, request)
     }
 
-    // Find existing discussion for this post
-    const searchQuery = `query {
+    // Find discussion
+    const searchQuery = `query($categoryId: ID!) {
       repository(owner: "williamcachamwri", name: "wica") {
-        discussions(first: 10, orderBy: {field: CREATED_AT, direction: DESC}, categoryId: "${CATEGORY_ID}") {
-          nodes {
-            id
-            title
-            body
-            url
-            createdAt
-            reactions(first: 100) {
-              nodes {
-                id
-                content
-                user { login }
-              }
-            }
-          }
+        discussions(first: 10, orderBy: {field: CREATED_AT, direction: DESC}, categoryId: $categoryId) {
+          nodes { id title body url createdAt reactions(first: 100) { nodes { id content user { login } } } }
         }
       }
     }`
-
-    const searchRes = await fetch(GITHUB_GRAPHQL, {
-      method: 'POST',
-      headers: headers(env.GITHUB_TOKEN),
-      body: JSON.stringify({ query: searchQuery }),
-    })
-    const searchJson = (await searchRes.json()) as GitHubResponse
-    if (searchJson.errors) throw new Error(searchJson.errors[0]?.message || 'GitHub API error')
-
-    const discussions = searchJson.data?.repository?.discussions?.nodes || []
+    const searchData = await ghFetch(searchQuery, env.GITHUB_TOKEN, { categoryId: CATEGORY_ID }) as any
+    const discussions = searchData?.repository?.discussions?.nodes || []
     const discussionTitle = getDiscussionTitle(slug, title)
-    let discussion = discussions.find((d) => d.title === discussionTitle)
+    let discussion = discussions.find((d: any) => d.title === discussionTitle)
 
-    // Create discussion if not exists
+    // Create if not exists
     if (!discussion) {
-      const createMutation = `mutation {
-        createDiscussion(input: {
-          repositoryId: "${REPO_ID}",
-          categoryId: "${CATEGORY_ID}",
-          title: ${JSON.stringify(discussionTitle)},
-          body: ${JSON.stringify(`Comments and likes for "${title}"`)}
-        }) {
-          discussion {
-            id
-            title
-            body
-            url
-            createdAt
-          }
+      const createMutation = `mutation($repoId: ID!, $categoryId: ID!, $dTitle: String!, $dBody: String!) {
+        createDiscussion(input: {repositoryId: $repoId, categoryId: $categoryId, title: $dTitle, body: $dBody}) {
+          discussion { id title body url createdAt }
         }
       }`
-
-      const createRes = await fetch(GITHUB_GRAPHQL, {
-        method: 'POST',
-        headers: headers(env.GITHUB_TOKEN),
-        body: JSON.stringify({ query: createMutation }),
-      })
-      const createJson = (await createRes.json()) as GitHubResponse
-      if (createJson.errors) throw new Error(createJson.errors[0]?.message || 'GitHub API error')
-      const created = createJson.data?.createDiscussion?.discussion
+      const createData = await ghFetch(createMutation, env.GITHUB_TOKEN, {
+        repoId: REPO_ID,
+        categoryId: CATEGORY_ID,
+        dTitle: discussionTitle,
+        dBody: `Comments and likes for "${title}"`,
+      }) as any
+      const created = createData?.createDiscussion?.discussion
       if (!created) throw new Error('Failed to create discussion')
       discussion = { ...created, reactions: { nodes: [] } }
     }
 
     const existingReaction = (discussion.reactions?.nodes || []).find(
-      (r) => r.content === 'HEART' && r.user?.login === viewerLogin
+      (r: any) => r.content === 'HEART' && r.user?.login === viewerLogin
     )
 
     let liked: boolean
 
     if (existingReaction) {
-      // Unlike: remove existing reaction
-      const removeMutation = `mutation {
-        removeReaction(input: {
-          subjectId: "${discussion.id}",
-          content: HEART
-        }) {
-          reaction { id }
-        }
-      }`
-
-      const removeRes = await fetch(GITHUB_GRAPHQL, {
-        method: 'POST',
-        headers: headers(token),
-        body: JSON.stringify({ query: removeMutation }),
-      })
-      const removeJson = (await removeRes.json()) as GitHubResponse
-      if (removeJson.errors) throw new Error(removeJson.errors[0]?.message || 'GitHub API error')
+      await ghFetch(`mutation($subjectId: ID!) {
+        removeReaction(input: {subjectId: $subjectId, content: HEART}) { reaction { id } }
+      }`, token, { subjectId: discussion.id })
       liked = false
     } else {
-      // Like: add reaction
-      const reactionMutation = `mutation {
-        addReaction(input: {
-          subjectId: "${discussion.id}",
-          content: HEART
-        }) {
-          reaction { id }
-        }
-      }`
-
-      const reactionRes = await fetch(GITHUB_GRAPHQL, {
-        method: 'POST',
-        headers: headers(token),
-        body: JSON.stringify({ query: reactionMutation }),
-      })
-      const reactionJson = (await reactionRes.json()) as GitHubResponse
-      if (reactionJson.errors) throw new Error(reactionJson.errors[0]?.message || 'GitHub API error')
+      await ghFetch(`mutation($subjectId: ID!) {
+        addReaction(input: {subjectId: $subjectId, content: HEART}) { reaction { id } }
+      }`, token, { subjectId: discussion.id })
       liked = true
     }
 
-    // Refetch reactions to get accurate count
-    const countQuery = `query {
-      node(id: "${discussion.id}") {
-        ... on Discussion {
-          reactions(first: 100) {
-            nodes { content }
-          }
-        }
+    // Refetch likes count
+    const countData = await ghFetch(`query($nodeId: ID!) {
+      node(id: $nodeId) {
+        ... on Discussion { reactions(first: 100) { nodes { content } } }
       }
-    }`
+    }`, env.GITHUB_TOKEN, { nodeId: discussion.id }) as any
+    const heartCount = (countData?.node?.reactions?.nodes || []).filter((r: any) => r.content === 'HEART').length
 
-    const countRes = await fetch(GITHUB_GRAPHQL, {
-      method: 'POST',
-      headers: headers(env.GITHUB_TOKEN),
-      body: JSON.stringify({ query: countQuery }),
-    })
-    const countJson = (await countRes.json()) as GitHubResponse
-    const heartCount = (countJson.data?.node?.reactions?.nodes || []).filter((r) => r.content === 'HEART').length
-
-    return new Response(JSON.stringify({ liked, count: heartCount }), {
-      status: 200,
-      headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
-    })
+    return jsonOK({ liked, count: heartCount }, request)
   } catch (err) {
-    return new Response(JSON.stringify({ error: (err as Error).message }), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
-    })
+    return jsonError('Failed to update like', 500, request)
   }
 }

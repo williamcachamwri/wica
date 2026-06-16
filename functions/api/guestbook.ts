@@ -1,64 +1,22 @@
+import { jsonOK, jsonError } from '../utils/security'
+
 const GITHUB_GRAPHQL = 'https://api.github.com/graphql'
 const TURNSTILE_VERIFY = 'https://challenges.cloudflare.com/turnstile/v0/siteverify'
 const REPO_ID = 'R_kgDOS6MeVw'
 const CATEGORY_ID = 'DIC_kwDOS6MeV84C_Jgv'
 
+const ALLOWED_ORIGINS = ['https://wica.info', 'https://wica.pages.dev', 'http://localhost:5173', 'http://127.0.0.1:5173']
 const REACTION_EMOJIS = ['👍', '❤️', '😄', '🚀', '👀']
 
-interface Env {
-  GITHUB_TOKEN: string
-  TURNSTILE_SECRET: string
-}
+interface Env { GITHUB_TOKEN: string; TURNSTILE_SECRET: string }
 
-interface TurnstileResponse {
-  success: boolean
-  'error-codes'?: string[]
-}
-
-interface DiscussionNode {
-  id: string
-  title: string
-  body: string
-  author: { login: string } | null
-  createdAt: string
-  url: string
-}
-
-interface GitHubResponse {
-  data?: {
-    repository?: {
-      discussions?: {
-        nodes?: DiscussionNode[]
-      }
-    }
-    createDiscussion?: {
-      discussion?: DiscussionNode
-    }
-    updateDiscussion?: {
-      discussion?: DiscussionNode
-    }
-    node?: DiscussionNode
-  }
-  errors?: Array<{ message: string }>
-}
-
-interface Entry {
-  id: string
-  message: string
-  author: string
-  date: string
-  url: string
-  reactions: Record<string, number>
-}
-
-function headers(token?: string): Record<string, string> {
-  const h: Record<string, string> = {
+function ghHeaders(token: string): Record<string, string> {
+  return {
     Accept: 'application/vnd.github.v3+json',
     'User-Agent': 'wica-guestbook/1.0',
     'Content-Type': 'application/json',
+    Authorization: `Bearer ${token}`,
   }
-  if (token) h.Authorization = `Bearer ${token}`
-  return h
 }
 
 function emptyReactions(): Record<string, number> {
@@ -71,7 +29,7 @@ function serializeBody(message: string, author: string, reactions: Record<string
 
 function parseBody(body: string): { message: string; author: string; reactions: Record<string, number> } {
   const authorMatch = body.match(/<!--guestbook:author:([^>]+)-->/)
-  const reactionsMatch = body.match(/<!--guestbook:reactions:({[^}]+})-->/)
+  const reactionsMatch = body.match(/<!--guestbook:reactions:(\{[^}]+\})-->/)
   const message = body
     .replace(/<!--guestbook:author:[^>]+-->/, '')
     .replace(/<!--guestbook:reactions:[^>]+-->/, '')
@@ -79,14 +37,8 @@ function parseBody(body: string): { message: string; author: string; reactions: 
 
   let reactions = emptyReactions()
   if (reactionsMatch) {
-    try {
-      const parsed = JSON.parse(reactionsMatch[1])
-      reactions = { ...emptyReactions(), ...parsed }
-    } catch {
-      // keep defaults
-    }
+    try { Object.assign(reactions, JSON.parse(reactionsMatch[1])) } catch {}
   }
-
   return {
     message,
     author: authorMatch ? authorMatch[1].trim() : 'anonymous',
@@ -94,240 +46,136 @@ function parseBody(body: string): { message: string; author: string; reactions: 
   }
 }
 
-function formatDiscussion(node: DiscussionNode): Entry {
+function formatEntry(node: { id: string; title: string; body: string; author: { login: string } | null; createdAt: string; url: string }) {
   const parsed = parseBody(node.body)
-  return {
-    id: node.id,
-    message: parsed.message,
-    author: parsed.author,
-    date: node.createdAt,
-    url: node.url,
-    reactions: parsed.reactions,
-  }
+  return { id: node.id, message: parsed.message, author: parsed.author, date: node.createdAt, url: node.url, reactions: parsed.reactions }
 }
 
-const LIST_QUERY = `query {
-  repository(owner: "williamcachamwri", name: "wica") {
-    discussions(first: 50, orderBy: {field: CREATED_AT, direction: DESC}, categoryId: "${CATEGORY_ID}") {
-      nodes {
-        id
-        title
-        body
-        author { login }
-        createdAt
-        url
-      }
-    }
-  }
-}`
+async function ghFetch(query: string, token: string, variables?: Record<string, unknown>) {
+  const res = await fetch(GITHUB_GRAPHQL, {
+    method: 'POST',
+    headers: ghHeaders(token),
+    body: JSON.stringify(variables ? { query, variables } : { query }),
+  })
+  const json = (await res.json()) as { data?: unknown; errors?: Array<{ message: string }> }
+  if (json.errors) throw new Error('GitHub API error')
+  return json.data
+}
 
 export async function onRequest(context: { request: Request; env: Env }): Promise<Response> {
   const { request, env } = context
 
+  // POST: create entry or react
   if (request.method === 'POST') {
+    const origin = request.headers.get('Origin')
+    if (origin && !ALLOWED_ORIGINS.includes(origin)) {
+      return jsonError('Forbidden', 403, request)
+    }
+
     if (!env.GITHUB_TOKEN) {
-      return new Response(JSON.stringify({ error: 'GitHub token not configured' }), {
-        status: 503,
-        headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
-      })
+      return jsonError('GitHub token not configured', 503, request)
     }
 
     try {
       const payload = (await request.json()) as {
-        message?: string
-        author?: string
-        turnstileToken?: string
-        discussionId?: string
-        emoji?: string
+        message?: string; author?: string; turnstileToken?: string
+        discussionId?: string; emoji?: string
       }
 
-      // React to an existing entry
+      // React to existing entry
       if (payload.discussionId && payload.emoji) {
         if (!REACTION_EMOJIS.includes(payload.emoji)) {
-          return new Response(JSON.stringify({ error: 'Invalid reaction' }), {
-            status: 400,
-            headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
-          })
+          return jsonError('Invalid reaction', 400, request)
         }
 
-        const fetchQuery = `query {
-          node(id: "${payload.discussionId}") {
-            ... on Discussion {
-              id
-              title
-              body
-              author { login }
-              createdAt
-              url
-            }
-          }
-        }`
-
-        const fetchRes = await fetch(GITHUB_GRAPHQL, {
-          method: 'POST',
-          headers: headers(env.GITHUB_TOKEN),
-          body: JSON.stringify({ query: fetchQuery }),
-        })
-        const fetchJson = (await fetchRes.json()) as GitHubResponse
-        if (fetchJson.errors) {
-          throw new Error(fetchJson.errors[0]?.message || 'GitHub API error')
-        }
-        const node = fetchJson.data?.node
-        if (!node) throw new Error('Entry not found')
+        const fetchData = await ghFetch(`query($nodeId: ID!) {
+          node(id: $nodeId) { ... on Discussion { id title body author { login } createdAt url } }
+        }`, env.GITHUB_TOKEN, { nodeId: payload.discussionId }) as any
+        const node = fetchData?.node
+        if (!node) return jsonError('Entry not found', 404, request)
 
         const parsed = parseBody(node.body)
         parsed.reactions[payload.emoji] = (parsed.reactions[payload.emoji] || 0) + 1
 
-        const updateMutation = `mutation {
-          updateDiscussion(input: {
-            discussionId: "${node.id}",
-            body: ${JSON.stringify(serializeBody(parsed.message, parsed.author, parsed.reactions))}
-          }) {
-            discussion {
-              id
-              title
-              body
-              author { login }
-              createdAt
-              url
-            }
+        const updateData = await ghFetch(`mutation($discussionId: ID!, $body: String!) {
+          updateDiscussion(input: {discussionId: $discussionId, body: $body}) {
+            discussion { id title body author { login } createdAt url }
           }
-        }`
+        }`, env.GITHUB_TOKEN, {
+          discussionId: node.id,
+          body: serializeBody(parsed.message, parsed.author, parsed.reactions),
+        }) as any
+        const updated = updateData?.updateDiscussion?.discussion
+        if (!updated) return jsonError('Failed to update reaction', 500, request)
 
-        const updateRes = await fetch(GITHUB_GRAPHQL, {
-          method: 'POST',
-          headers: headers(env.GITHUB_TOKEN),
-          body: JSON.stringify({ query: updateMutation }),
-        })
-        const updateJson = (await updateRes.json()) as GitHubResponse
-        if (updateJson.errors) {
-          throw new Error(updateJson.errors[0]?.message || 'GitHub API error')
-        }
-        const updated = updateJson.data?.updateDiscussion?.discussion
-        if (!updated) throw new Error('Failed to update reaction')
-
-        return new Response(JSON.stringify(formatDiscussion(updated)), {
-          status: 200,
-          headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
-        })
+        return jsonOK(formatEntry(updated), request)
       }
 
-      // Create a new entry
+      // Create new entry
       const message = payload.message
       if (!message || typeof message !== 'string' || message.trim().length === 0) {
-        return new Response(JSON.stringify({ error: 'Message is required' }), {
-          status: 400,
-          headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
-        })
+        return jsonError('Message is required', 400, request)
+      }
+      if (message.length > 500) {
+        return jsonError('Message too long (max 500 chars)', 400, request)
       }
 
       if (!env.TURNSTILE_SECRET) {
-        return new Response(JSON.stringify({ error: 'Turnstile not configured' }), {
-          status: 503,
-          headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
-        })
+        return jsonError('Turnstile not configured', 503, request)
       }
-
       if (!payload.turnstileToken) {
-        return new Response(JSON.stringify({ error: 'Captcha required' }), {
-          status: 400,
-          headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
-        })
+        return jsonError('Captcha required', 400, request)
       }
 
       const verifyRes = await fetch(TURNSTILE_VERIFY, {
         method: 'POST',
-        body: new URLSearchParams({
-          secret: env.TURNSTILE_SECRET,
-          response: payload.turnstileToken,
-        }),
+        body: new URLSearchParams({ secret: env.TURNSTILE_SECRET, response: payload.turnstileToken }),
       })
-      const verifyData = (await verifyRes.json()) as TurnstileResponse
+      const verifyData = (await verifyRes.json()) as { success: boolean }
       if (!verifyData.success) {
-        return new Response(JSON.stringify({ error: 'Captcha verification failed' }), {
-          status: 403,
-          headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
-        })
+        return jsonError('Captcha verification failed', 403, request)
       }
 
-      const text = message.trim()
-      const author = (payload.author || 'anonymous').toString().trim().slice(0, 32) || 'anonymous'
+      const text = message.trim().slice(0, 500)
+      const author = (payload.author || 'anonymous').toString().trim().slice(0, 32).replace(/[<>"'&]/g, '') || 'anonymous'
       const body = serializeBody(text, author, emptyReactions())
 
-      const mutation = `mutation {
-        createDiscussion(input: {
-          repositoryId: "${REPO_ID}",
-          categoryId: "${CATEGORY_ID}",
-          title: ${JSON.stringify(text)},
-          body: ${JSON.stringify(body)}
-        }) {
-          discussion {
-            id
-            title
-            body
-            author { login }
-            createdAt
-            url
-          }
+      const createData = await ghFetch(`mutation($repoId: ID!, $categoryId: ID!, $title: String!, $body: String!) {
+        createDiscussion(input: {repositoryId: $repoId, categoryId: $categoryId, title: $title, body: $body}) {
+          discussion { id title body author { login } createdAt url }
         }
-      }`
+      }`, env.GITHUB_TOKEN, {
+        repoId: REPO_ID,
+        categoryId: CATEGORY_ID,
+        title: text,
+        body,
+      }) as any
+      const discussion = createData?.createDiscussion?.discussion
+      if (!discussion) return jsonError('Failed to create entry', 500, request)
 
-      const res = await fetch(GITHUB_GRAPHQL, {
-        method: 'POST',
-        headers: headers(env.GITHUB_TOKEN),
-        body: JSON.stringify({ query: mutation }),
-      })
-
-      const json = (await res.json()) as GitHubResponse
-
-      if (json.errors) {
-        throw new Error(json.errors[0]?.message || 'GitHub API error')
-      }
-
-      const discussion = json.data?.createDiscussion?.discussion
-      if (!discussion) throw new Error('Failed to create discussion')
-
-      return new Response(JSON.stringify(formatDiscussion(discussion)), {
+      return new Response(JSON.stringify(formatEntry(discussion)), {
         status: 201,
-        headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+        headers: { 'Content-Type': 'application/json', 'X-Content-Type-Options': 'nosniff', 'X-Frame-Options': 'DENY', 'Referrer-Policy': 'strict-origin-when-cross-origin' },
       })
     } catch (err) {
-      return new Response(JSON.stringify({ error: (err as Error).message }), {
-        status: 500,
-        headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
-      })
+      return jsonError('Failed to process request', 500, request)
     }
   }
 
+  // GET: list entries
   try {
-    const res = await fetch(GITHUB_GRAPHQL, {
-      method: 'POST',
-      headers: headers(env.GITHUB_TOKEN),
-      body: JSON.stringify({ query: LIST_QUERY }),
-    })
+    const data = await ghFetch(`query($categoryId: ID!) {
+      repository(owner: "williamcachamwri", name: "wica") {
+        discussions(first: 50, orderBy: {field: CREATED_AT, direction: DESC}, categoryId: $categoryId) {
+          nodes { id title body author { login } createdAt url }
+        }
+      }
+    }`, env.GITHUB_TOKEN, { categoryId: CATEGORY_ID }) as any
+    const nodes = data?.repository?.discussions?.nodes || []
+    const entries = nodes.filter((n: any) => !n.title.startsWith('[blog-post:')).map(formatEntry)
 
-    const json = (await res.json()) as GitHubResponse
-
-    if (json.errors) {
-      throw new Error(json.errors[0]?.message || 'GitHub API error')
-    }
-
-    const nodes = json.data?.repository?.discussions?.nodes || []
-    const data = nodes
-      .filter((node) => !node.title.startsWith('[blog-post:'))
-      .map(formatDiscussion)
-
-    return new Response(JSON.stringify(data), {
-      headers: {
-        'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*',
-        'Cache-Control': 'no-cache',
-      },
-    })
+    return jsonOK(entries, request)
   } catch (err) {
-    return new Response(JSON.stringify({ error: (err as Error).message }), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
-    })
+    return jsonError('Failed to fetch entries', 500, request)
   }
 }

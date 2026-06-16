@@ -26,7 +26,7 @@ interface Entry {
 }
 
 const ALLOWED_REACTIONS = ['👍', '❤️', '😄', '🚀', '👀']
-const SITE_KEY = '0x4AAAAAADkpDYfY0xHNwred'
+const SITE_KEY = import.meta.env.VITE_TURNSTILE_SITE_KEY || '0x4AAAAAADkpDYfY0xHNwred'
 
 function formatDate(date: string) {
   return new Date(date).toLocaleDateString('en-US', {
