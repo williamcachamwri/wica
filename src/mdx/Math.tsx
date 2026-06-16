@@ -6,7 +6,8 @@ interface MathProps {
 }
 
 export function Math({ children, block = false }: MathProps) {
-  const html = katex.renderToString(children, {
+  const expression = typeof children === 'string' ? children.trim() : String(children).trim()
+  const html = katex.renderToString(expression, {
     throwOnError: false,
     displayMode: block,
   })

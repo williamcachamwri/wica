@@ -13,13 +13,15 @@ export function Callout({ children }: { children: React.ReactNode }) {
 export function Counter() {
   const [count, setCount] = useState(0)
   return (
-    <button
-      type="button"
-      onClick={() => setCount((c) => c + 1)}
-      className="my-4 px-4 py-2 bg-text text-bg font-mono text-sm rounded hover:bg-accent transition-colors"
-    >
-      Clicked {count} time{count === 1 ? '' : 's'}
-    </button>
+    <div className="my-4">
+      <button
+        type="button"
+        onClick={() => setCount((c) => c + 1)}
+        className="px-4 py-2 bg-text text-bg font-mono text-sm rounded hover:bg-accent transition-colors"
+      >
+        Clicked {count} time{count === 1 ? '' : 's'}
+      </button>
+    </div>
   )
 }
 

@@ -124,15 +124,49 @@ html {
 
 /* ── Math ──────────────────────────────────────────────────────────── */
 .math-inline {
-  display: inline-flex;
-  align-items: center;
+  display: inline;
+}
+
+.math-inline .katex {
+  display: inline;
+  font-size: 1.05em;
 }
 
 .math-block {
-  display: flex;
-  justify-content: center;
-  margin: 1.25rem 0;
+  display: block;
+  margin: 1.5rem 0;
   overflow-x: auto;
+  overflow-y: hidden;
+  text-align: center;
+}
+
+.math-block::-webkit-scrollbar {
+  height: 0;
+  width: 0;
+}
+
+.math-block .katex-display {
+  margin: 0;
+  overflow: visible;
+}
+
+.math-block .katex {
+  display: inline-block;
+  white-space: nowrap;
+}
+
+/* Prevent raw formula text from showing when KaTeX hasn't loaded or fails */
+.math-inline > .katex-mathml,
+.math-block > .katex-display > .katex-mathml {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 
 /* ── Reduced motion ──────────────────────────────────────────────── */
