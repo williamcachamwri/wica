@@ -211,7 +211,7 @@ export default function BlogPost() {
           {post.meta.tags && (
             <div className="flex gap-2 mt-3 flex-wrap">
               {post.meta.tags.map((t) => (
-                <Link key={t} to={`/tags/${encodeURIComponent(t)}`} className="blog-item__tag">
+                <Link key={t} to={`/blog/tag/${encodeURIComponent(t)}`} className="blog-item__tag">
                   {t}
                 </Link>
               ))}

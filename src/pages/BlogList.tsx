@@ -23,6 +23,14 @@ export default function BlogList() {
       )
     : allPosts
 
+  const tagCounts = allPosts.reduce<Record<string, number>>((acc, post) => {
+    post.tags?.forEach((t) => {
+      acc[t] = (acc[t] || 0) + 1
+    })
+    return acc
+  }, {})
+  const allTags = Object.entries(tagCounts).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+
   return (
     <div className="app-shell app-shell--in">
       <SEO
@@ -65,6 +73,23 @@ export default function BlogList() {
           )}
         </div>
 
+        {allTags.length > 0 && (
+          <section className="mb-10">
+            <div className="blog-tags-cloud">
+              {allTags.map(([tag, count]) => (
+                <Link
+                  key={tag}
+                  to={`/blog/tag/${encodeURIComponent(tag)}`}
+                  className="blog-tags-cloud__item"
+                >
+                  {tag}
+                  <span className="blog-tags-cloud__count">{count}</span>
+                </Link>
+              ))}
+            </div>
+          </section>
+        )}
+
         <section className="mb-14">
           <SectionDivider label={query.trim() ? `${filtered.length} post${filtered.length !== 1 ? 's' : ''} found` : 'All posts'} />
           <div className="blog-list">
@@ -76,7 +101,7 @@ export default function BlogList() {
                   {post.tags && (
                     <div className="blog-item__tags">
                       {post.tags.map((t) => (
-                        <Link key={t} to={`/tags/${encodeURIComponent(t)}`} className="blog-item__tag">
+                        <Link key={t} to={`/blog/tag/${encodeURIComponent(t)}`} className="blog-item__tag">
                           {t}
                         </Link>
                       ))}

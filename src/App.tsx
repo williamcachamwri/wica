@@ -99,8 +99,8 @@ function AnimatedRoutes() {
           <Routes location={location}>
             <Route path="/" element={<Home />} />
             <Route path="/blog" element={<BlogList />} />
+            <Route path="/blog/tag/:tag" element={<Tags />} />
             <Route path="/blog/:slug" element={<BlogPost />} />
-            <Route path="/tags/:tag" element={<Tags />} />
             <Route path="/guestbook" element={<Guestbook />} />
             <Route path="/universe" element={<Universe />} />
             <Route path="/changelog/:sha" element={<Changelog />} />

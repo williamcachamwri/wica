@@ -26,7 +26,7 @@ export default function Tags() {
       <SEO
         title={`#${decodedTag}`}
         description={`Posts tagged with #${decodedTag}`}
-        pathname={`/tags/${encodeURIComponent(decodedTag)}`}
+        pathname={`/blog/tag/${encodeURIComponent(decodedTag)}`}
       />
       <div className="grain" aria-hidden="true" />
 
@@ -67,12 +67,13 @@ export default function Tags() {
                     {post.tags && (
                       <div className="blog-item__tags">
                         {post.tags.map((t) => (
-                          <span
-                            key={t}
-                            className={`blog-item__tag ${t === decodedTag ? 'blog-item__tag--active' : ''}`}
-                          >
-                            {t}
-                          </span>
+                        <Link
+                          key={t}
+                          to={`/blog/tag/${encodeURIComponent(t)}`}
+                          className={`blog-item__tag ${t === decodedTag ? 'blog-item__tag--active' : ''}`}
+                        >
+                          {t}
+                        </Link>
                         ))}
                       </div>
                     )}
