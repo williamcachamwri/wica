@@ -14,37 +14,81 @@ function loadMermaid() {
   return mermaidPromise
 }
 
+function getVar(name: string): string {
+  if (typeof window === 'undefined') return '#000000'
+  const value = getComputedStyle(document.documentElement).getPropertyValue(name).trim()
+  return value || '#000000'
+}
+
+function hexToRgb(hex: string): { r: number; g: number; b: number } {
+  const clean = hex.replace('#', '')
+  if (clean.length === 3) {
+    return {
+      r: parseInt(clean[0] + clean[0], 16),
+      g: parseInt(clean[1] + clean[1], 16),
+      b: parseInt(clean[2] + clean[2], 16),
+    }
+  }
+  return {
+    r: parseInt(clean.slice(0, 2), 16),
+    g: parseInt(clean.slice(2, 4), 16),
+    b: parseInt(clean.slice(4, 6), 16),
+  }
+}
+
+function rgbToHex(r: number, g: number, b: number): string {
+  return `#${[r, g, b].map((v) => Math.round(v).toString(16).padStart(2, '0')).join('')}`
+}
+
+function mix(color1: string, color2: string, ratio: number): string {
+  const c1 = hexToRgb(color1)
+  const c2 = hexToRgb(color2)
+  return rgbToHex(
+    c1.r * (1 - ratio) + c2.r * ratio,
+    c1.g * (1 - ratio) + c2.g * ratio,
+    c1.b * (1 - ratio) + c2.b * ratio,
+  )
+}
+
 async function initMermaid() {
   const mermaid = await loadMermaid()
   if (initialized) return mermaid
+
+  const accent = getVar('--accent')
+  const surface = getVar('--surface')
+  const bg = getVar('--bg')
+  const text = getVar('--text')
+  const textMuted = getVar('--text-muted')
+  const border = getVar('--border')
+
   mermaid.default.initialize({
     startOnLoad: false,
     theme: 'base',
     themeVariables: {
-      primaryColor: 'color-mix(in srgb, var(--accent) 12%, var(--surface))',
-      primaryTextColor: 'var(--text)',
-      primaryBorderColor: 'var(--accent)',
-      lineColor: 'var(--text-muted)',
-      secondaryColor: 'var(--surface)',
-      tertiaryColor: 'var(--bg)',
+      primaryColor: mix(accent, surface, 0.12),
+      primaryTextColor: text,
+      primaryBorderColor: accent,
+      lineColor: textMuted,
+      secondaryColor: surface,
+      tertiaryColor: bg,
       fontFamily: 'Inter, system-ui, sans-serif',
       fontSize: '14px',
       nodeBorder: '1px',
-      clusterBkg: 'color-mix(in srgb, var(--accent) 4%, var(--surface))',
-      clusterBorder: 'var(--border)',
-      actorBorder: 'var(--border)',
-      actorBkg: 'var(--surface)',
-      actorLineColor: 'var(--text-muted)',
-      signalColor: 'var(--text)',
-      sectionBkgColor: 'var(--surface)',
-      altSectionBkgColor: 'var(--bg)',
-      gridColor: 'var(--border)',
+      clusterBkg: mix(accent, surface, 0.04),
+      clusterBorder: border,
+      actorBorder: border,
+      actorBkg: surface,
+      actorLineColor: textMuted,
+      signalColor: text,
+      sectionBkgColor: surface,
+      altSectionBkgColor: bg,
+      gridColor: border,
       pieOuterStrokeWidth: '1px',
-      pieOuterStroke: 'var(--border)',
+      pieOuterStroke: border,
       pieTitleTextSize: '16px',
-      pieTitleTextColor: 'var(--text)',
+      pieTitleTextColor: text,
       pieSectionTextSize: '12px',
-      pieSectionTextColor: 'var(--text)',
+      pieSectionTextColor: text,
     },
     flowchart: {
       useMaxWidth: true,

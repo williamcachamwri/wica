@@ -23,6 +23,17 @@ interface CodeProps {
   children?: React.ReactNode
 }
 
+interface PreProps {
+  children?: React.ReactNode
+  node?: {
+    children?: Array<{
+      properties?: {
+        className?: string[]
+      }
+    }>
+  }
+}
+
 function extractText(children: React.ReactNode): string {
   if (children === null || children === undefined) return ''
   if (typeof children === 'string') return children
@@ -34,11 +45,15 @@ function extractText(children: React.ReactNode): string {
   return ''
 }
 
+function getLanguage(className?: string): string {
+  return className?.match(/language-(\w+)/)?.[1] || ''
+}
+
 function CodeBlock({ inline, className, children }: CodeProps) {
   if (inline) {
     return <code className={className}>{children}</code>
   }
-  const language = className?.replace('language-', '') || ''
+  const language = getLanguage(className)
   if (language === 'mermaid') {
     const text = extractText(children)
     if (text.trim()) return <Mermaid>{text}</Mermaid>
@@ -46,7 +61,7 @@ function CodeBlock({ inline, className, children }: CodeProps) {
   return <code className={className}>{children}</code>
 }
 
-function PreBlock({ children }: { children?: React.ReactNode }) {
+function PreBlock({ children, node }: PreProps) {
   const hasMermaid = (node: React.ReactNode): boolean => {
     if (!node) return false
     if (Array.isArray(node)) return node.some(hasMermaid)
@@ -57,7 +72,16 @@ function PreBlock({ children }: { children?: React.ReactNode }) {
     return false
   }
   if (hasMermaid(children)) return <>{children}</>
-  return <pre>{children}</pre>
+
+  const codeClass = node?.children?.[0]?.properties?.className
+  const language = getLanguage(codeClass?.join(' '))
+
+  return (
+    <pre data-language={language || undefined}>
+      {language && <span className="code-language">{language}</span>}
+      {children}
+    </pre>
+  )
 }
 
 
