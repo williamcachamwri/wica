@@ -269,7 +269,8 @@
 
 /* ── Working hours ───────────────────────────────────────────────── */
 .wh {
-  margin-bottom: 1.5rem;
+  margin-top: 0.75rem;
+  margin-bottom: 1.25rem;
 }
 
 .wh__row {
