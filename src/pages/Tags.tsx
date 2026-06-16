@@ -52,6 +52,19 @@ export default function Tags() {
             ) : (
               filtered.map((post) => (
                 <article key={post.slug} className="blog-item group">
+                  {post.tags && (
+                    <div className="blog-item__tags">
+                      {post.tags.map((t) => (
+                        <Link
+                          key={t}
+                          to={`/blog/tag/${encodeURIComponent(t)}`}
+                          className={`blog-item__tag ${t === decodedTag ? 'blog-item__tag--active' : ''}`}
+                        >
+                          {t}
+                        </Link>
+                      ))}
+                    </div>
+                  )}
                   <Link to={`/blog/${post.slug}`} className="blog-item__link">
                     <div className="blog-item__header">
                       <h2 className="blog-item__title">{post.title}</h2>
@@ -64,19 +77,6 @@ export default function Tags() {
                         )}
                       </div>
                     </div>
-                    {post.tags && (
-                      <div className="blog-item__tags">
-                        {post.tags.map((t) => (
-                        <Link
-                          key={t}
-                          to={`/blog/tag/${encodeURIComponent(t)}`}
-                          className={`blog-item__tag ${t === decodedTag ? 'blog-item__tag--active' : ''}`}
-                        >
-                          {t}
-                        </Link>
-                        ))}
-                      </div>
-                    )}
                     <p className="blog-item__summary">{post.summary}</p>
                     <span className="blog-item__arrow" aria-hidden="true">
                       read article
