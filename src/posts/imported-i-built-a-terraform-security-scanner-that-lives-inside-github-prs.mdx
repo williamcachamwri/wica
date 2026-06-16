@@ -1,0 +1,68 @@
+export const meta = {
+  slug: 'imported-i-built-a-terraform-security-scanner-that-lives-inside-github-prs',
+  title: 'I built a Terraform security scanner that lives inside GitHub PRs',
+  date: '2026-06-16',
+  summary: 'The problem
+
+IAM wildcards and public S3 buckets keep slipping through 
+Terraform code review. Tools like Checkov and tfsec exist 
+but they live in CI, require config files, and developers 
+ignore the output because it\'s not where they\'re working.
+
+What I built
+
+TerraWatch is a GitHub App that scans',
+  tags: ['devops', 'terraform', 'aws', 'security'],
+}
+
+<p><strong>The problem</strong></p>
+
+<p>IAM wildcards and public S3 buckets keep slipping through <br>
+Terraform code review. Tools like Checkov and tfsec exist <br>
+but they live in CI, require config files, and developers <br>
+ignore the output because it's not where they're working.</p>
+
+<p><strong>What I built</strong></p>
+
+<p>TerraWatch is a GitHub App that scans every pull request <br>
+that touches .tf files automatically. If it finds a security <br>
+issue it blocks the merge and posts the exact code fix as a <br>
+PR comment.</p>
+
+<p>The developer sees something like this in their PR:</p>
+
+<p><strong>⚠️ PUBLIC_S3_BUCKET - main.tf (Line 6)</strong><br>
+Severity: HIGH<br>
+Risk: S3 bucket allows public read access.<br>
+Fix:</p>
+
+<ul>
+<li>acl = "public-read"</li>
+<li>acl = "private"</li>
+<li>block_public_acls = true</li>
+<li>restrict_public_buckets = true</li>
+</ul>
+
+<p>They copy the fix, push, and the merge unblocks automatically.</p>
+
+<p><strong>How it's different</strong></p>
+
+<ul>
+<li>No YAML, no CI config - installs in 2 minutes via GitHub App</li>
+<li>Fixes are hardcoded diffs, not AI generated</li>
+<li>Nothing auto-applied - you review every fix</li>
+<li>No Checkov dependency - own lightweight rules engine</li>
+<li>Only reads changed .tf files in the PR, never your full codebase</li>
+</ul>
+
+<p><strong>29 rules covering</strong></p>
+
+<p>S3 public access, IAM wildcards, open ports (SSH/RDP/MySQL/Postgres), <br>
+unencrypted EBS/RDS, public databases, hardcoded secrets, <br>
+EKS public endpoints, CloudTrail disabled, IMDSv1, and more.</p>
+
+<p><strong>Try it</strong></p>
+
+<p>Free during beta - terrawatch.dev</p>
+
+<p>Also launching on Product Hunt today if you want to show some support!</p>

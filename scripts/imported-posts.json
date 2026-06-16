@@ -70,5 +70,89 @@
     "title": "HackTheBox - Snapped Writeup",
     "url": "https://dev.to/exploitnotes/hackthebox-snapped-writeup-3idb",
     "importedAt": "2026-06-16T06:31:52.635Z"
+  },
+  "devto-feed-i-built-a-terraform-security-scanner-that-lives-inside-github-prs-0": {
+    "slug": "imported-i-built-a-terraform-security-scanner-that-lives-inside-github-prs",
+    "title": "I built a Terraform security scanner that lives inside GitHub PRs",
+    "url": "https://dev.to/alejny/i-built-a-terraform-security-scanner-that-lives-inside-github-prs-2220",
+    "fallback": true,
+    "importedAt": "2026-06-16T06:42:36.701Z"
+  },
+  "devto-feed-agentic-qa-pipelines-in-2026-why-test-scripts-are-already-dead-and-what-replaces-1": {
+    "slug": "imported-agentic-qa-pipelines-in-2026-why-test-scripts-are-already-dead-and-what-replaces",
+    "title": "Agentic QA Pipelines in 2026: Why Test Scripts Are Already Dead (And What Replaces Them)",
+    "url": "https://dev.to/ailoitte_sk/agentic-qa-pipelines-in-2026-why-test-scripts-are-already-dead-and-what-replaces-them-4og8",
+    "fallback": true,
+    "importedAt": "2026-06-16T06:42:38.241Z"
+  },
+  "devto-feed-grok-build-agent-dashboard-run-8-parallel-coding-agents-from-one-screen-2": {
+    "slug": "imported-grok-build-agent-dashboard-run-8-parallel-coding-agents-from-one-screen",
+    "title": "Grok Build Agent Dashboard: Run 8 Parallel Coding Agents From One Screen",
+    "url": "https://dev.to/akaranjkar08/grok-build-agent-dashboard-run-8-parallel-coding-agents-from-one-screen-32bf",
+    "fallback": true,
+    "importedAt": "2026-06-16T06:42:39.768Z"
+  },
+  "devto-feed-the-exact-math-that-made-40000000-out-of-polymarket-full-roadmap-3": {
+    "slug": "imported-the-exact-math-that-made-40000000-out-of-polymarket-full-roadmap",
+    "title": "The exact math that made $40,000,000 out of Polymarket (Full roadmap)",
+    "url": "https://dev.to/xniiinx/the-exact-math-that-made-40000000-out-of-polymarket-full-roadmap-1il6",
+    "fallback": true,
+    "importedAt": "2026-06-16T06:42:41.312Z"
+  },
+  "devto-feed-i-got-tired-of-hand-rolling-message-queues-in-freertos-so-i-built-embedmq-4": {
+    "slug": "imported-i-got-tired-of-hand-rolling-message-queues-in-freertos-so-i-built-embedmq",
+    "title": "I got tired of hand-rolling message queues in FreeRTOS. So I built embedmq.",
+    "url": "https://dev.to/w4ysonch/i-got-tired-of-hand-rolling-message-queues-in-freertos-so-i-built-embedmq-47l3",
+    "fallback": true,
+    "importedAt": "2026-06-16T06:42:42.887Z"
+  },
+  "devto-feed-is-faang-becoming-mango-in-the-ai-era-5": {
+    "slug": "imported-is-faang-becoming-mango-in-the-ai-era",
+    "title": "Is FAANG Becoming MANGO in the AI Era?",
+    "url": "https://dev.to/coderboy_11/is-faang-becoming-mango-in-the-ai-era-31me",
+    "fallback": true,
+    "importedAt": "2026-06-16T06:42:44.491Z"
+  },
+  "devto-feed-retry-in-distributed-systems-how-production-systems-recover-from-temporary-failu-6": {
+    "slug": "imported-retry-in-distributed-systems-how-production-systems-recover-from-temporary-failu",
+    "title": "Retry in Distributed Systems — How Production Systems Recover From Temporary Failures",
+    "url": "https://dev.to/neel-vekariya/retry-in-distributed-systems-how-production-systems-recover-from-temporary-failures-3e74",
+    "fallback": true,
+    "importedAt": "2026-06-16T06:42:46.014Z"
+  },
+  "devto-feed-how-to-track-local-seo-rankings-by-city-with-an-api-7": {
+    "slug": "imported-how-to-track-local-seo-rankings-by-city-with-an-api",
+    "title": "How to Track Local SEO Rankings by City with an API",
+    "url": "https://dev.to/cecilia_hill_d7b1b8d510e7/how-to-track-local-seo-rankings-by-city-with-an-api-32mh",
+    "fallback": true,
+    "importedAt": "2026-06-16T06:42:47.531Z"
+  },
+  "devto-feed-day-19-of-100-days-of-clickhouse-managing-users-and-roles-with-rbac-8": {
+    "slug": "imported-day-19-of-100-days-of-clickhouse-managing-users-and-roles-with-rbac",
+    "title": "Day 19 of 100 Days of ClickHouse®: Managing Users and Roles with RBAC",
+    "url": "https://dev.to/kanishga_subramani_49ad73/day-19-of-100-days-of-clickhouser-managing-users-and-roles-with-rbac-h7f",
+    "fallback": true,
+    "importedAt": "2026-06-16T06:42:49.076Z"
+  },
+  "devto-feed-have-we-lost-the-art-of-pure-optimization-9": {
+    "slug": "imported-have-we-lost-the-art-of-pure-optimization",
+    "title": "Have We Lost the Art of Pure Optimization?",
+    "url": "https://dev.to/prabashanadev/have-we-lost-the-art-of-pure-optimization-31b9",
+    "fallback": true,
+    "importedAt": "2026-06-16T06:42:50.593Z"
+  },
+  "devto-feed-how-i-built-a-set-it-and-forget-it-sync-system-with-django-signals-10": {
+    "slug": "imported-how-i-built-a-set-it-and-forget-it-sync-system-with-django-signals",
+    "title": "How I Built a \"Set It and Forget It\" Sync System with Django Signals",
+    "url": "https://dev.to/acel/how-i-built-a-set-it-and-forget-it-sync-system-with-django-signals-2ld7",
+    "fallback": true,
+    "importedAt": "2026-06-16T06:42:52.131Z"
+  },
+  "devto-feed-i-built-an-ai-video-clip-finder-that-runs-100-in-your-browser-no-uploads-no-api--11": {
+    "slug": "imported-i-built-an-ai-video-clip-finder-that-runs-100-in-your-browser-no-uploads-no-api-",
+    "title": "I built an AI video clip finder that runs 100% in your browser — no uploads, no API, no GPU costs",
+    "url": "https://dev.to/__a570829a/i-built-an-ai-video-clip-finder-that-runs-100-in-your-browser-no-uploads-no-api-no-gpu-costs-101o",
+    "fallback": true,
+    "importedAt": "2026-06-16T06:42:53.714Z"
   }
 }
