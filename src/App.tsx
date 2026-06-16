@@ -27,6 +27,7 @@ import './styles/lightbox.css'
 import './styles/blog-interactions.css'
 import './styles/contributions.css'
 import './styles/insights-chart.css'
+import './styles/lighthouse.css'
 import './styles/uses.css'
 
 const BlogPost = lazy(() => import('./pages/BlogPost'))

@@ -26,6 +26,14 @@
   --cursor-ring: rgba(17, 17, 17, 0.35);
   --icon-box-bg: #fafafa;
 
+  /* Score colors — Lighthouse-style, tinted against surface */
+  --score-good: #16a34a;
+  --score-good-bg: color-mix(in srgb, #16a34a 10%, var(--surface));
+  --score-ok: #d97706;
+  --score-ok-bg: color-mix(in srgb, #d97706 10%, var(--surface));
+  --score-bad: #dc2626;
+  --score-bad-bg: color-mix(in srgb, #dc2626 10%, var(--surface));
+
   /* Diff colors — GitHub-inspired, tinted against surface */
   --diff-add: #16a34a;
   --diff-add-bg: color-mix(in srgb, #16a34a 10%, var(--surface));
@@ -79,6 +87,14 @@
   --loader-bg: #000000;
   --cursor-ring: rgba(255, 255, 255, 0.25);
   --icon-box-bg: #2e2e3e;
+
+  /* Score colors — Lighthouse-style, tinted against surface */
+  --score-good: #4ade80;
+  --score-good-bg: color-mix(in srgb, #4ade80 12%, var(--surface));
+  --score-ok: #fbbf24;
+  --score-ok-bg: color-mix(in srgb, #fbbf24 12%, var(--surface));
+  --score-bad: #f87171;
+  --score-bad-bg: color-mix(in srgb, #f87171 12%, var(--surface));
 
   /* Diff colors — GitHub-inspired, tinted against surface */
   --diff-add: #4ade80;

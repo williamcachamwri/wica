@@ -1,0 +1,294 @@
+/* ── Lighthouse Section ───────────────────────────────────────────── */
+
+.lighthouse-section {
+  margin-bottom: 3.5rem;
+}
+
+.lighthouse-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.75rem;
+}
+
+/* ── Score cards ──────────────────────────────────────────────────── */
+
+.lighthouse-card {
+  position: relative;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 1.15rem;
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.03),
+    0 1px 2px rgba(0, 0, 0, 0.02);
+  opacity: 0;
+  transform: translateY(12px);
+  transition:
+    opacity 0.5s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.5s cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 0.3s ease,
+    box-shadow 0.3s ease,
+    background 0.25s ease;
+  transition-delay: var(--lighthouse-delay, 0s);
+}
+
+.lighthouse-section--visible .lighthouse-card {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@media (hover: hover) {
+  .lighthouse-card:hover {
+    transform: translateY(-2px);
+    border-color: var(--border-strong);
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.05);
+  }
+}
+
+.lighthouse-card__icon {
+  position: absolute;
+  top: 0.85rem;
+  right: 0.85rem;
+  width: 28px;
+  height: 28px;
+  pointer-events: none;
+}
+
+.lighthouse-card__icon svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.lighthouse-card__label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-subtle);
+  margin-bottom: 0.35rem;
+}
+
+.lighthouse-card__score {
+  font-family: var(--font-mono);
+  font-size: 1.75rem;
+  font-weight: 700;
+  line-height: 1;
+  margin-bottom: 0.75rem;
+  transition: color 0.3s ease;
+}
+
+.lighthouse-card__bar-track {
+  width: 100%;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--border);
+  overflow: hidden;
+}
+
+.lighthouse-card__bar {
+  display: block;
+  height: 100%;
+  width: 0;
+  border-radius: 999px;
+  transition: width 1s cubic-bezier(0.22, 1, 0.36, 1);
+  transition-delay: var(--bar-delay, 0.2s);
+}
+
+.lighthouse-section--visible .lighthouse-card__bar {
+  width: calc(var(--score, 0) * 100%);
+}
+
+/* ── Metric rows ──────────────────────────────────────────────────── */
+
+.lighthouse-metrics {
+  margin-top: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.lighthouse-metric {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.65rem 0.8rem;
+  border-radius: 10px;
+  border: 1px solid transparent;
+  background: var(--surface);
+  opacity: 0;
+  transform: translateY(10px);
+  transition:
+    opacity 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+    background 0.2s cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 0.2s cubic-bezier(0.22, 1, 0.36, 1);
+  transition-delay: var(--lighthouse-delay, 0s);
+}
+
+.lighthouse-section--visible .lighthouse-metric {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@media (hover: hover) {
+  .lighthouse-metric:hover {
+    background: var(--code-bg);
+    border-color: var(--border);
+  }
+}
+
+.lighthouse-metric__dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+
+.lighthouse-metric__content {
+  flex: 1;
+  min-width: 0;
+}
+
+.lighthouse-metric__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.35rem;
+}
+
+.lighthouse-metric__name {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.lighthouse-metric__value {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-subtle);
+  flex-shrink: 0;
+}
+
+.lighthouse-metric__bar-track {
+  width: 100%;
+  height: 5px;
+  border-radius: 999px;
+  background: var(--border);
+  overflow: hidden;
+}
+
+.lighthouse-metric__bar {
+  display: block;
+  height: 100%;
+  width: 0;
+  border-radius: 999px;
+  transition: width 1s cubic-bezier(0.22, 1, 0.36, 1);
+  transition-delay: var(--bar-delay, 0.4s);
+}
+
+.lighthouse-section--visible .lighthouse-metric__bar {
+  width: calc(var(--score, 0) * 100%);
+}
+
+.lighthouse-metric__score {
+  font-family: var(--font-mono);
+  font-size: 14px;
+  font-weight: 700;
+  width: 2rem;
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.lighthouse-meta {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-subtle);
+  margin-top: 0.5rem;
+  text-align: right;
+  opacity: 0.8;
+}
+
+/* ── Skeleton states ──────────────────────────────────────────────── */
+
+.lighthouse-card--skeleton {
+  opacity: 1;
+  transform: none;
+  pointer-events: none;
+}
+
+.lighthouse-metric--skeleton {
+  opacity: 1;
+  transform: none;
+  pointer-events: none;
+}
+
+.lighthouse-card--skeleton .skeleton-line,
+.lighthouse-metric--skeleton .skeleton-line {
+  background: var(--border);
+  border-radius: 4px;
+  height: 0.75rem;
+  width: 60%;
+  margin-bottom: 0.5rem;
+}
+
+.lighthouse-card--skeleton .skeleton-line--title {
+  width: 45%;
+  height: 0.85rem;
+}
+
+.lighthouse-card--skeleton .skeleton-line--value {
+  width: 35%;
+  height: 1.5rem;
+}
+
+/* ── Mobile ───────────────────────────────────────────────────────── */
+
+@media (max-width: 640px) {
+  .lighthouse-grid {
+    gap: 0.6rem;
+  }
+
+  .lighthouse-card {
+    padding: 0.9rem;
+    border-radius: 14px;
+  }
+
+  .lighthouse-card__icon {
+    width: 24px;
+    height: 24px;
+    top: 0.7rem;
+    right: 0.7rem;
+  }
+
+  .lighthouse-card__label {
+    font-size: 9px;
+  }
+
+  .lighthouse-card__score {
+    font-size: 1.5rem;
+    margin-bottom: 0.6rem;
+  }
+
+  .lighthouse-card__bar-track {
+    height: 6px;
+  }
+
+  .lighthouse-metric {
+    padding: 0.55rem 0.65rem;
+  }
+
+  .lighthouse-metric__name {
+    font-size: 12px;
+  }
+
+  .lighthouse-metric__score {
+    font-size: 13px;
+    width: 1.75rem;
+  }
+}
