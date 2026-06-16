@@ -160,37 +160,11 @@
   display: flex;
   justify-content: center;
   margin: 2rem 0;
-  padding: 1.5rem;
-  border: 1px solid var(--border);
-  border-radius: 16px;
-  background: var(--surface);
-  overflow-x: auto;
-  box-shadow:
-    inset 0 0 0 1px color-mix(in srgb, var(--accent) 4%, transparent),
-    0 8px 32px -12px color-mix(in srgb, var(--accent) 8%, transparent);
-}
-
-.mermaid-diagram::-webkit-scrollbar {
-  height: 0;
-  width: 0;
 }
 
 .mermaid-diagram svg {
   max-width: 100%;
   height: auto;
-}
-
-.mermaid-diagram .node rect,
-.mermaid-diagram .node circle,
-.mermaid-diagram .node ellipse,
-.mermaid-diagram .node polygon,
-.mermaid-diagram .node path {
-  stroke-width: 1.5px !important;
-}
-
-.mermaid-diagram .edgeLabel {
-  background-color: var(--surface) !important;
-  color: var(--text) !important;
 }
 
 .mermaid-diagram .label {
@@ -456,7 +430,7 @@
 .code-language {
   position: absolute;
   top: 0.75rem;
-  right: 0.75rem;
+  left: 0.75rem;
   padding: 0.2rem 0.5rem;
   border-radius: 6px;
   background: color-mix(in srgb, var(--accent) 10%, var(--pre-bg));

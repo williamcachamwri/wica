@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 
 interface MermaidProps {
   children: string
@@ -115,7 +115,6 @@ async function initMermaid() {
 }
 
 export function Mermaid({ children }: MermaidProps) {
-  const ref = useRef<HTMLDivElement>(null)
   const [svg, setSvg] = useState<string>('')
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
@@ -127,7 +126,7 @@ export function Mermaid({ children }: MermaidProps) {
         const mermaid = await initMermaid()
         const id = `mermaid-${Math.random().toString(36).slice(2, 11)}`
         const text = typeof children === 'string' ? children.trim() : String(children).trim()
-        const { svg: renderedSvg } = await mermaid.default.render(id, text, ref.current ?? undefined)
+        const { svg: renderedSvg } = await mermaid.default.render(id, text)
         if (cancelled) return
         setSvg(renderedSvg)
         setError(null)
@@ -152,6 +151,6 @@ export function Mermaid({ children }: MermaidProps) {
   }
 
   return (
-    <div className="mermaid-diagram" ref={ref} data-loading={loading} dangerouslySetInnerHTML={{ __html: svg }} />
+    <div className="mermaid-diagram" data-loading={loading} dangerouslySetInnerHTML={{ __html: svg }} />
   )
 }

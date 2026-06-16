@@ -49,6 +49,78 @@ function getLanguage(className?: string): string {
   return className?.match(/language-(\w+)/)?.[1] || ''
 }
 
+const LANGUAGE_LABELS: Record<string, string> = {
+  ts: 'TypeScript',
+  tsx: 'TSX',
+  js: 'JavaScript',
+  jsx: 'JSX',
+  py: 'Python',
+  rb: 'Ruby',
+  go: 'Go',
+  rs: 'Rust',
+  cpp: 'C++',
+  c: 'C',
+  cs: 'C#',
+  sh: 'Shell',
+  bash: 'Bash',
+  zsh: 'Zsh',
+  ps1: 'PowerShell',
+  html: 'HTML',
+  css: 'CSS',
+  scss: 'SCSS',
+  sass: 'Sass',
+  less: 'Less',
+  md: 'Markdown',
+  mdx: 'MDX',
+  json: 'JSON',
+  yaml: 'YAML',
+  yml: 'YAML',
+  toml: 'TOML',
+  xml: 'XML',
+  svg: 'SVG',
+  sql: 'SQL',
+  graphql: 'GraphQL',
+  gql: 'GraphQL',
+  dockerfile: 'Dockerfile',
+  makefile: 'Makefile',
+  vim: 'Vim',
+  lua: 'Lua',
+  php: 'PHP',
+  swift: 'Swift',
+  kt: 'Kotlin',
+  java: 'Java',
+  scala: 'Scala',
+  r: 'R',
+  matlab: 'MATLAB',
+  dart: 'Dart',
+  flutter: 'Flutter',
+  elixir: 'Elixir',
+  erlang: 'Erlang',
+  haskell: 'Haskell',
+  clojure: 'Clojure',
+  perl: 'Perl',
+  objectivec: 'Objective-C',
+  objc: 'Objective-C',
+  groovy: 'Groovy',
+  diff: 'Diff',
+  ini: 'INI',
+  conf: 'Config',
+  nginx: 'Nginx',
+  apache: 'Apache',
+  tex: 'TeX',
+  latex: 'LaTeX',
+  wasm: 'WebAssembly',
+  markdown: 'Markdown',
+  plaintext: 'Plain Text',
+  text: 'Text',
+  mermaid: 'Mermaid',
+}
+
+function getLanguageLabel(language: string): string {
+  if (!language) return ''
+  return LANGUAGE_LABELS[language.toLowerCase()] || language.charAt(0).toUpperCase() + language.slice(1)
+}
+
 function CodeBlock({ inline, className, children }: CodeProps) {
   if (inline) {
     return <code className={className}>{children}</code>
@@ -78,7 +150,7 @@ function PreBlock({ children, node }: PreProps) {
 
   return (
     <pre data-language={language || undefined}>
-      {language && <span className="code-language">{language}</span>}
+      {language && <span className="code-language">{getLanguageLabel(language)}</span>}
       {children}
     </pre>
   )
