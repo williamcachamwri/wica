@@ -43,6 +43,8 @@ export function WorkingHours() {
   }, [])
 
   const tz = Intl.DateTimeFormat().resolvedOptions().timeZone
+  const offset = -now.getTimezoneOffset()
+  const offsetStr = `GMT${offset >= 0 ? '+' : ''}${Math.floor(offset / 60)}`
   const h = now.getHours()
   const m = now.getMinutes()
   const s = now.getSeconds()
@@ -73,7 +75,7 @@ export function WorkingHours() {
           {status.label}
         </span>
         <span className="wh__sep" />
-        <span className="wh__tz">{tz}</span>
+        <span className="wh__tz">{offsetStr}</span>
         <span className="wh__date">{WEEKDAYS[dow]}, {month}/{day}</span>
       </div>
     </div>
