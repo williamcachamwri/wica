@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { motion } from 'framer-motion'
 
 function pad(n: number): string {
   return n.toString().padStart(2, '0')
@@ -15,37 +16,71 @@ function getStatus(h: number): { label: string; color: string } {
 
 const WEEKDAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 
+const DIGITS = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+
+function DigitRoll({ digit, label }: { digit: number; label: string }) {
+  return (
+    <div className="wh__digit-wrap" aria-label={`${label}: ${digit}`}>
+      <motion.div
+        className="wh__digit-strip"
+        animate={{ y: -digit * 1.35 }}
+        transition={{ type: 'spring', stiffness: 180, damping: 22, mass: 0.8 }}
+      >
+        {DIGITS.map((d) => (
+          <span key={d} className="wh__digit">{d}</span>
+        ))}
+      </motion.div>
+    </div>
+  )
+}
+
 export function WorkingHours() {
   const [now, setNow] = useState(new Date())
 
   useEffect(() => {
-    const id = setInterval(() => setNow(new Date()), 10_000)
+    const id = setInterval(() => setNow(new Date()), 1000)
     return () => clearInterval(id)
   }, [])
 
   const tz = Intl.DateTimeFormat().resolvedOptions().timeZone
-  const hours = now.getHours()
-  const mins = now.getMinutes()
+  const h = now.getHours()
+  const m = now.getMinutes()
+  const s = now.getSeconds()
   const dow = now.getDay()
   const day = now.getDate()
-  const month = now.getMonth()
-  const status = getStatus(hours)
+  const month = now.getMonth() + 1
+  const status = getStatus(h)
+  const hh = pad(h)
+  const mm = pad(m)
+  const ss = pad(s)
+
+  const shortTz = tz.includes('/')
+    ? tz.split('/').pop()!.replace(/_/g, ' ')
+    : tz
 
   return (
-    <div className="working-hours">
-      <div className="working-hours__row">
-        <span className="working-hours__time">
-          {pad(hours)}<span className="working-hours__colon">:</span>{pad(mins)}
-        </span>
-        <span className="working-hours__dot-indicator" style={{ background: status.color }} />
-        <span className="working-hours__status" style={{ color: status.color }}>
+    <div className="wh">
+      <div className="wh__row">
+        <div className="wh__digits">
+          <DigitRoll digit={Number(hh[0])} label="tens of hours" />
+          <DigitRoll digit={Number(hh[1])} label="hours" />
+          <span className="wh__colon">:</span>
+          <DigitRoll digit={Number(mm[0])} label="tens of minutes" />
+          <DigitRoll digit={Number(mm[1])} label="minutes" />
+          <span className="wh__colon">:</span>
+          <DigitRoll digit={Number(ss[0])} label="tens of seconds" />
+          <DigitRoll digit={Number(ss[1])} label="seconds" />
+        </div>
+
+        <span className="wh__dot" style={{ background: status.color }} />
+        <span className="wh__status" style={{ color: status.color }}>
           {status.label}
         </span>
-        <span className="working-hours__sep">/</span>
-        <span className="working-hours__tz">{tz}</span>
-        <span className="working-hours__date">
-          {WEEKDAYS[dow]}, {month + 1}/{day}
-        </span>
+      </div>
+
+      <div className="wh__meta">
+        <span className="wh__tz">{shortTz}</span>
+        <span className="wh__date">{WEEKDAYS[dow]}, {month}/{day}</span>
       </div>
     </div>
   )

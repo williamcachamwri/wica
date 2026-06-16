@@ -281,79 +281,111 @@
 }
 
 /* ── Working hours ───────────────────────────────────────────────── */
-.working-hours {
+.wh {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.wh__row {
   display: flex;
   align-items: center;
   gap: 0.6rem;
-  margin-bottom: 1.5rem;
-}
-
-.working-hours__row {
-  display: flex;
-  align-items: center;
-  gap: 0.55rem;
   padding: 0.5rem 0.85rem;
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 999px;
-  font-size: 13px;
   line-height: 1;
 }
 
-.working-hours__time {
+.wh__digits {
+  display: flex;
+  align-items: center;
+  gap: 0.1rem;
+}
+
+.wh__digit-wrap {
+  width: 0.9rem;
+  height: 1.35rem;
+  overflow: hidden;
+  position: relative;
+  border-radius: 3px;
+}
+
+.wh__digit-strip {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.wh__digit {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 1.35rem;
   font-family: var(--font-mono);
-  font-size: 1.1rem;
-  font-weight: 600;
-  letter-spacing: -0.02em;
+  font-size: 1.15rem;
+  font-weight: 700;
   color: var(--text);
+  line-height: 1.35rem;
 }
 
-.working-hours__colon {
-  animation: blink 1s step-end infinite;
+.wh__colon {
+  font-family: var(--font-mono);
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-subtle);
+  margin: 0 0.1rem;
+  animation: wh-blink 1s step-end infinite;
 }
 
-@keyframes blink {
+@keyframes wh-blink {
   50% {
-    opacity: 0;
+    opacity: 0.2;
   }
 }
 
-.working-hours__dot-indicator {
+.wh__dot {
   width: 7px;
   height: 7px;
   border-radius: 50%;
   flex-shrink: 0;
 }
 
-.working-hours__status {
+.wh__status {
   font-weight: 500;
   font-size: 12.5px;
   white-space: nowrap;
 }
 
-.working-hours__sep {
+.wh__meta {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-family: var(--font-mono);
+  font-size: 11px;
   color: var(--text-subtle);
+  white-space: nowrap;
+}
+
+.wh__tz {
+  color: var(--text-subtle);
+}
+
+.wh__date {
+  color: var(--text-subtle);
+}
+
+.wh__tz::after {
+  content: '·';
+  margin-left: 0.4rem;
   opacity: 0.35;
-  font-family: var(--font-mono);
-  font-size: 11px;
-}
-
-.working-hours__tz {
-  color: var(--text-subtle);
-  font-family: var(--font-mono);
-  font-size: 11px;
-  white-space: nowrap;
-}
-
-.working-hours__date {
-  color: var(--text-subtle);
-  font-family: var(--font-mono);
-  font-size: 11px;
-  white-space: nowrap;
 }
 
 @media (max-width: 640px) {
-  .working-hours__tz {
+  .wh__tz {
     display: none;
   }
 }

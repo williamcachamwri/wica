@@ -275,94 +275,80 @@ export function CommandPalette({ open, onOpenChange, theme, onToggleTheme, sound
     close()
   }, [location.pathname, close])
 
-  return (
-    <>
-      <button
-        type="button"
-        className="command-palette__trigger"
-        onClick={() => onOpenChange(true)}
-        aria-label="Open command palette"
-      >
-        <CommandIcon />
-        <KIcon />
-      </button>
+  return createPortal(
+    <AnimatePresence>
+      {open && (
+        <motion.div
+          className="command-palette__overlay"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.2 }}
+          onClick={close}
+        >
+          <motion.div
+            className="command-palette"
+            initial={{ opacity: 0, y: -20, scale: 0.96 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -12, scale: 0.98 }}
+            transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="command-palette__input-wrapper">
+              <SearchIcon />
+              <input
+                ref={inputRef}
+                type="text"
+                className="command-palette__input"
+                placeholder="Type a command or search..."
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                spellCheck={false}
+              />
+              <kbd className="command-palette__esc">Esc</kbd>
+            </div>
 
-      {createPortal(
-        <AnimatePresence>
-          {open && (
-            <motion.div
-              className="command-palette__overlay"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.2 }}
-              onClick={close}
-            >
-              <motion.div
-                className="command-palette"
-                initial={{ opacity: 0, y: -20, scale: 0.96 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, y: -12, scale: 0.98 }}
-                transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-                onClick={(e) => e.stopPropagation()}
-              >
-                <div className="command-palette__input-wrapper">
-                  <SearchIcon />
-                  <input
-                    ref={inputRef}
-                    type="text"
-                    className="command-palette__input"
-                    placeholder="Type a command or search..."
-                    value={query}
-                    onChange={(e) => setQuery(e.target.value)}
-                    spellCheck={false}
-                  />
-                  <kbd className="command-palette__esc">Esc</kbd>
-                </div>
+            <div className="command-palette__list" role="listbox">
+              {filtered.length === 0 ? (
+                <div className="command-palette__empty">No commands found.</div>
+              ) : (
+                filtered.map((item, index) => (
+                  <motion.button
+                    key={item.id}
+                    type="button"
+                    className={`command-palette__item ${index === selectedIndex ? 'command-palette__item--selected' : ''}`}
+                    role="option"
+                    aria-selected={index === selectedIndex}
+                    onClick={item.action}
+                    onMouseEnter={() => setSelectedIndex(index)}
+                    layout
+                    initial={{ opacity: 0, x: -8 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: index * 0.02 }}
+                  >
+                    <span className="command-palette__icon">{item.icon}</span>
+                    <span className="command-palette__label">
+                      {item.label}
+                      {item.description && (
+                        <span className="command-palette__description">{item.description}</span>
+                      )}
+                    </span>
+                    {item.shortcut && (
+                      <span className="command-palette__shortcut">{item.shortcut}</span>
+                    )}
+                  </motion.button>
+                ))
+              )}
+            </div>
 
-                <div className="command-palette__list" role="listbox">
-                  {filtered.length === 0 ? (
-                    <div className="command-palette__empty">No commands found.</div>
-                  ) : (
-                    filtered.map((item, index) => (
-                      <motion.button
-                        key={item.id}
-                        type="button"
-                        className={`command-palette__item ${index === selectedIndex ? 'command-palette__item--selected' : ''}`}
-                        role="option"
-                        aria-selected={index === selectedIndex}
-                        onClick={item.action}
-                        onMouseEnter={() => setSelectedIndex(index)}
-                        layout
-                        initial={{ opacity: 0, x: -8 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: index * 0.02 }}
-                      >
-                        <span className="command-palette__icon">{item.icon}</span>
-                        <span className="command-palette__label">
-                          {item.label}
-                          {item.description && (
-                            <span className="command-palette__description">{item.description}</span>
-                          )}
-                        </span>
-                        {item.shortcut && (
-                          <span className="command-palette__shortcut">{item.shortcut}</span>
-                        )}
-                      </motion.button>
-                    ))
-                  )}
-                </div>
-
-                <div className="command-palette__footer">
-                  <span><kbd>↑</kbd> <kbd>↓</kbd> to navigate</span>
-                  <span><kbd>↵</kbd> to select</span>
-                </div>
-              </motion.div>
-            </motion.div>
-          )}
-        </AnimatePresence>,
-        document.body
+            <div className="command-palette__footer">
+              <span><kbd>↑</kbd> <kbd>↓</kbd> to navigate</span>
+              <span><kbd>↵</kbd> to select</span>
+            </div>
+          </motion.div>
+        </motion.div>
       )}
-    </>
+    </AnimatePresence>,
+    document.body
   )
 }
