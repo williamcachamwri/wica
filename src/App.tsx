@@ -1,6 +1,8 @@
 import { lazy, Suspense, useEffect, useRef, useState } from 'react'
 import { BrowserRouter, Route, Routes, useLocation } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
+import { ColorPaletteFloating } from './components/ColorPaletteFloating'
+import { CommandPalette } from './components/CommandPalette'
 import { CustomCursor } from './components/CustomCursor'
 import { FloatingNavbar } from './components/FloatingNavbar'
 import { InspectFloating } from './components/InspectFloating'
@@ -29,6 +31,7 @@ import './styles/contributions.css'
 import './styles/insights-chart.css'
 import './styles/lighthouse.css'
 import './styles/uses.css'
+import './styles/command-palette.css'
 
 const BlogPost = lazy(() => import('./pages/BlogPost'))
 const Guestbook = lazy(() => import('./pages/Guestbook'))
@@ -115,6 +118,7 @@ export default function App() {
   const [accent, setAccent] = useState(DEFAULT_ACCENT)
   const [theme, setTheme] = useState<Theme>(getInitialTheme)
   const [soundMuted, setSoundMuted] = useState(true)
+  const [commandPaletteOpen, setCommandPaletteOpen] = useState(false)
   const transitionTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   useEffect(() => {
@@ -146,8 +150,14 @@ export default function App() {
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault()
+        setCommandPaletteOpen((v) => !v)
+        return
+      }
       if (e.key === 'Escape') {
         setInspectActive(false)
+        setCommandPaletteOpen(false)
       }
       if (e.key === 'ArrowUp') {
         setNavbarVisible(false)
@@ -165,13 +175,8 @@ export default function App() {
     const handleClick = (e: MouseEvent) => {
       const target = e.target as HTMLElement
       const isLink = target.closest('a, button, [role="button"], [data-cursor-hover]')
-      const isNavbarToggle = target.closest('.navbar-expand-btn, .theme-toggle, .color-dot')
       if (!isLink) return
-      if (isNavbarToggle) {
-        playSoftClick()
-      } else {
-        playClick()
-      }
+      playClick()
     }
 
     window.addEventListener('click', handleClick, { passive: true })
@@ -179,6 +184,7 @@ export default function App() {
   }, [])
 
   const handleAccentChange = (color: string) => {
+    playSoftClick()
     setAccent(color)
     document.documentElement.style.setProperty('--accent', color)
     localStorage.setItem('ddt-accent', color)
@@ -187,10 +193,11 @@ export default function App() {
   const handleToggleSound = () => {
     const next = toggleMuted()
     setSoundMuted(!next)
-    if (next) playClick()
+    playSoftClick()
   }
 
   const toggleTheme = () => {
+    playSoftClick()
     const next = theme === 'light' ? 'dark' : 'light'
 
     const btn = document.querySelector('.theme-toggle')
@@ -241,21 +248,30 @@ export default function App() {
         transition={{ type: 'spring', stiffness: 260, damping: 24 }}
       >
         <FloatingNavbar
-          accent={accent}
-          onAccentChange={handleAccentChange}
           theme={theme}
           onToggleTheme={toggleTheme}
           soundMuted={soundMuted}
           onToggleSound={handleToggleSound}
+          commandPaletteOpen={commandPaletteOpen}
+          onToggleCommandPalette={() => setCommandPaletteOpen((v) => !v)}
         />
       </motion.div>
 
       <CustomCursor />
       <Inspector active={inspectActive} />
+      <ColorPaletteFloating accent={accent} onAccentChange={handleAccentChange} />
       <InspectFloating active={inspectActive} onToggle={() => setInspectActive((v) => !v)} />
       <NowPlayingSticky />
       <AnimatedRoutes />
       <ToastContainer />
+      <CommandPalette
+        open={commandPaletteOpen}
+        onOpenChange={setCommandPaletteOpen}
+        theme={theme}
+        onToggleTheme={toggleTheme}
+        soundMuted={soundMuted}
+        onToggleSound={handleToggleSound}
+      />
     </BrowserRouter>
   )
 }

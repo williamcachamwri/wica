@@ -4,6 +4,7 @@ import { InlineLink } from '../components/InlineLink'
 import { SpriteWithFirework } from '../components/SpriteWithFirework'
 import { AnimatedName } from '../components/AnimatedName'
 import { NowPlaying } from '../components/NowPlaying'
+import { WorkingHours } from './WorkingHours'
 import { sprites } from '../data/sprites'
 
 interface HeroProps {
@@ -46,6 +47,8 @@ export function Hero({ typewriterStart, nameStartDelay }: HeroProps) {
         </h1>
         <span className="block mt-2 text-muted text-lg">Developer & maker</span>
         <NowPlaying />
+        <div className="hero-divider" />
+        <WorkingHours />
       </div>
 
       <div className="space-y-4 text-[17px] leading-[1.7] text-text-secondary max-w-[620px] mb-10">

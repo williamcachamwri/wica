@@ -2,24 +2,16 @@ import { Link, useLocation } from 'react-router-dom'
 import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 
-const ACCENT_COLORS = [
-  { label: 'Blue', value: '#2563eb' },
-  { label: 'Rose', value: '#e11d48' },
-  { label: 'Amber', value: '#d97706' },
-  { label: 'Emerald', value: '#059669' },
-  { label: 'Violet', value: '#7c3aed' },
-]
-
 interface FloatingNavbarProps {
-  accent: string
-  onAccentChange: (color: string) => void
   theme: 'light' | 'dark'
   onToggleTheme: () => void
   soundMuted?: boolean
   onToggleSound?: () => void
+  commandPaletteOpen?: boolean
+  onToggleCommandPalette?: () => void
 }
 
-export function FloatingNavbar({ accent, onAccentChange, theme, onToggleTheme, soundMuted = true, onToggleSound }: FloatingNavbarProps) {
+export function FloatingNavbar({ theme, onToggleTheme, soundMuted = true, onToggleSound, onToggleCommandPalette }: FloatingNavbarProps) {
   const location = useLocation()
   const isActive = (path: string) => location.pathname === path
   const [expanded, setExpanded] = useState(true)
@@ -73,19 +65,24 @@ export function FloatingNavbar({ accent, onAccentChange, theme, onToggleTheme, s
           <Link to="/uses" className={isActive('/uses') ? 'active' : ''}>uses</Link>
         </div>
 
-        <div className="floating-navbar__palette" aria-label="Accent color">
-          {ACCENT_COLORS.map((color) => (
-            <button
-              key={color.value}
-              type="button"
-              className={`color-dot ${accent === color.value ? 'color-dot--active' : ''}`}
-              style={{ '--dot-color': color.value } as React.CSSProperties}
-              onClick={() => onAccentChange(color.value)}
-              title={color.label}
-              aria-label={`Use ${color.label} accent`}
-            />
-          ))}
-        </div>
+        <button
+          type="button"
+          className="navbar-search"
+          onClick={onToggleCommandPalette}
+          aria-label="Open command palette"
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="11" cy="11" r="8" />
+            <line x1="21" y1="21" x2="16.65" y2="16.65" />
+          </svg>
+          <span>Search</span>
+          <kbd>
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M18 3a3 3 0 0 0-3 3v12a3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3H6a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3V6a3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3h12a3 3 0 0 0 3-3 3 3 0 0 0-3-3z" />
+            </svg>
+            K
+          </kbd>
+        </button>
 
         {onToggleSound && (
           <button
