@@ -11,6 +11,15 @@ interface CommitFile {
   deletions: number
   changes: number
   patch?: string
+  isBinary?: boolean
+  oldOid?: string | null
+  newOid?: string | null
+}
+
+const REPO = 'williamcachamwri/wica'
+
+function imgUrl(oid: string, path: string): string {
+  return `https://raw.githubusercontent.com/${REPO}/${oid}/${path}`
 }
 
 interface CommitData {
@@ -21,7 +30,6 @@ interface CommitData {
   files: CommitFile[]
   totalAdditions: number
   totalDeletions: number
-  ogImage?: string
 }
 
 const STATUS_LABEL: Record<string, string> = {
@@ -74,6 +82,9 @@ export default function Changelog() {
           deletions: f.deletions,
           changes: f.changes,
           patch: f.patch || undefined,
+          isBinary: f.isBinary || false,
+          oldOid: f.oldOid || null,
+          newOid: f.newOid || null,
         })) || []
 
         setData({
@@ -84,7 +95,6 @@ export default function Changelog() {
           files,
           totalAdditions: files.reduce((s: number, f: CommitFile) => s + f.additions, 0),
           totalDeletions: files.reduce((s: number, f: CommitFile) => s + f.deletions, 0),
-          ogImage: json.ogImage,
         })
         setError(false)
       } catch {
@@ -184,17 +194,6 @@ export default function Changelog() {
       <main id="main" className="max-w-[760px] mx-auto px-6 pt-16 md:pt-24 pb-20">
         <Link to="/" className="inline-link text-sm mb-6 inline-block">‹ back home</Link>
 
-        {data.ogImage && (
-          <div className="changelog-og">
-            <img
-              src={data.ogImage}
-              alt={`Commit ${data.sha} OG image`}
-              className="changelog-og__img"
-              loading="lazy"
-            />
-          </div>
-        )}
-
         <div className="changelog-header">
           <div className="changelog-header__row">
             <span className="changelog-badge">{data.sha}</span>
@@ -225,7 +224,7 @@ export default function Changelog() {
                 </span>
                 <code className="changelog-file__path">{file.filename}</code>
                 <span className="changelog-file__expand">
-                  {file.patch && (
+                  {(file.patch || file.isBinary) && (
                     <motion.svg
                       width="12" height="12" viewBox="0 0 24 24"
                       fill="none" stroke="currentColor" strokeWidth="2"
@@ -238,7 +237,7 @@ export default function Changelog() {
                   )}
                 </span>
               </button>
-              {(file.additions > 0 || file.deletions > 0) && !file.patch && (
+              {(file.additions > 0 || file.deletions > 0) && !file.patch && !file.isBinary && (
                 <div className="changelog-file__bars">
                   {file.additions > 0 && (
                     <span
@@ -257,7 +256,7 @@ export default function Changelog() {
                 </div>
               )}
               <AnimatePresence initial={false}>
-                {file.patch && expanded.has(i) && (
+                {file.patch && !file.isBinary && expanded.has(i) && (
                   <motion.div
                     key="diff"
                     className="changelog-file__diff"
@@ -267,6 +266,41 @@ export default function Changelog() {
                     transition={{ type: 'spring', stiffness: 300, damping: 26, mass: 0.7 }}
                   >
                     {renderDiff(file.patch)}
+                  </motion.div>
+                )}
+                {file.isBinary && expanded.has(i) && (
+                  <motion.div
+                    key="img"
+                    className="changelog-file__image"
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: 'auto', opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ type: 'spring', stiffness: 300, damping: 26, mass: 0.7 }}
+                  >
+                    <div className="changelog-image-diff">
+                      {(file.status === 'modified' || file.status === 'removed') && file.oldOid && (
+                        <div className="changelog-image-diff__side">
+                          <span className="changelog-image-diff__label">before</span>
+                          <img
+                            src={imgUrl(file.oldOid, file.filename)}
+                            alt={`${file.filename} before`}
+                            className={`changelog-image-diff__img ${file.status === 'removed' ? 'changelog-image-diff__img--removed' : ''}`}
+                            loading="lazy"
+                          />
+                        </div>
+                      )}
+                      {(file.status === 'modified' || file.status === 'added') && file.newOid && (
+                        <div className="changelog-image-diff__side">
+                          {file.status === 'modified' && <span className="changelog-image-diff__label">after</span>}
+                          <img
+                            src={imgUrl(file.newOid, file.filename)}
+                            alt={`${file.filename} after`}
+                            className="changelog-image-diff__img"
+                            loading="lazy"
+                          />
+                        </div>
+                      )}
+                    </div>
                   </motion.div>
                 )}
               </AnimatePresence>

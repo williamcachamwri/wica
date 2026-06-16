@@ -50,11 +50,6 @@ interface GitHubCommitPayload {
   }
 }
 
-function extractOgImage(html: string): string | null {
-  const match = html.match(/property="og:image"\s+content="([^"]+)"/)
-  return match?.[1] ?? null
-}
-
 function stripHtml(html: string): string {
   return html
     .replace(/<br\s*\/?>/gi, '\n')
@@ -113,6 +108,9 @@ function toGitHubApiFormat(payload: GitHubCommitPayload) {
       deletions,
       changes: additions + deletions,
       patch: patchLines?.join('\n'),
+      isBinary: entry.isBinary || false,
+      oldOid: entry.oldOid || null,
+      newOid: entry.newOid || null,
     }
   })
 
@@ -191,9 +189,8 @@ export const onRequest: PagesFunction = async (context) => {
 
     await Promise.all(backfillPromises)
     const data = toGitHubApiFormat(payload)
-    const ogImage = extractOgImage(html)
 
-    return Response.json({ ...data, ogImage }, { headers: corsHeaders })
+    return Response.json(data, { headers: corsHeaders })
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err)
     return Response.json({ error: message }, { status: 500, headers: corsHeaders })
