@@ -7,21 +7,15 @@ const COOKIE_NAME = 'gh_token'
 const COOKIE_MAX_AGE = 60 * 60 * 24 * 7 // 7 days
 
 function setTokenCookie(token: string, isLocalhost: boolean): string {
-  const parts = [
-    `${COOKIE_NAME}=${encodeURIComponent(token)}`,
-    `Path=/`,
-    `Max-Age=${COOKIE_MAX_AGE}`,
-    `HttpOnly`,
-    `SameSite=Lax`,
-  ]
-  if (!isLocalhost) parts.push('Secure')
-  return parts.join('; ')
+  const secure = !isLocalhost ? '; Secure' : ''
+  const newCookie = `${COOKIE_NAME}=${encodeURIComponent(token)}; Path=/api/; Max-Age=${COOKIE_MAX_AGE}; HttpOnly; SameSite=Lax${secure}`
+  const clearOld = `${COOKIE_NAME}=; Path=/; Max-Age=0; HttpOnly; SameSite=Lax${secure}`
+  return `${newCookie}\n${clearOld}`
 }
 
 function deleteTokenCookie(isLocalhost: boolean): string {
-  const parts = [`${COOKIE_NAME}=`, `Path=/`, `Max-Age=0`, `HttpOnly`, `SameSite=Lax`]
-  if (!isLocalhost) parts.push('Secure')
-  return parts.join('; ')
+  const secure = !isLocalhost ? '; Secure' : ''
+  return `${COOKIE_NAME}=; Path=/api/; Max-Age=0; HttpOnly; SameSite=Lax${secure}`
 }
 
 export async function onRequest(context: { request: Request; env: Env }): Promise<Response> {
@@ -74,11 +68,12 @@ export async function onRequest(context: { request: Request; env: Env }): Promis
     }
 
     const redirect = url.searchParams.get('state') || '/'
+    const cookieStr = setTokenCookie(tokenData.access_token, isLocalhost)
     return new Response(null, {
       status: 302,
       headers: {
         Location: redirect,
-        'Set-Cookie': setTokenCookie(tokenData.access_token, isLocalhost),
+        'Set-Cookie': cookieStr.split('\n'),
         'Access-Control-Allow-Origin': '*',
       },
     })
