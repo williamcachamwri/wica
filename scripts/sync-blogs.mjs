@@ -126,36 +126,6 @@ function slugify(text) {
 
 const AI_PROVIDERS = [
   {
-    name: 'Hugging Face',
-    key: () => process.env.HF_TOKEN || process.env.HUGGINGFACE_TOKEN || '',
-    model: 'mistralai/Mistral-7B-Instruct-v0.3',
-    async call(prompt) {
-      const token = this.key()
-      const url = `https://api-inference.huggingface.co/models/${this.model}/v1/chat/completions`
-      const headers = { 'Content-Type': 'application/json' }
-      if (token) headers['Authorization'] = `Bearer ${token}`
-      const res = await fetch(url, {
-        method: 'POST',
-        headers,
-        body: JSON.stringify({
-          model: this.model,
-          messages: [
-            { role: 'system', content: 'You rewrite blog articles. Output only valid JSON, no other text.' },
-            { role: 'user', content: prompt },
-          ],
-          temperature: 0.6,
-          max_tokens: 8192,
-        }),
-      })
-      if (!res.ok) {
-        const err = await res.text()
-        throw new Error(`HuggingFace ${res.status}: ${err.slice(0, 200)}`)
-      }
-      const data = await res.json()
-      return data.choices?.[0]?.message?.content || ''
-    },
-  },
-  {
     name: 'NVIDIA',
     key: () => process.env.NVIDIA_API_KEY || '',
     model: 'deepseek-ai/deepseek-v4-pro',
@@ -212,6 +182,36 @@ const AI_PROVIDERS = [
       if (!res.ok) {
         const err = await res.text()
         throw new Error(`Alibaba ${res.status}: ${err.slice(0, 200)}`)
+      }
+      const data = await res.json()
+      return data.choices?.[0]?.message?.content || ''
+    },
+  },
+  {
+    name: 'Hugging Face',
+    key: () => process.env.HF_TOKEN || process.env.HUGGINGFACE_TOKEN || '',
+    model: 'mistralai/Mistral-7B-Instruct-v0.3',
+    async call(prompt) {
+      const token = this.key()
+      const url = `https://api-inference.huggingface.co/models/${this.model}/v1/chat/completions`
+      const headers = { 'Content-Type': 'application/json' }
+      if (token) headers['Authorization'] = `Bearer ${token}`
+      const res = await fetch(url, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({
+          model: this.model,
+          messages: [
+            { role: 'system', content: 'You rewrite blog articles. Output only valid JSON, no other text.' },
+            { role: 'user', content: prompt },
+          ],
+          temperature: 0.6,
+          max_tokens: 8192,
+        }),
+      })
+      if (!res.ok) {
+        const err = await res.text()
+        throw new Error(`HuggingFace ${res.status}: ${err.slice(0, 200)}`)
       }
       const data = await res.json()
       return data.choices?.[0]?.message?.content || ''
@@ -331,6 +331,9 @@ async function processArticle(providers, article, dryRun) {
 
   if (!body) {
     console.log(`  → All AI providers failed, writing raw for "${article.title}"`)
+    const rawContent = hasHtml(article.body)
+      ? stripHtmlTags(article.body.slice(0, 5000))
+      : article.body.slice(0, 5000)
     body = `export const meta = {
   slug: ${JSON.stringify(slug)},
   title: ${JSON.stringify(article.title)},
@@ -339,8 +342,7 @@ async function processArticle(providers, article, dryRun) {
   tags: [${article.tags.map((t) => JSON.stringify(t)).join(', ')}],
 }
 
-${article.body.slice(0, 5000)}
-`
+${escapeMdxBraces(rawContent)}`
   }
 
   if (!dryRun) {
