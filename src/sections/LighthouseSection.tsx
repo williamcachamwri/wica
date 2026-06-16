@@ -110,63 +110,6 @@ function useCountUp(target: number, duration = 1200, start = false) {
   return value
 }
 
-function PerformanceIcon() {
-  return (
-    <svg width="28" height="28" viewBox="0 0 16 16" shapeRendering="crispEdges" aria-hidden="true">
-      <rect x="2" y="2" width="12" height="12" rx="2" fill="var(--accent)" />
-      <rect x="7" y="3" width="2" height="2" fill="#fff" />
-      <rect x="6" y="5" width="4" height="6" rx="1" fill="#fff" />
-      <rect x="5" y="9" width="1" height="2" fill="#fff" />
-      <rect x="10" y="9" width="1" height="2" fill="#fff" />
-      <rect x="7" y="11" width="2" height="1" fill="#fff" opacity="0.6" />
-      <rect x="7" y="12" width="2" height="1" fill="#fff" opacity="0.3" />
-    </svg>
-  )
-}
-
-function AccessibilityIcon() {
-  return (
-    <svg width="28" height="28" viewBox="0 0 16 16" shapeRendering="crispEdges" aria-hidden="true">
-      <rect x="2" y="2" width="12" height="12" rx="2" fill="#7c3aed" />
-      <rect x="7" y="4" width="2" height="2" rx="1" fill="#fff" />
-      <rect x="6" y="7" width="4" height="4" rx="1" fill="#fff" />
-      <rect x="5" y="8" width="1" height="3" fill="#fff" opacity="0.8" />
-      <rect x="10" y="8" width="1" height="3" fill="#fff" opacity="0.8" />
-    </svg>
-  )
-}
-
-function BestPracticesIcon() {
-  return (
-    <svg width="28" height="28" viewBox="0 0 16 16" shapeRendering="crispEdges" aria-hidden="true">
-      <rect x="2" y="2" width="12" height="12" rx="2" fill="#0891b2" />
-      <rect x="5" y="4" width="6" height="7" rx="1" fill="#fff" opacity="0.2" />
-      <rect x="6" y="8" width="2" height="1" fill="#fff" />
-      <rect x="7" y="7" width="1" height="1" fill="#fff" />
-      <rect x="8" y="6" width="3" height="1" fill="#fff" />
-    </svg>
-  )
-}
-
-function SeoIcon() {
-  return (
-    <svg width="28" height="28" viewBox="0 0 16 16" shapeRendering="crispEdges" aria-hidden="true">
-      <rect x="2" y="2" width="12" height="12" rx="2" fill="#16a34a" />
-      <rect x="5" y="5" width="5" height="5" rx="2.5" fill="#fff" opacity="0.2" />
-      <rect x="10" y="10" width="1" height="1" fill="#fff" />
-      <rect x="11" y="11" width="1" height="1" fill="#fff" />
-      <rect x="12" y="12" width="1" height="1" fill="#fff" />
-    </svg>
-  )
-}
-
-const CATEGORY_ICONS: Record<string, () => JSX.Element> = {
-  performance: PerformanceIcon,
-  accessibility: AccessibilityIcon,
-  bestPractices: BestPracticesIcon,
-  seo: SeoIcon,
-}
-
 export function LighthouseSection() {
   const [data, setData] = useState<LighthouseData | FetchError | null>(null)
   const { ref: sectionRef, visible } = useInViewport<HTMLElement>()
@@ -230,13 +173,11 @@ export function LighthouseSection() {
       <div className="lighthouse-grid">
         {cats.map((key, i) => {
           const score = d.scores[key]
-          const Icon = CATEGORY_ICONS[key]
           return (
             <ScoreCard
               key={key}
               label={CATEGORY_LABELS[key]}
               score={score}
-              icon={<Icon />}
               index={i}
               visible={visible}
             />
@@ -272,13 +213,11 @@ export function LighthouseSection() {
 function ScoreCard({
   label,
   score,
-  icon,
   index,
   visible,
 }: {
   label: string
   score: number | null
-  icon: React.ReactNode
   index: number
   visible: boolean
 }) {
@@ -293,9 +232,6 @@ function ScoreCard({
         '--bar-delay': `${0.2 + index * 0.07}s`,
       } as React.CSSProperties}
     >
-      <span className="lighthouse-card__icon" aria-hidden="true">
-        {icon}
-      </span>
       <div className="lighthouse-card__label">{label}</div>
       <div
         className="lighthouse-card__score"

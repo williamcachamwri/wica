@@ -45,21 +45,6 @@
   }
 }
 
-.lighthouse-card__icon {
-  position: absolute;
-  top: 0.85rem;
-  right: 0.85rem;
-  width: 28px;
-  height: 28px;
-  pointer-events: none;
-}
-
-.lighthouse-card__icon svg {
-  width: 100%;
-  height: 100%;
-  display: block;
-}
-
 .lighthouse-card__label {
   font-family: var(--font-mono);
   font-size: 10px;
@@ -257,13 +242,6 @@
   .lighthouse-card {
     padding: 0.9rem;
     border-radius: 14px;
-  }
-
-  .lighthouse-card__icon {
-    width: 24px;
-    height: 24px;
-    top: 0.7rem;
-    right: 0.7rem;
   }
 
   .lighthouse-card__label {
