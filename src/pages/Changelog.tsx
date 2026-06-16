@@ -6,6 +6,7 @@ import { Footer } from '../components/Footer'
 
 interface CommitFile {
   filename: string
+  previous_filename?: string | null
   status: string
   additions: number
   deletions: number
@@ -222,7 +223,11 @@ export default function Changelog() {
                 <span className={`changelog-file__status changelog-file__status--${file.status}`}>
                   {STATUS_LABEL[file.status] || file.status}
                 </span>
-                <code className="changelog-file__path">{file.filename}</code>
+                <code className="changelog-file__path">
+                  {file.status === 'renamed' && file.previous_filename ? (
+                    <><span className="changelog-file__old-path">{file.previous_filename}</span> → {file.filename}</>
+                  ) : file.filename}
+                </code>
                 <span className="changelog-file__expand">
                   {(file.patch || file.isBinary) && (
                     <motion.svg

@@ -320,6 +320,11 @@
   word-break: break-all;
 }
 
+.changelog-file__old-path {
+  color: var(--text-muted);
+  text-decoration: line-through;
+}
+
 .changelog-file__bars {
   display: flex;
   gap: 2px;

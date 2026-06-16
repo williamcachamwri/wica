@@ -52,8 +52,11 @@ function toGitHubApiFormat(payload: any) {
       if (calc.del > 0) deletions = calc.del
     }
 
+    const isRenamed = entry.status === 'RENAMED'
+
     return {
       filename: entry.path,
+      previous_filename: isRenamed ? entry.oldTreeEntry?.path || null : null,
       status: entry.status.toLowerCase(),
       additions, deletions,
       changes: additions + deletions,
