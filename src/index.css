@@ -25,6 +25,7 @@
   --loader-bg: #0a0a0a;
   --cursor-ring: rgba(17, 17, 17, 0.35);
   --icon-box-bg: #fafafa;
+  --polaroid-bg: #ffffff;
 
   /* Score colors — Lighthouse-style, tinted against surface */
   --score-good: #16a34a;
@@ -87,6 +88,7 @@
   --loader-bg: #000000;
   --cursor-ring: rgba(255, 255, 255, 0.25);
   --icon-box-bg: #2e2e3e;
+  --polaroid-bg: #f0ede8;
 
   /* Score colors — Lighthouse-style, tinted against surface */
   --score-good: #4ade80;

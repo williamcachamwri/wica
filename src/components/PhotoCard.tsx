@@ -1,12 +1,12 @@
 import type { Photo } from '../types'
 
-type PhotoCardProps = Photo & { onClick?: () => void }
+type PhotoCardProps = Photo & { index?: number; onClick?: () => void }
 
-export function PhotoCard({ src, caption, rotate, onClick }: PhotoCardProps) {
+export function PhotoCard({ src, caption, rotate, index = 0, onClick }: PhotoCardProps) {
   return (
     <figure
       className="polaroid"
-      style={{ '--rotate': `${rotate}deg` } as React.CSSProperties}
+      style={{ '--rotate': `${rotate}deg`, '--i': index } as React.CSSProperties}
       onClick={onClick}
       role={onClick ? 'button' : undefined}
       tabIndex={onClick ? 0 : undefined}
