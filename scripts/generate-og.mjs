@@ -236,6 +236,8 @@ async function main() {
 
   for (const page of PAGES) {
     const outName = page.slug === 'home' ? 'og-image.png' : `og/${page.slug}.png`
+    const outPath = path.join(publicDir, outName)
+    if (fs.existsSync(outPath)) continue
     await generatePNG(
       ogTemplate({
         title: page.title,
@@ -249,6 +251,8 @@ async function main() {
   }
 
   for (const post of getAllPosts()) {
+    const outPath = path.join(ogDir, `${post.slug}.png`)
+    if (fs.existsSync(outPath)) continue
     await generatePNG(
       ogTemplate({
         title: post.title,
@@ -260,7 +264,7 @@ async function main() {
         }),
       }),
       fonts,
-      path.join(ogDir, `${post.slug}.png`),
+      outPath,
     )
   }
 }

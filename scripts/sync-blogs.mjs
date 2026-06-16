@@ -140,11 +140,11 @@ const AI_PROVIDERS = [
         body: JSON.stringify({
           model: this.model,
           messages: [
-            { role: 'system', content: 'You convert blog articles into clean MDX format. Output only the MDX content, no explanations.' },
+            { role: 'system', content: 'You rewrite blog articles. Output only valid JSON, no other text.' },
             { role: 'user', content: prompt },
           ],
           temperature: 0.6,
-          max_tokens: 4096,
+          max_tokens: 8192,
         }),
       })
       if (!res.ok) {
@@ -158,7 +158,7 @@ const AI_PROVIDERS = [
   {
     name: 'NVIDIA',
     key: () => process.env.NVIDIA_API_KEY || '',
-    model: 'mistralai/mistral-7b-instruct-v0.3',
+    model: 'deepseek-ai/deepseek-v4-pro',
     async call(prompt) {
       const token = this.key()
       const url = 'https://integrate.api.nvidia.com/v1/chat/completions'
@@ -171,11 +171,11 @@ const AI_PROVIDERS = [
         body: JSON.stringify({
           model: this.model,
           messages: [
-            { role: 'system', content: 'You convert blog articles into clean MDX format. Output only the MDX content, no explanations.' },
+            { role: 'system', content: 'You rewrite blog articles. Output only valid JSON, no other text.' },
             { role: 'user', content: prompt },
           ],
           temperature: 0.6,
-          max_tokens: 4096,
+          max_tokens: 8192,
         }),
       })
       if (!res.ok) {
@@ -202,11 +202,11 @@ const AI_PROVIDERS = [
         body: JSON.stringify({
           model: this.model,
           messages: [
-            { role: 'system', content: 'You convert blog articles into clean MDX format. Output only the MDX content, no explanations.' },
+            { role: 'system', content: 'You rewrite blog articles. Output only valid JSON, no other text.' },
             { role: 'user', content: prompt },
           ],
           temperature: 0.6,
-          max_tokens: 4096,
+          max_tokens: 8192,
         }),
       })
       if (!res.ok) {
@@ -226,39 +226,49 @@ function getActiveProvider() {
   return null
 }
 
-function parseGeneratedMdx(text) {
-  let meta = { title: '', date: '', summary: '', tags: [] }
-  let content = text
+function extractJson(text) {
+  const m = text.match(/\{[\s\S]*\}/)
+  if (!m) throw new Error('AI response contains no JSON object')
+  return JSON.parse(m[0])
+}
 
-  const metaMatch = text.match(
-    /export\s+const\s+meta\s*=\s*\{([\s\S]*?)\}/
-  )
-  if (metaMatch) {
-    const block = metaMatch[1]
-    const getVal = (key) => {
-      const m = block.match(new RegExp(`${key}\\s*:\\s*(.+)`))
-      if (!m) return undefined
-      let v = m[1].trim().replace(/,$/, '')
-      if (v.startsWith("'") || v.startsWith('"')) v = v.slice(1, -1)
-      if (v.startsWith('[')) {
-        try {
-          v = JSON.parse(v)
-        } catch {
-          v = v.replace(/[\[\]\s'"]/g, '').split(',')
-        }
-      }
-      return v
+function hasHtml(text) {
+  const htmlRegex = /<(p|br|h[1-6]|div|span|strong|em|b|i|u|ul|ol|li|table|tr|td|th|thead|tbody|tfoot|pre|code|img|a|blockquote|hr|form|input|button|label|section|article|header|footer|main|aside|nav|figure|figcaption)(\s[^>]*)?>/
+  return htmlRegex.test(text)
+}
+
+function stripHtmlTags(text) {
+  return text
+    .replace(/<p>/gi, '\n\n')
+    .replace(/<\/p>/gi, '')
+    .replace(/<br\s*\/?>/gi, '\n')
+    .replace(/<strong>(.*?)<\/strong>/gi, '**$1**')
+    .replace(/<b>(.*?)<\/b>/gi, '**$1**')
+    .replace(/<em>(.*?)<\/em>/gi, '*$1*')
+    .replace(/<i>(.*?)<\/i>/gi, '*$1*')
+    .replace(/<code>(.*?)<\/code>/gi, '`$1`')
+    .replace(/<h1>(.*?)<\/h1>/gi, '\n# $1\n')
+    .replace(/<h2>(.*?)<\/h2>/gi, '\n## $1\n')
+    .replace(/<h3>(.*?)<\/h3>/gi, '\n### $1\n')
+    .replace(/<h4>(.*?)<\/h4>/gi, '\n#### $1\n')
+    .replace(/<li>(.*?)<\/li>/gi, '- $1')
+    .replace(/<a\s+href="([^"]*)"[^>]*>(.*?)<\/a>/gi, '[$2]($1)')
+    .replace(/<[^>]+>/g, '')
+    .replace(/\n{4,}/g, '\n\n\n')
+    .trim()
+}
+
+function escapeMdxBraces(text) {
+  const lines = text.split('\n')
+  let inCodeBlock = false
+  return lines.map(line => {
+    if (line.trimStart().startsWith('```')) {
+      inCodeBlock = !inCodeBlock
+      return line
     }
-    meta.title = getVal('title') || ''
-    meta.date = getVal('date') || ''
-    meta.summary = getVal('summary') || ''
-    meta.tags = getVal('tags') || []
-
-    const afterMeta = text.slice(metaMatch.index + metaMatch[0].length)
-    content = afterMeta.replace(/^\s*\n*/, '').trim()
-  }
-
-  return { meta, content }
+    if (inCodeBlock) return line
+    return line.replace(/\{/g, '&#123;').replace(/\}/g, '&#125;')
+  }).join('\n')
 }
 
 async function processArticle(provider, article, dryRun) {
@@ -266,23 +276,40 @@ async function processArticle(provider, article, dryRun) {
   const filePath = new URL(`../src/posts/${slug}.mdx`, import.meta.url)
 
   let body = article.body
+  const rawFallback = () => {
+    console.log(`  → No AI provider or fallback, writing raw for "${article.title}"`)
+    return `export const meta = {
+  slug: ${JSON.stringify(slug)},
+  title: ${JSON.stringify(article.title)},
+  date: ${JSON.stringify(article.date)},
+  summary: ${JSON.stringify(article.description || '')},
+  tags: [${article.tags.map((t) => JSON.stringify(t)).join(', ')}],
+}
+
+${article.body.slice(0, 5000)}
+`
+  }
 
   if (provider) {
-    console.log(`  → ${provider.name} generating MDX for "${article.title}"...`)
-    const prompt = `Convert this article into an MDX blog post in English.
+    console.log(`  → ${provider.name} rewriting "${article.title}"...`)
+    const prompt = `Viết lại bài viết này thành blog post bằng Markdown (TIẾNG ANH).
 
-Rules:
-- export const meta = { slug: "${slug}", title: "...", date: "${article.date}", summary: "...", tags: [...] }
-- summary: 1-2 sentences.
-- tags: 2-5 keywords.
-- slug is "${slug}" — keep it exactly.
-- Rewrite in your own words, preserve facts and code blocks.
-- No React/JSX imports.
-- No \`\`\` fence wrapping.
-- End with: ${TRACKING_MARKER.trim()}
-- Add: *Originally published at ${article.url}*
+QUY TẮC (bắt buộc):
+- CHỈ dùng markdown: ## cho heading, - cho list, \`\`\` cho code block
+- TUYỆT ĐỐI KHÔNG dùng HTML tags (<p>, <br>, <div>, <span>, <strong>, <h1>, <code>, etc.)
+- Viết lại bằng lời của bạn, giữ nguyên nội dung và code blocks
+- Kết thúc với: ${TRACKING_MARKER.trim()}
+- Thêm dòng: *Originally published at ${article.url}*
 
-Article:
+Trả về JSON object (chỉ JSON, không kèm text khác):
+{
+  "summary": "Tóm tắt 1-2 câu",
+  "tags": ["tag1", "tag2"],
+  "body": "Nội dung markdown"
+}
+
+Tiêu đề: ${article.title}
+Bài viết:
 ${body.slice(0, 8000)}`
 
     let result = ''
@@ -290,38 +317,38 @@ ${body.slice(0, 8000)}`
       result = await provider.call(prompt)
     } catch (err) {
       console.error(`    ✗ ${provider.name} failed: ${err.message}`)
-      // fallback: try next provider or write raw
       throw err
     }
 
-    const { meta, content } = parseGeneratedMdx(result)
+    let data
+    try {
+      data = extractJson(result)
+    } catch (err) {
+      console.error(`    ✗ Failed to parse AI JSON response: ${err.message}`)
+      throw err
+    }
 
-    if (!meta.title) meta.title = article.title
-    if (!meta.date) meta.date = article.date
-    if (!meta.summary) meta.summary = article.description || ''
-    if (!meta.tags || meta.tags.length === 0) meta.tags = article.tags
+    const summary = data.summary || article.description || ''
+    const tags = Array.isArray(data.tags) && data.tags.length > 0 ? data.tags : article.tags
+    let content = data.body || article.body
+
+    // Nếu còn HTML tags, strip chúng sang markdown
+    if (hasHtml(content)) {
+      console.log(`    ⚠ Detected HTML in AI output, converting to markdown`)
+      content = stripHtmlTags(content)
+    }
 
     body = `export const meta = {
-  slug: '${slug}',
-  title: '${meta.title.replace(/'/g, "\\'")}',
-  date: '${meta.date}',
-  summary: '${meta.summary.replace(/'/g, "\\'")}',
-  tags: [${(meta.tags || []).map((t) => `'${t}'`).join(', ')}],
+  slug: ${JSON.stringify(slug)},
+  title: ${JSON.stringify(article.title)},
+  date: ${JSON.stringify(article.date)},
+  summary: ${JSON.stringify(summary)},
+  tags: [${tags.map((t) => JSON.stringify(t)).join(', ')}],
 }
 
-${content || ''}`
+${escapeMdxBraces(content || '')}`
   } else {
-    console.log(`  → No AI provider available, writing raw for "${article.title}"`)
-    body = `export const meta = {
-  slug: '${slug}',
-  title: '${article.title.replace(/'/g, "\\'")}',
-  date: '${article.date}',
-  summary: '${(article.description || '').replace(/'/g, "\\'")}',
-  tags: [${article.tags.map((t) => `'${t}'`).join(', ')}],
-}
-
-${article.body.slice(0, 5000)}
-`
+    body = rawFallback()
   }
 
   if (!dryRun) {
