@@ -27,8 +27,7 @@
     opacity 0.5s cubic-bezier(0.22, 1, 0.36, 1),
     transform 0.5s cubic-bezier(0.22, 1, 0.36, 1),
     border-color 0.3s ease,
-    box-shadow 0.3s ease,
-    background 0.25s ease;
+    box-shadow 0.3s ease;
   transition-delay: var(--lighthouse-delay, 0s);
 }
 
@@ -61,7 +60,6 @@
   font-weight: 700;
   line-height: 1;
   margin-bottom: 0.75rem;
-  transition: color 0.3s ease;
 }
 
 .lighthouse-card__bar-track {
