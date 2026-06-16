@@ -219,13 +219,6 @@ const AI_PROVIDERS = [
   },
 ]
 
-function getActiveProvider() {
-  for (const p of AI_PROVIDERS) {
-    if (p.key()) return p
-  }
-  return null
-}
-
 function extractJson(text) {
   const m = text.match(/\{[\s\S]*\}/)
   if (!m) throw new Error('AI response contains no JSON object')
@@ -271,28 +264,8 @@ function escapeMdxBraces(text) {
   }).join('\n')
 }
 
-async function processArticle(provider, article, dryRun) {
-  const slug = `imported-${slugify(article.title)}`
-  const filePath = new URL(`../src/posts/${slug}.mdx`, import.meta.url)
-
-  let body = article.body
-  const rawFallback = () => {
-    console.log(`  → No AI provider or fallback, writing raw for "${article.title}"`)
-    return `export const meta = {
-  slug: ${JSON.stringify(slug)},
-  title: ${JSON.stringify(article.title)},
-  date: ${JSON.stringify(article.date)},
-  summary: ${JSON.stringify(article.description || '')},
-  tags: [${article.tags.map((t) => JSON.stringify(t)).join(', ')}],
-}
-
-${article.body.slice(0, 5000)}
-`
-  }
-
-  if (provider) {
-    console.log(`  → ${provider.name} rewriting "${article.title}"...`)
-    const prompt = `Viết lại bài viết này thành blog post bằng Markdown (TIẾNG ANH).
+function buildPrompt(article, slug) {
+  return `Viết lại bài viết này thành blog post bằng Markdown (TIẾNG ANH).
 
 QUY TẮC (bắt buộc):
 - CHỈ dùng markdown: ## cho heading, - cho list, \`\`\` cho code block
@@ -310,35 +283,25 @@ Trả về JSON object (chỉ JSON, không kèm text khác):
 
 Tiêu đề: ${article.title}
 Bài viết:
-${body.slice(0, 8000)}`
+${article.body.slice(0, 8000)}`
+}
 
-    let result = ''
-    try {
-      result = await provider.call(prompt)
-    } catch (err) {
-      console.error(`    ✗ ${provider.name} failed: ${err.message}`)
-      throw err
-    }
+async function tryWriteWithAi(provider, article, slug) {
+  console.log(`  → ${provider.name} rewriting "${article.title}"...`)
+  const prompt = buildPrompt(article, slug)
+  const result = await provider.call(prompt)
+  const data = extractJson(result)
 
-    let data
-    try {
-      data = extractJson(result)
-    } catch (err) {
-      console.error(`    ✗ Failed to parse AI JSON response: ${err.message}`)
-      throw err
-    }
+  const summary = data.summary || article.description || ''
+  const tags = Array.isArray(data.tags) && data.tags.length > 0 ? data.tags : article.tags
+  let content = data.body || article.body
 
-    const summary = data.summary || article.description || ''
-    const tags = Array.isArray(data.tags) && data.tags.length > 0 ? data.tags : article.tags
-    let content = data.body || article.body
+  if (hasHtml(content)) {
+    console.log(`    ⚠ Detected HTML in AI output, converting to markdown`)
+    content = stripHtmlTags(content)
+  }
 
-    // Nếu còn HTML tags, strip chúng sang markdown
-    if (hasHtml(content)) {
-      console.log(`    ⚠ Detected HTML in AI output, converting to markdown`)
-      content = stripHtmlTags(content)
-    }
-
-    body = `export const meta = {
+  return `export const meta = {
   slug: ${JSON.stringify(slug)},
   title: ${JSON.stringify(article.title)},
   date: ${JSON.stringify(article.date)},
@@ -347,8 +310,37 @@ ${body.slice(0, 8000)}`
 }
 
 ${escapeMdxBraces(content || '')}`
-  } else {
-    body = rawFallback()
+}
+
+async function processArticle(providers, article, dryRun) {
+  const slug = `imported-${slugify(article.title)}`
+  const filePath = new URL(`../src/posts/${slug}.mdx`, import.meta.url)
+
+  let body
+
+  if (providers && providers.length > 0) {
+    for (const provider of providers) {
+      try {
+        body = await tryWriteWithAi(provider, article, slug)
+        break
+      } catch (err) {
+        console.error(`    ✗ ${provider.name} failed: ${err.message}`)
+      }
+    }
+  }
+
+  if (!body) {
+    console.log(`  → All AI providers failed, writing raw for "${article.title}"`)
+    body = `export const meta = {
+  slug: ${JSON.stringify(slug)},
+  title: ${JSON.stringify(article.title)},
+  date: ${JSON.stringify(article.date)},
+  summary: ${JSON.stringify(article.description || '')},
+  tags: [${article.tags.map((t) => JSON.stringify(t)).join(', ')}],
+}
+
+${article.body.slice(0, 5000)}
+`
   }
 
   if (!dryRun) {
@@ -368,9 +360,9 @@ import { existsSync } from 'node:fs'
 const dryRun = process.env.DRY_RUN === '1'
 
 async function main() {
-  const provider = getActiveProvider()
-  if (provider) {
-    console.log(`🤖 AI provider: ${provider.name} (${provider.model})`)
+  const providers = AI_PROVIDERS.filter(p => p.key())
+  if (providers.length > 0) {
+    console.log(`🤖 AI providers: ${providers.map(p => `${p.name} (${p.model})`).join(', ')}`)
   } else {
     console.log('⚠️  No AI API key set — posts will be saved raw without AI rewrite.')
     console.log('   Set one of: HF_TOKEN, NVIDIA_API_KEY, ALIBABA_API_KEY')
@@ -397,32 +389,14 @@ async function main() {
         continue
       }
 
-      try {
-        const slug = await processArticle(provider, article, dryRun)
-        imported[article.sourceId] = {
-          slug,
-          title: article.title,
-          url: article.url,
-          importedAt: new Date().toISOString(),
-        }
-        slugs.push(slug)
-      } catch (err) {
-        console.error(`  ✗ Failed for "${article.title}": ${err.message}`)
-        // try raw fallback
-        try {
-          const slug = await processArticle(null, article, dryRun)
-          imported[article.sourceId] = {
-            slug,
-            title: article.title,
-            url: article.url,
-            fallback: true,
-            importedAt: new Date().toISOString(),
-          }
-          slugs.push(slug)
-        } catch (fallbackErr) {
-          console.error(`  ✗ Raw fallback also failed: ${fallbackErr.message}`)
-        }
+      const slug = await processArticle(providers, article, dryRun)
+      imported[article.sourceId] = {
+        slug,
+        title: article.title,
+        url: article.url,
+        importedAt: new Date().toISOString(),
       }
+      slugs.push(slug)
 
       await new Promise((r) => setTimeout(r, 1500))
     }
