@@ -16,25 +16,87 @@
 const IMPORTS_FILE = new URL('imported-posts.json', import.meta.url)
 const TRACKING_MARKER = '--- imported via sync-blogs ---\n'
 
+// ─── RSS/Atom feed parser (no dependencies) ─────────────────────────
+function parseRssFeed(xml, feedId) {
+  const items = []
+  const isAtom = xml.includes('<feed') && xml.includes('xmlns="http://www.w3.org/2005/Atom"')
+
+  if (isAtom) {
+    const entries = xml.match(/<entry>[\s\S]*?<\/entry>/g) || []
+    for (const entry of entries) {
+      const title = extractXmlValue(entry, 'title')
+      const url =
+        extractXmlAttr(entry, 'link', 'href') ||
+        (entry.match(/<link[^>]*href="([^"]+)"/) || [])[1] || ''
+      const description = extractXmlValue(entry, 'summary') || extractXmlValue(entry, 'content')
+      const dateRaw = extractXmlValue(entry, 'published') || extractXmlValue(entry, 'updated') || ''
+      const date = dateRaw.split('T')[0] || ''
+      const tags = [...entry.matchAll(/<category[^>]*term="([^"]+)"/g)].map((m) => m[1])
+      items.push({ feedId, title, url, description, date, tags })
+    }
+  } else {
+    const entries = xml.match(/<item>[\s\S]*?<\/item>/g) || []
+    for (const entry of entries) {
+      const title = extractXmlValue(entry, 'title')
+      const url =
+        extractXmlValue(entry, 'link') ||
+        (entry.match(/<link[^>]*href="([^"]+)"/) || [])[1] || ''
+      const description = extractXmlValue(entry, 'description') || extractXmlValue(entry, 'content:encoded')
+      const dateRaw = extractXmlValue(entry, 'pubDate') || extractXmlValue(entry, 'dc:date') || ''
+      const date = dateRaw.split('T')[0] || new Date(dateRaw).toISOString().split('T')[0] || ''
+      const tags = [
+        ...entry.matchAll(/<category[^>]*>([^<]+)<\/category>/g),
+        ...entry.matchAll(/<dc:subject[^>]*>([^<]+)<\/dc:subject>/g),
+      ].map((m) => m[1])
+      items.push({ feedId, title, url, description, date, tags })
+    }
+  }
+
+  return items
+}
+
+function extractXmlValue(xml, tag) {
+  const m = xml.match(new RegExp(`<${tag}[^>]*>([\\s\\S]*?)<\\/${tag}>`))
+  return m ? decodeHtml(m[1].trim()) : ''
+}
+
+function extractXmlAttr(xml, tag, attr) {
+  const m = xml.match(new RegExp(`<${tag}[^>]*${attr}="([^"]+)"`))
+  return m ? m[1] : ''
+}
+
+function decodeHtml(text) {
+  return text
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/&apos;/g, "'")
+}
+
+// ─── Sources ─────────────────────────────────────────────────────────
+// Thêm feed RSS bạn muốn sync vào đây
 const SOURCES = [
   {
-    id: 'devto',
-    name: 'dev.to',
-    username: 'williamcachamwri', // <-- ganti dengan username dev.to kalau beda
+    id: 'devto-feed',
+    name: 'dev.to feed',
+    feedUrl: 'https://dev.to/feed',
     async fetch() {
-      const res = await fetch(
-        `https://dev.to/api/articles?username=${this.username}&per_page=20&state=all`
-      )
-      if (!res.ok) throw new Error(`dev.to API: ${res.status}`)
-      const articles = await res.json()
-      return articles.map((a) => ({
-        sourceId: `devto-${a.id}`,
-        url: a.url,
-        title: a.title,
-        description: a.description || '',
-        tags: (a.tags || []).filter(Boolean),
-        date: a.published_at?.split('T')[0] || '',
-        body: a.body_markdown || '',
+      const res = await fetch(this.feedUrl)
+      if (!res.ok) throw new Error(`${this.feedUrl}: ${res.status}`)
+      const xml = await res.text()
+      const items = parseRssFeed(xml, this.id)
+      return items.map((item, i) => ({
+        sourceId: `${this.id}-${slugify(item.title)}-${i}`,
+        url: item.url,
+        title: item.title,
+        description: item.description
+          ? item.description.replace(/<[^>]*>/g, '').slice(0, 300)
+          : '',
+        tags: item.tags.filter(Boolean),
+        date: item.date || '',
+        body: item.description || '',
       }))
     },
   },
