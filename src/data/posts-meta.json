@@ -1,0 +1,52 @@
+[
+  {
+    "slug": "design-systems",
+    "title": "Designing Systems That Breathe",
+    "date": "2024-05-22",
+    "summary": "Thoughts on whitespace, rhythm, and intentional constraints in UI design.",
+    "wordCount": 194,
+    "readTime": "1 min",
+    "tags": []
+  },
+  {
+    "slug": "markdown-test",
+    "title": "Markdown & MDX Feature Test",
+    "date": "2024-12-01",
+    "summary": "A full exercise of every supported Markdown feature on the blog.",
+    "wordCount": 145,
+    "readTime": "1 min",
+    "tags": []
+  },
+  {
+    "slug": "nvidia-gpu-technical-analysis",
+    "title": "Phân Tích Kỹ Thuật Card Đồ Họa NVIDIA — Từ Kiến Trúc Đến Hiệu Năng",
+    "date": "2026-06-16",
+    "summary": "Đi sâu vào kiến trúc, bộ nhớ, quy trình sản xuất và các chỉ số hiệu năng của card đồ họa NVIDIA qua các thế hệ Turing, Ampere, Ada Lovelace và Blackwell.",
+    "wordCount": 2243,
+    "readTime": "11 min",
+    "tags": [
+      "hardware",
+      "nvidia",
+      "gpu",
+      "deep-dive"
+    ]
+  },
+  {
+    "slug": "quiet-tools",
+    "title": "The Quiet Joy of Small Tools",
+    "date": "2024-03-15",
+    "summary": "Why I prefer building tiny, focused utilities over large platforms.",
+    "wordCount": 255,
+    "readTime": "1 min",
+    "tags": []
+  },
+  {
+    "slug": "slow-tech",
+    "title": "Embracing Slow Tech",
+    "date": "2024-08-10",
+    "summary": "On resisting the urge to optimise every second and building software that respects attention.",
+    "wordCount": 263,
+    "readTime": "1 min",
+    "tags": []
+  }
+]

@@ -3,7 +3,6 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import satori from 'satori'
 import { Resvg } from '@resvg/resvg-js'
-import { posts } from '../src/data/posts.ts'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const publicDir = path.resolve(__dirname, '../public')
@@ -44,6 +43,54 @@ const PAGES = [
   },
 ]
 
+function parseMdFrontmatter(raw) {
+  const match = raw.match(/^---\n([\s\S]*?)\n---/)
+  if (!match) return {}
+
+  const result = {}
+  for (const line of match[1].split('\n')) {
+    const colonIdx = line.indexOf(':')
+    if (colonIdx === -1) continue
+    const key = line.slice(0, colonIdx).trim()
+    let value = line.slice(colonIdx + 1).trim()
+
+    if (value.startsWith('[') && value.endsWith(']')) {
+      try {
+        value = value.replace(/'/g, '"')
+        result[key] = JSON.parse(value)
+      } catch {
+        result[key] = value.slice(1, -1).split(',').map((s) => s.trim().replace(/['"]/g, ''))
+      }
+    } else {
+      result[key] = value
+    }
+  }
+  return result
+}
+
+function getMdPosts() {
+  const postsDir = path.resolve(__dirname, '../public/posts')
+  if (!fs.existsSync(postsDir)) return []
+  return fs.readdirSync(postsDir)
+    .filter((f) => f.endsWith('.md'))
+    .map((f) => {
+      const raw = fs.readFileSync(path.join(postsDir, f), 'utf-8')
+      const frontmatter = parseMdFrontmatter(raw)
+      const slug = f.replace('.md', '')
+      const content = raw.replace(/^---[\s\S]*?\n---\n?/, '').trim()
+      const wordCount = content.split(/\s+/).filter(Boolean).length
+      return {
+        slug,
+        title: frontmatter.title || slug,
+        date: frontmatter.date || '',
+        summary: frontmatter.summary || '',
+        wordCount,
+        readTime: `${Math.max(1, Math.round(wordCount / 200))} min`,
+        tags: frontmatter.tags || [],
+      }
+    })
+}
+
 function extractMdxMeta(filePath) {
   const raw = fs.readFileSync(filePath, 'utf-8')
   const match = raw.match(/export\s+const\s+meta\s*=\s*({[\s\S]*?})/)
@@ -57,11 +104,13 @@ function extractMdxMeta(filePath) {
 
 function getAllPosts() {
   const mdxDir = path.resolve(__dirname, '../src/posts')
-  const mdxPosts = fs.readdirSync(mdxDir)
-    .filter((f) => f.endsWith('.mdx'))
-    .map((f) => extractMdxMeta(path.join(mdxDir, f)))
-    .filter(Boolean)
-  return [...posts, ...mdxPosts].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+  const mdxPosts = fs.existsSync(mdxDir)
+    ? fs.readdirSync(mdxDir)
+      .filter((f) => f.endsWith('.mdx'))
+      .map((f) => extractMdxMeta(path.join(mdxDir, f)))
+      .filter(Boolean)
+    : []
+  return [...getMdPosts(), ...mdxPosts].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
 }
 
 async function loadFonts() {
@@ -69,207 +118,183 @@ async function loadFonts() {
     fetch('https://fonts.gstatic.com/s/inter/v20/UcCO3FwrK3iLTeHuS_nVMrMxCp50SjIw2boKoduKmMEVuLyfMZg.ttf').then((r) => r.arrayBuffer()),
     fetch('https://fonts.gstatic.com/s/inter/v20/UcCO3FwrK3iLTeHuS_nVMrMxCp50SjIw2boKoduKmMEVuFuYMZg.ttf').then((r) => r.arrayBuffer()),
   ])
-  return [
-    { name: 'Inter', data: Buffer.from(regular), weight: 400, style: 'normal' },
-    { name: 'Inter', data: Buffer.from(bold), weight: 700, style: 'normal' },
-  ]
+  return { regular, bold }
 }
 
-function ogTemplate({ title, description, subtitle, isHome }) {
-  return {
-    type: 'div',
-    props: {
-      style: {
-        width: '100%',
-        height: '100%',
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'space-between',
-        backgroundColor: '#07070a',
-        color: '#f4f4f5',
-        padding: '64px',
-        fontFamily: 'Inter, sans-serif',
-        position: 'relative',
-        overflow: 'hidden',
-      },
-      children: [
-        {
-          type: 'div',
-          props: {
-            style: {
-              position: 'absolute',
-              top: '-200px',
-              right: '-200px',
-              width: '600px',
-              height: '600px',
-              borderRadius: '50%',
-              background: 'radial-gradient(circle, rgba(37,99,235,0.25) 0%, transparent 70%)',
-            },
-          },
-        },
-        {
-          type: 'div',
-          props: {
-            style: {
-              position: 'absolute',
-              bottom: '-150px',
-              left: '-150px',
-              width: '500px',
-              height: '500px',
-              borderRadius: '50%',
-              background: 'radial-gradient(circle, rgba(37,99,235,0.12) 0%, transparent 70%)',
-            },
-          },
-        },
-        {
-          type: 'div',
-          props: {
-            style: { display: 'flex', alignItems: 'center', gap: '16px' },
-            children: [
-              {
-                type: 'div',
-                props: {
-                  style: {
-                    width: '40px',
-                    height: '40px',
-                    borderRadius: '10px',
-                    background: '#2563eb',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    color: '#fff',
-                    fontSize: '20px',
-                    fontWeight: 700,
-                  },
-                  children: 'lvk',
-                },
-              },
-              {
-                type: 'span',
-                props: {
-                  style: { fontSize: '22px', fontWeight: 700, color: '#f4f4f5' },
-                  children: 'wica',
-                },
-              },
-            ],
-          },
-        },
-        {
-          type: 'div',
-          props: {
-            style: { display: 'flex', flexDirection: 'column', maxWidth: '1000px' },
-            children: [
-              {
-                type: 'div',
-                props: {
-                  style: {
-                    fontSize: isHome ? '72px' : '56px',
-                    fontWeight: 700,
-                    lineHeight: 1.1,
-                    letterSpacing: '-0.03em',
-                    marginBottom: '24px',
-                    color: '#f4f4f5',
-                  },
-                  children: title,
-                },
-              },
-              {
-                type: 'div',
-                props: {
-                  style: {
-                    fontSize: '26px',
-                    lineHeight: 1.45,
-                    color: '#a1a1aa',
-                  },
-                  children: description,
-                },
-              },
-              subtitle && {
-                type: 'div',
-                props: {
-                  style: {
-                    marginTop: '32px',
-                    fontSize: '18px',
-                    fontFamily: 'JetBrains Mono, monospace',
-                    color: '#2563eb',
-                  },
-                  children: subtitle,
-                },
-              },
-            ].filter(Boolean),
-          },
-        },
-        {
-          type: 'div',
-          props: {
-            style: {
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              fontSize: '18px',
-              color: '#71717a',
-              borderTop: '1px solid #27272a',
-              paddingTop: '32px',
-            },
-            children: [
-              { type: 'span', props: { children: SITE.name } },
-              { type: 'span', props: { children: SITE.url.replace('https://', '') } },
-            ],
-          },
-        },
-      ],
-    },
+async function generateOgImage(post, fonts) {
+  const SX = 1200 / 1080
+
+  const tagColors = {
+    design: '#a78bfa',
+    ui: '#34d399',
+    code: '#60a5fa',
+    philosophy: '#fbbf24',
+    meta: '#f472b6',
+    writing: '#fb923c',
+    hardware: '#f87171',
+    nvidia: '#76b900',
+    gpu: '#a78bfa',
+    'deep-dive': '#60a5fa',
   }
-}
 
-async function generatePNG(node, fonts, outPath) {
-  const svg = await satori(node, { width: 1200, height: 630, fonts })
+  const tags = Array.isArray(post.tags) ? post.tags : []
+  const subtitle = post.summary?.length > 120 ? post.summary.slice(0, 117) + '...' : post.summary || ''
+
+  const svg = await satori(
+    {
+      type: 'div',
+      props: {
+        style: {
+          display: 'flex',
+          flexDirection: 'column',
+          width: '100%',
+          height: '100%',
+          padding: '72px',
+          background: 'linear-gradient(135deg, #0b0b0b 0%, #1a1a2e 100%)',
+          fontFamily: 'Inter',
+        },
+        children: [
+          {
+            type: 'div',
+            props: {
+              style: { display: 'flex', alignItems: 'center', gap: '12px', marginBottom: 'auto' },
+              children: [
+                {
+                  type: 'span',
+                  props: {
+                    style: { width: 10, height: 10, borderRadius: '50%', background: '#a78bfa' },
+                  },
+                },
+                {
+                  type: 'span',
+                  props: {
+                    style: { color: '#a3a3a3', fontSize: 20 * SX, letterSpacing: '0.1em' },
+                    children: SITE.name.toUpperCase(),
+                  },
+                },
+              ],
+            },
+          },
+          {
+            type: 'div',
+            props: {
+              style: { display: 'flex', flexDirection: 'column', gap: 24 },
+              children: [
+                {
+                  type: 'h1',
+                  props: {
+                    style: {
+                      fontSize: 48 * SX,
+                      fontWeight: 700,
+                      color: '#f5f5f5',
+                      lineHeight: 1.2,
+                      letterSpacing: '-0.02em',
+                      margin: 0,
+                    },
+                    children: post.title,
+                  },
+                },
+                subtitle
+                  ? {
+                      type: 'p',
+                      props: {
+                        style: {
+                          fontSize: 22 * SX,
+                          color: '#a3a3a3',
+                          lineHeight: 1.5,
+                          margin: 0,
+                        },
+                        children: subtitle,
+                      },
+                    }
+                  : null,
+              ].filter(Boolean),
+            },
+          },
+          {
+            type: 'div',
+            props: {
+              style: { display: 'flex', gap: 12, marginTop: 'auto', alignItems: 'center' },
+              children: [
+                {
+                  type: 'span',
+                  props: {
+                    style: { color: '#737373', fontSize: 16 * SX },
+                    children: post.date,
+                  },
+                },
+                ...(tags.length > 0
+                  ? [
+                      {
+                        type: 'span',
+                        props: {
+                          style: { width: 4, height: 4, borderRadius: '50%', background: '#525252' },
+                        },
+                      },
+                      ...tags.slice(0, 3).map((tag) => ({
+                        type: 'span',
+                        props: {
+                          style: {
+                            padding: '4px 12px',
+                            borderRadius: 9999,
+                            fontSize: 14 * SX,
+                            color: tagColors[tag] || '#a3a3a3',
+                            border: `1px solid ${tagColors[tag] || '#525252'}33`,
+                            background: `${tagColors[tag] || '#525252'}15`,
+                          },
+                          children: tag,
+                        },
+                      })),
+                    ]
+                  : []),
+              ],
+            },
+          },
+        ],
+      },
+    },
+    {
+      width: 1200,
+      height: 630,
+      fonts: [
+        { name: 'Inter', data: fonts.regular, weight: 400 },
+        { name: 'Inter', data: fonts.bold, weight: 700 },
+      ],
+    }
+  )
+
   const resvg = new Resvg(svg, { fitTo: { mode: 'width', value: 1200 } })
-  const png = resvg.render()
-  fs.writeFileSync(outPath, png.asPng())
-  console.log('generated:', path.relative(publicDir, outPath))
+  const pngBuffer = resvg.render().asPng()
+
+  if (!fs.existsSync(ogDir)) {
+    fs.mkdirSync(ogDir, { recursive: true })
+  }
+
+  const slug = post.slug || post.slug === 'home' ? post.slug : post.slug
+  const outPath = path.join(ogDir, `${slug}.png`)
+  if (fs.existsSync(outPath)) {
+    console.log(`  - og: ${slug}.png (exists, skipped)`)
+    return
+  }
+  fs.writeFileSync(outPath, pngBuffer)
+  console.log(`  ✓ og: ${slug}.png`)
 }
 
 async function main() {
-  fs.mkdirSync(ogDir, { recursive: true })
+  console.log('generating og images…')
   const fonts = await loadFonts()
 
+  const allPosts = getAllPosts()
+
   for (const page of PAGES) {
-    const outName = page.slug === 'home' ? 'og-image.png' : `og/${page.slug}.png`
-    const outPath = path.join(publicDir, outName)
-    if (fs.existsSync(outPath)) continue
-    await generatePNG(
-      ogTemplate({
-        title: page.title,
-        description: page.description,
-        subtitle: page.subtitle,
-        isHome: page.isHome,
-      }),
-      fonts,
-      path.join(publicDir, outName),
-    )
+    await generateOgImage(page, fonts)
   }
 
-  for (const post of getAllPosts()) {
-    const outPath = path.join(ogDir, `${post.slug}.png`)
-    if (fs.existsSync(outPath)) continue
-    await generatePNG(
-      ogTemplate({
-        title: post.title,
-        description: post.summary,
-        subtitle: new Date(post.date).toLocaleDateString('en-US', {
-          year: 'numeric',
-          month: 'long',
-          day: 'numeric',
-        }),
-      }),
-      fonts,
-      outPath,
-    )
+  for (const post of allPosts) {
+    await generateOgImage(post, fonts)
   }
+
+  console.log('done: og images generated.')
 }
 
-main().catch((err) => {
-  console.error(err)
-  process.exit(1)
-})
+main().catch(console.error)

@@ -5,21 +5,29 @@ interface ParsedPost {
   content: string
 }
 
-function parseFrontmatter(raw: string): { frontmatter: Record<string, string>; content: string } {
-  const match = raw.match(/^---\n([\s\S]*?)\n---\n([\s\S]*)$/)
-  if (!match) {
-    return { frontmatter: {}, content: raw }
-  }
+function parseFrontmatter(raw: string): Record<string, unknown> {
+  const match = raw.match(/^---\n([\s\S]*?)\n---/)
+  if (!match) return {}
 
-  const frontmatter: Record<string, string> = {}
-  match[1].split('\n').forEach((line) => {
-    const [key, ...rest] = line.split(':')
-    if (key && rest.length) {
-      frontmatter[key.trim()] = rest.join(':').trim()
+  const result: Record<string, unknown> = {}
+  for (const line of match[1].split('\n')) {
+    const colonIdx = line.indexOf(':')
+    if (colonIdx === -1) continue
+    const key = line.slice(0, colonIdx).trim()
+    let value: string = line.slice(colonIdx + 1).trim()
+
+    if (value.startsWith('[') && value.endsWith(']')) {
+      try {
+        value = value.replace(/'/g, '"')
+        result[key] = JSON.parse(value)
+      } catch {
+        result[key] = value.slice(1, -1).split(',').map((s) => s.trim().replace(/['"]/g, ''))
+      }
+    } else {
+      result[key] = value
     }
-  })
-
-  return { frontmatter, content: match[2].trim() }
+  }
+  return result
 }
 
 function countWords(text: string): number {
@@ -36,18 +44,20 @@ export async function fetchPost(slug: string): Promise<ParsedPost> {
     throw new Error(`Post not found: ${slug}`)
   }
   const raw = await response.text()
-  const { frontmatter, content } = parseFrontmatter(raw)
+  const frontmatter = parseFrontmatter(raw)
+  const content = raw.replace(/^---[\s\S]*?\n---\n?/, '').trim()
   const wordCount = countWords(content)
   const readTime = estimateReadTime(wordCount)
 
   return {
     meta: {
       slug,
-      title: frontmatter.title || slug,
-      date: frontmatter.date || '',
-      summary: frontmatter.summary || '',
+      title: (frontmatter.title as string) || slug,
+      date: (frontmatter.date as string) || '',
+      summary: (frontmatter.summary as string) || '',
       wordCount,
       readTime,
+      tags: (frontmatter.tags as string[]) || [],
     },
     content,
   }

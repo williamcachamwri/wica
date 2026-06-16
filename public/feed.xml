@@ -5,8 +5,15 @@
     <link>https://wica.info</link>
     <description>Notes on design, code, and slow living.</description>
     <language>en</language>
-    <lastBuildDate>Tue, 16 Jun 2026 10:17:38 GMT</lastBuildDate>
+    <lastBuildDate>Tue, 16 Jun 2026 10:45:54 GMT</lastBuildDate>
     <atom:link href="https://wica.info/feed.xml" rel="self" type="application/rss+xml"/>
+    <item>
+      <title>Phân Tích Kỹ Thuật Card Đồ Họa NVIDIA — Từ Kiến Trúc Đến Hiệu Năng</title>
+      <link>https://wica.info/blog/nvidia-gpu-technical-analysis</link>
+      <guid isPermaLink="true">https://wica.info/blog/nvidia-gpu-technical-analysis</guid>
+      <description>Đi sâu vào kiến trúc, bộ nhớ, quy trình sản xuất và các chỉ số hiệu năng của card đồ họa NVIDIA qua các thế hệ Turing, Ampere, Ada Lovelace và Blackwell.</description>
+      <pubDate>Tue, 16 Jun 2026 00:00:00 GMT</pubDate>
+    </item>
     <item>
       <title>MDX Interactive Test</title>
       <link>https://wica.info/blog/mdx-test</link>
@@ -25,7 +32,7 @@
       <title>Embracing Slow Tech</title>
       <link>https://wica.info/blog/slow-tech</link>
       <guid isPermaLink="true">https://wica.info/blog/slow-tech</guid>
-      <description>On resisting the urge to optimize every second and building software that respects attention.</description>
+      <description>On resisting the urge to optimise every second and building software that respects attention.</description>
       <pubDate>Sat, 10 Aug 2024 00:00:00 GMT</pubDate>
     </item>
     <item>

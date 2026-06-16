@@ -5,9 +5,10 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "generate:posts-meta": "tsx scripts/generate-posts-meta.mjs",
     "generate:og": "tsx scripts/generate-og.mjs",
     "generate:rss": "tsx scripts/generate-rss.mjs",
-    "build": "npm run generate:og && npm run generate:rss && vite build",
+    "build": "npm run generate:posts-meta && npm run generate:og && npm run generate:rss && vite build",
     "lint": "eslint .",
     "preview": "vite preview"
   },
