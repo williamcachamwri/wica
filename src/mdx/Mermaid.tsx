@@ -1,6 +1,12 @@
 import { useEffect, useState } from 'react'
 import DOMPurify from 'dompurify'
 
+const PURIFY_CONFIG = {
+  USE_PROFILES: { svg: true, svgFilters: true },
+  ADD_TAGS: ['style'],
+  ADD_ATTR: ['style'],
+}
+
 interface MermaidProps {
   children: string
 }
@@ -75,7 +81,7 @@ export function Mermaid({ children }: MermaidProps) {
         const text = typeof children === 'string' ? children.trim() : String(children).trim()
         const { svg: renderedSvg } = await mermaidModule.default.render(id, text)
         if (cancelled) return
-        setSvg(DOMPurify.sanitize(renderedSvg))
+        setSvg(DOMPurify.sanitize(renderedSvg, PURIFY_CONFIG))
         setError(null)
       } catch (e) {
         if (cancelled) return
