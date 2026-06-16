@@ -535,24 +535,44 @@ export function InsightsChart({
               />
 
               <g className={`insights-chart__dot-group ${isHovering ? 'insights-chart__dot-group--active' : ''}`}>
-                <g style={{ transform: `translateY(${hoveredPoint.sessionsY}px)` }}>
-                  <circle r={12} className="insights-chart__dot-pulse insights-chart__dot-pulse--sessions" />
-                  <circle r={7} className="insights-chart__dot-glow insights-chart__dot-glow--sessions" />
-                  <circle
-                    key={`core-s-${hoverIndex}`}
-                    r={4.5}
-                    className="insights-chart__dot-core insights-chart__dot-core--sessions"
-                  />
-                </g>
-                <g style={{ transform: `translateY(${hoveredPoint.visitorsY}px)` }}>
-                  <circle r={12} className="insights-chart__dot-pulse insights-chart__dot-pulse--visitors" />
-                  <circle r={7} className="insights-chart__dot-glow insights-chart__dot-glow--visitors" />
-                  <circle
-                    key={`core-v-${hoverIndex}`}
-                    r={4.5}
-                    className="insights-chart__dot-core insights-chart__dot-core--visitors"
-                  />
-                </g>
+                <circle
+                  cx={0}
+                  cy={hoveredPoint.sessionsY}
+                  r={4}
+                  className="insights-chart__dot-pulse insights-chart__dot-pulse--sessions"
+                />
+                <circle
+                  cx={0}
+                  cy={hoveredPoint.sessionsY}
+                  r={7}
+                  className="insights-chart__dot-glow insights-chart__dot-glow--sessions"
+                />
+                <circle
+                  key={`core-s-${hoverIndex}`}
+                  cx={0}
+                  cy={hoveredPoint.sessionsY}
+                  r={2}
+                  className="insights-chart__dot-core insights-chart__dot-core--sessions"
+                />
+                <circle
+                  cx={0}
+                  cy={hoveredPoint.visitorsY}
+                  r={4}
+                  className="insights-chart__dot-pulse insights-chart__dot-pulse--visitors"
+                />
+                <circle
+                  cx={0}
+                  cy={hoveredPoint.visitorsY}
+                  r={7}
+                  className="insights-chart__dot-glow insights-chart__dot-glow--visitors"
+                />
+                <circle
+                  key={`core-v-${hoverIndex}`}
+                  cx={0}
+                  cy={hoveredPoint.visitorsY}
+                  r={2}
+                  className="insights-chart__dot-core insights-chart__dot-core--visitors"
+                />
               </g>
             </g>
           )}

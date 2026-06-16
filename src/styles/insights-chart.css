@@ -260,20 +260,16 @@
   pointer-events: none;
 }
 
-.insights-chart__dot-group > g {
-  transform-box: fill-box;
-  transform-origin: center;
-}
-
 .insights-chart__dot-pulse {
   opacity: 0;
+  transform-box: fill-box;
   transform-origin: center;
   transition: opacity 0.3s ease;
 }
 
 .insights-chart__dot-group--active .insights-chart__dot-pulse {
   opacity: 1;
-  animation: insights-dot-pulse 1s ease-out infinite;
+  animation: insights-dot-pulse 1s ease-out infinite both;
 }
 
 .insights-chart__dot-pulse--visitors {
@@ -298,13 +294,14 @@
 
 .insights-chart__dot-glow {
   opacity: 0;
+  transform-box: fill-box;
   transform-origin: center;
   transition: opacity 0.3s ease;
 }
 
 .insights-chart__dot-group--active .insights-chart__dot-glow {
   opacity: 0.15;
-  animation: insights-dot-glow 1.5s cubic-bezier(0.22, 1, 0.36, 1) infinite;
+  animation: insights-dot-glow 1.5s cubic-bezier(0.22, 1, 0.36, 1) infinite both;
 }
 
 .insights-chart__dot-glow--visitors {
@@ -327,7 +324,7 @@
 .insights-chart__dot-core {
   stroke: var(--surface);
   stroke-width: 2.5;
-  animation: insights-dot-bounce 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  animation: insights-dot-bounce 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) both;
 }
 
 .insights-chart__dot-core--visitors {
