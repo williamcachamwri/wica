@@ -1,6 +1,6 @@
 import { Loader } from '../components/Loader'
 import { SEO } from '../components/SEO'
-import { Footer } from '../sections/Footer'
+import { Footer } from '../components/Footer'
 import { GithubActivity } from '../sections/GithubActivity'
 import { Hero } from '../sections/Hero'
 import { Insights } from '../sections/Insights'

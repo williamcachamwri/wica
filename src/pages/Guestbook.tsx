@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef, useCallback } from 'react'
 import { Link } from 'react-router-dom'
 import { SEO } from '../components/SEO'
+import { Footer } from '../components/Footer'
 import { SectionDivider } from '../components/SectionDivider'
 import { showToast } from '../components/Toast'
 
@@ -317,6 +318,7 @@ export default function Guestbook() {
             )}
           </div>
         </section>
+        <Footer />
       </main>
     </div>
   )

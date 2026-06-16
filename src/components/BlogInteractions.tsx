@@ -185,7 +185,31 @@ export function BlogInteractions({ slug, title }: BlogInteractionsProps) {
 
       <div className="blog-interactions__comments">
         {loading ? (
-          <p className="blog-interactions__empty">Loading comments…</p>
+          <div className="guestbook-skeleton" aria-busy="true" aria-label="Loading comments">
+            <div className="guestbook-skeleton__item">
+              <div className="guestbook-skeleton__avatar" />
+              <div className="guestbook-skeleton__content">
+                <div className="guestbook-skeleton__line" />
+                <div className="guestbook-skeleton__line guestbook-skeleton__line--short" />
+                <div className="guestbook-skeleton__line guestbook-skeleton__line--meta" />
+              </div>
+            </div>
+            <div className="guestbook-skeleton__item">
+              <div className="guestbook-skeleton__avatar" />
+              <div className="guestbook-skeleton__content">
+                <div className="guestbook-skeleton__line" />
+                <div className="guestbook-skeleton__line guestbook-skeleton__line--meta" />
+              </div>
+            </div>
+            <div className="guestbook-skeleton__item">
+              <div className="guestbook-skeleton__avatar" />
+              <div className="guestbook-skeleton__content">
+                <div className="guestbook-skeleton__line" />
+                <div className="guestbook-skeleton__line guestbook-skeleton__line--short" />
+                <div className="guestbook-skeleton__line guestbook-skeleton__line--meta" />
+              </div>
+            </div>
+          </div>
         ) : comments.length === 0 ? (
           <p className="blog-interactions__empty">No comments yet. Be the first.</p>
         ) : (

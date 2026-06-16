@@ -12,6 +12,7 @@ import { showToast } from '../components/Toast'
 import { allPosts } from '../data/allPosts'
 import type { PostMeta } from '../data/allPosts'
 import { BlogInteractions } from '../components/BlogInteractions'
+import { Footer } from '../components/Footer'
 import { fetchPost } from '../lib/posts'
 import { getMdxPost } from '../lib/mdxPosts'
 
@@ -208,10 +209,10 @@ export default function BlogPost() {
           <h1 className="name-title text-[clamp(1.75rem,5vw,2.5rem)] font-bold tracking-[-0.02em] leading-[1.15]">
             {post.meta.title}
           </h1>
-          {post.meta.tags && (
-            <div className="flex gap-2 mt-3 flex-wrap">
+          {post.meta.tags && post.meta.tags.length > 0 && (
+            <div className="post-tags">
               {post.meta.tags.map((t) => (
-                <Link key={t} to={`/blog/tag/${encodeURIComponent(t)}`} className="blog-item__tag">
+                <Link key={t} to={`/blog/tag/${encodeURIComponent(t)}`} className="post-tag">
                   {t}
                 </Link>
               ))}
@@ -319,9 +320,7 @@ export default function BlogPost() {
 
         <BlogInteractions slug={slug || ''} title={post.meta.title} />
 
-        <footer className="text-sm text-subtle text-center mt-16">
-          <p>built with patience · styled with restraint</p>
-        </footer>
+        <Footer />
       </main>
     </div>
   )

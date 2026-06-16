@@ -1,6 +1,6 @@
 import { SEO } from '../components/SEO'
 import { SectionDivider } from '../components/SectionDivider'
-import { Footer } from '../sections/Footer'
+import { Footer } from '../components/Footer'
 import { USES_ICONS } from '../data/usesIcons'
 
 interface UsesItem {

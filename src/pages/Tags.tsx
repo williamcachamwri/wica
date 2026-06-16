@@ -2,6 +2,7 @@ import { useMemo } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { SEO } from '../components/SEO'
 import { SectionDivider } from '../components/SectionDivider'
+import { Footer } from '../components/Footer'
 import { allPosts } from '../data/allPosts'
 
 function formatDate(date: string) {
@@ -92,9 +93,7 @@ export default function Tags() {
           </div>
         </section>
 
-        <footer className="text-sm text-subtle text-center">
-          <p>built with patience · styled with restraint</p>
-        </footer>
+        <Footer />
       </main>
     </div>
   )

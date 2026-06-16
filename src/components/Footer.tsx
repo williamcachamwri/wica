@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom'
-import { InlineLink } from '../components/InlineLink'
-import { NowPlaying } from '../components/NowPlaying'
-import { BuildInfo } from '../components/BuildInfo'
+import { InlineLink } from './InlineLink'
+import { NowPlaying } from './NowPlaying'
+import { BuildInfo } from './BuildInfo'
 
 export function Footer() {
   return (

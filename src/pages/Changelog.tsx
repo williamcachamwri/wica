@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import { SEO } from '../components/SEO'
-import { Footer } from '../sections/Footer'
+import { Footer } from '../components/Footer'
 
 interface CommitFile {
   filename: string
