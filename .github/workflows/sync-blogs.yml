@@ -1,0 +1,32 @@
+name: Sync Blogs
+
+on:
+  schedule:
+    - cron: '0 6 * * 1'  # 06:00 UTC every Monday
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Sync blog posts
+        run: node scripts/sync-blogs.mjs
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+          NVIDIA_API_KEY: ${{ secrets.NVIDIA_API_KEY }}
+          ALIBABA_API_KEY: ${{ secrets.ALIBABA_API_KEY }}
+
+      - name: Commit and push
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "chore: sync imported blog posts"
+          file_pattern: src/posts/ scripts/imported-posts.json
