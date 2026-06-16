@@ -177,7 +177,7 @@ const AI_PROVIDERS = [
             const parts = chunk?.[1]
             if (!Array.isArray(parts)) continue
             const text = parts.filter(p => typeof p === 'string' && !p.startsWith('http')).join('')
-            if (text) result = text
+            if (text && text.includes('{')) result = text
           }
         } catch {}
       }
