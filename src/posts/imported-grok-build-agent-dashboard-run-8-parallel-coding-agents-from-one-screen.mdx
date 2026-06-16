@@ -1,0 +1,101 @@
+export const meta = {
+  slug: 'imported-grok-build-agent-dashboard-run-8-parallel-coding-agents-from-one-screen',
+  title: 'Grok Build Agent Dashboard: Run 8 Parallel Coding Agents From One Screen',
+  date: '2026-06-16',
+  summary: 'xAI shipped the Grok Build Agent Dashboard on June 15, 2026, and it changes how multi-session coding actually works. Eight parallel agents — four on Grok Code 1 Fast, four on Grok 4 Fast — all visible on one screen. Sessions sorted by state automatically. Sub-agents rolled up under the session that ',
+  tags: ['grokbuild', 'xaiparallel'],
+}
+
+<p><strong>xAI shipped the Grok Build Agent Dashboard on June 15, 2026, and it changes how multi-session coding actually works.</strong> Eight parallel agents — four on Grok Code 1 Fast, four on Grok 4 Fast — all visible on one screen. Sessions sorted by state automatically. Sub-agents rolled up under the session that launched them. Reply to a blocked session without ever leaving the dashboard view.</p>
+
+<p>If you are already running Grok Build (launched June 5, 2026 in beta), this is a meaningful upgrade. If you are evaluating coding agents and parallel execution is part of your decision criteria, the Agent Dashboard is the most developed TUI for multi-session work in any terminal coding agent right now.</p>
+
+<p>Here is exactly what it does and when to use it.</p>
+
+<h2>
+  
+  
+  How to Open It
+</h2>
+
+<p>Two ways in. From your shell:<br>
+</p>
+
+<div class="highlight js-code-highlight">
+<pre class="highlight plaintext"><code>grok dashboard
+</code></pre>
+
+</div>
+
+
+
+<p>Or from inside any Grok Build session:<br>
+</p>
+
+<div class="highlight js-code-highlight">
+<pre class="highlight plaintext"><code>/dashboard
+</code></pre>
+
+</div>
+
+
+
+<p>The keyboard shortcut <code>Ctrl+</code> also opens the dashboard from any active session. Closing the dashboard does not close your sessions — they keep running. When you reopen it, every session is still there in whatever state it was in when you left.</p>
+
+<p>That last point matters. The dashboard is a view, not a session manager. Sessions have independent lifetimes. You can close the dashboard, switch to a different terminal, do other work, and come back to a batch of completed or paused sessions waiting for your attention.</p>
+
+<h2>
+  
+  
+  Session States and the Sorting Logic
+</h2>
+
+<p>Every session in the dashboard shows one of three states: <strong>working</strong>, <strong>awaiting input</strong>, or <strong>idle</strong>. The dashboard sorts them automatically, with sessions waiting for your input at the top. Working sessions come next. Idle sessions sit at the bottom.</p>
+
+<p>The practical result: open the dashboard and the first thing you see is your blocker queue. Sessions that need you are at the top. Everything else is running or done. You do not have to mentally track what state each terminal is in — the sort does that for you.</p>
+
+<p>Selecting any row shows the session's latest output inline, without opening the full conversation. If you need to reply, you can send a message directly from the dashboard row. If you need more context, opening the session gives you the full conversation and you can cycle to the next or previous session with a single keystroke without going back to the list.</p>
+
+<h2>
+  
+  
+  Grouping by Working Directory
+</h2>
+
+<p><code>Ctrl+S</code> groups sessions by their working directory. If you are running agents across multiple projects simultaneously — say, a Next.js frontend, a Go API service, and a Python data pipeline — grouping by directory visually clusters each project's agents together.</p>
+
+<p>Sub-agents launched by a parent session roll up under that parent row, not as separate entries. This is a deliberate choice: if a single Grok Build session spawns three sub-agents to handle three parallel subtasks, the dashboard shows one row for the parent with the sub-agent work rolled underneath it. The list reflects the work you dispatched, not the fan-out of internal parallelism.</p>
+
+<p>The distinction matters for cognitive load. A 5-session dashboard stays comprehensible. A 5-session dashboard that explodes into 20 rows because each session has 3–4 sub-agents is not navigable. The roll-up keeps the view readable.</p>
+
+<h2>
+  
+  
+  Parallel Agents: 8 Simultaneous Coding Agents
+</h2>
+
+<p>The headline feature. Grok Build exposes two model tiers in the Parallel Agents panel:</p>
+
+<div class="table-wrapper-paragraph"><table>
+<thead>
+<tr>
+<th>Model</th>
+<th>Max Parallel Agents</th>
+<th>Best For</th>
+</tr>
+</thead>
+<tbody>
+</tbody>
+</table></div>
+
+<p>| Grok Code 1 Fast | 4 | Routine code generation, test writing, documentation, boilerplate |</p>
+
+<p>| Grok 4 Fast | 4 | Architecture decisions, complex debugging, multi-file refactors |</p>
+
+<p>You can mix models. Send a single prompt to one Grok Code 1 Fast agent and three Grok 4 Fast agents simultaneously if the task justifies it. The two models run in parallel, not sequentially.</p>
+
+<p>The use case this was built for: sending a single coding prompt to multiple agents and comparing the outputs. xAI calls this Arena Mode in earlier Grok Build documentation — the Agent Dashboard is effectively Arena Mode with proper session management layered on top.</p>
+
+<p>Whether you actually want to compare outputs across 8 agents for every task is a different question. For most development work, you want <em>one</em> correct implementation, not eight variations to evaluate. The parallel pattern is most useful in three specific scenarios:</p>
+
+<p><strong>First: tasks where the implementation approach is genuin

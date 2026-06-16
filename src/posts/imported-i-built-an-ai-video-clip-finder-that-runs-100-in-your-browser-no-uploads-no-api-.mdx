@@ -1,0 +1,83 @@
+export const meta = {
+  slug: 'imported-i-built-an-ai-video-clip-finder-that-runs-100-in-your-browser-no-uploads-no-api-',
+  title: 'I built an AI video clip finder that runs 100% in your browser — no uploads, no API, no GPU costs',
+  date: '2026-06-16',
+  summary: 'Every time I used Opus Clip or Vidyo.ai, the same thought hit me:
+I’m paying $20/month to upload my video to someone else’s server,
+wait in a queue, and hope their AI finds something useful.
+
+So I built an alternative that runs entirely in the browser.
+No file uploads. No subscriptions. No server co',
+  tags: ['javascript', 'webdev', 'showdev', 'tutorial'],
+}
+
+<p>Every time I used Opus Clip or Vidyo.ai, the same thought hit me:<br>
+I’m paying $20/month to upload my video to someone else’s server,<br>
+wait in a queue, and hope their AI finds something useful.</p>
+
+<p>So I built an alternative that runs entirely in the browser.<br>
+No file uploads. No subscriptions. No server costs on my end.<br>
+The result is ClipGG’s AI Video Highlights tool —<br>
+and in this post I’ll walk through exactly how it works technically.</p>
+
+
+<h2>
+  
+  
+  The core problem I was solving
+</h2>
+
+<p>Finding highlights in a long video is genuinely hard to automate well.<br>
+The expensive approach: transcribe with Whisper, feed text to GPT-4,<br>
+profit. But that requires a backend, API costs, and user uploads.</p>
+
+<p>I wanted zero server involvement.<br>
+That meant doing everything with browser APIs.</p>
+
+
+<h2>
+  
+  
+  What actually runs in the browser
+</h2>
+
+<p>The pipeline has four stages:</p>
+<h3>
+  
+  
+  1. File reading — no upload needed
+</h3>
+
+
+<div class="highlight js-code-highlight">
+<pre class="highlight javascript"><code><span class="kd">const</span> <span class="nx">arrayBuffer</span> <span class="o">=</span> <span class="k">await</span> <span class="nx">file</span><span class="p">.</span><span class="nf">arrayBuffer</span><span class="p">()</span>
+<span class="c1">// The file never leaves the device.</span>
+<span class="c1">// ArrayBuffer is passed directly to Web Audio API.</span>
+</code></pre>
+
+</div>
+
+<h3>
+  
+  
+  2. Audio analysis — Web Audio API + Web Worker
+</h3>
+
+<p>I use <code>OfflineAudioContext</code> to decode audio faster than real-time,<br>
+then downsample to 8000–11025 Hz before analysis.<br>
+This reduces RAM usage from ~115MB to ~19MB for a 10-minute video.<br>
+</p>
+
+<div class="highlight js-code-highlight">
+<pre class="highlight javascript"><code><span class="c1">// Decode in a Web Worker so the UI never freezes</span>
+<span class="kd">const</span> <span class="nx">tempCtx</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">OfflineAudioContext</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">44100</span><span class="p">,</span> <span class="mi">44100</span><span class="p">)</span>
+<span class="kd">const</span> <span class="nx">audioBuffer</span> <span class="o">=</span> <span class="k">await</span> <span class="nx">tempCtx</span><span class="p">.</span><span class="nf">decodeAudioData</span><span class="p">(</span><span class="nx">arrayBuffer</span><span class="p">)</span>
+
+<span class="c1">// Downsample manually — OfflineAudioContext does NOT resample automatically</span>
+<span class="kd">function</span> <span class="nf">downsample</span><span class="p">(</span><span class="nx">channelData</span><span class="p">,</span> <span class="nx">originalRate</span><span class="p">,</span> <span class="nx">targetRate</span><span class="p">)</span> <span class="p">{</span>
+  <span class="kd">const</span> <span class="nx">ratio</span> <span class="o">=</span> <span class="nx">originalRate</span> <span class="o">/</span> <span class="nx">targetRate</span>
+  <span class="kd">const</span> <span class="nx">output</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Float32Array</span><span class="p">(</span><span class="nb">Math</span><span class="p">.</span><span class="nf">floor</span><span class="p">(</span><span class="nx">channelData</span><span class="p">.</span><span class="nx">length</span> <span class="o">/</span> <span class="nx">ratio</span><span class="p">))</span>
+  <span class="k">for </span><span class="p">(</span><span class="kd">let</span> <span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="o"><</span> <span class="nx">output</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+    <span class="kd">const</span> <span class="nx">start</span> <span class="o">=</span> <span class="nb">Math</span><span class="p">.</span><span class="nf">floor</span><span class="p">(</span><span class="nx">i</span> <span class="o">*</span> <span class="nx">ratio</span><span class="p">)</span>
+    <span class="kd">const</span> <span class="nx">end</span> <span class="o">=</span> <span class="nb">Math</span><span class="p">.</span><span class="nf">min</span><span class="p">(</span><span class="nb">Math</span><span class="p">.</span><span class="nf">floor</span><span class="p">((</span><span class="nx">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="nx">ratio</span><span class="p">),</span> <span class="nx">channelData</span><span class="p">.</span><span class="nx">length</span><span class="p">)</span>
+    <span class="kd">let</span> <span class="nx">sum</span> <span class="o">=</span> <span class="mi"

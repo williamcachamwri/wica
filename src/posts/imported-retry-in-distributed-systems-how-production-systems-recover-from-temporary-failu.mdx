@@ -1,0 +1,81 @@
+export const meta = {
+  slug: 'imported-retry-in-distributed-systems-how-production-systems-recover-from-temporary-failu',
+  title: 'Retry in Distributed Systems — How Production Systems Recover From Temporary Failures',
+  date: '2026-06-16',
+  summary: 'Not every failure is permanent.
+
+This is something I didn\'t think about before. When something fails in my app, my first thought was something broke, fix it. But when I started learning how distributed systems actually work, I realized that some failures are not really failures. They\'re just tempora',
+  tags: ['productivity', 'architecture', 'learning', 'writing'],
+}
+
+<p>Not every failure is permanent.</p>
+
+<p>This is something I didn't think about before. When something fails in my app, my first thought was something broke, fix it. But when I started learning how distributed systems actually work, I realized that some failures are not really failures. They're just temporary.</p>
+
+<p>Network glitch. API timeout. A service that just restarted. Rate limiting kicking in. These are all failures but they last for a very short time window. If your system tries the same operation again after a few seconds, it will probably succeed.</p>
+
+<p>So the question is does your system know how to try again? Or does it just give up the first time something goes wrong?<br>
+That's what retry is.<br>
+</p>
+
+<br>
+
+<h3>What Retry Actually Does</h3>
+
+<p>Without a retry system, if a temporary failure happens that's it. The entire operation fails. The user sees an error. The request is gone.<br>
+With retry, your system automatically attempts the operation again after a failure. The goal is simple recover from temporary failures without the user even knowing something went wrong.</p>
+
+<p>This felt obvious to me once I understood it. But building it properly is where it gets interesting.<br>
+</p>
+
+<br>
+
+<h3>The Configuration: What Each Part Controls</h3>
+
+<p>When I looked into how retry systems are actually configured, there were more options than I expected. And each one exists for a specific reason.</p>
+
+<p><code>maxAttempts</code> — this defines the maximum number of times the operation can be attempted. You don't want infinite retries. At some point if it keeps failing, it's probably not a temporary problem.</p>
+
+<p><code>exponential backoff</code> — instead of retrying immediately every time, the delay between retries doubles after each failure. First retry after 1 second, second after 2 seconds, third after 4 seconds. This gives the failing service time to recover instead of bombarding it with requests.</p>
+
+<p><code>baseDelay</code> — this is the starting delay used in the exponential backoff. The first wait time before retrying.</p>
+
+<p><code>maxDelay</code> — this caps the maximum delay. Without this, the exponential backoff keeps doubling forever and the delay becomes too long to be useful.</p>
+
+<p><code>shouldRetry</code> — this determines whether another retry should actually happen. Not every error deserves a retry. A 404 is not a temporary failure. A network timeout is. This config lets you define that logic.</p>
+
+<p><code>onRetry</code> — a callback that runs before each retry attempt. This is mainly used for logging, metrics, and monitoring. So you have a record of how many retries happened and why.<br>
+</p>
+
+<br>
+
+<h4>But There's a Catch — The Thundering Herd Problem</h4>
+
+<p>This is the part that I found really interesting.<br>
+Imagine 200 workers all connected to the same service. The service goes down for a moment. All 200 workers detect the failure and because of exponential backoff they all wait the same amount of time and then retry at the exact same moment.</p>
+
+<p>What happens? 200 requests hit the service at the same time the moment it comes back up. The service crashes again. Then all 200 retry again at the same time. It becomes a loop.</p>
+
+<p>This is called the thundering herd problem. And exponential backoff alone doesn't prevent it because all workers are using the same delay calculation.</p>
+
+<p>Jitter : The Solution for Thundering Herd</p>
+
+<p>Jitter means adding randomness to the retry timing. Instead of every worker waiting exactly 2 seconds, one waits 1.7 seconds, another waits 2.3 seconds, another waits 1.4 seconds. The requests spread out across a time window instead of hitting all at once.</p>
+
+<p>This one small addition of randomness in the delay completely solves the thundering herd problem. The service gets requests gradually, recovers properly, and the retry system actually works the way it's supposed to.<br>
+</p>
+
+<br>
+
+<h3>Why This Matters in Production</h3>
+
+<p>What I realized going through this retry is not just "try again". It's a carefully designed system. Without exponential backoff, you overload the failing service. Without jitter, you get thundering herd. Without<br>
+ <code>maxAttempts</code>, you retry forever. Without <code>shouldRetry</code>, you retry on errors that will never recover.</p>
+
+<p>Every config option exists because someone ran into a real problem in production.</p>
+
+<p>That's the thing about distributed systems the failures are real, the edge cases are real, and every piece of this infrastructure exists because someone hit a wall and had to find a way through it.<br>
+</p>
+
+<br><br>
+If I got something wrong or anything can be improved — please drop it in the comments. I'm still learning and I want to get this right.
