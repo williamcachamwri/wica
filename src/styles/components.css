@@ -278,6 +278,7 @@
   align-items: center;
   gap: 0.6rem;
   padding: 0.5rem 0.9rem;
+  width: fit-content;
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 999px;
