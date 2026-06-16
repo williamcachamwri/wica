@@ -69,6 +69,15 @@ function getRelated(currentSlug: string, currentTags?: string[]): PostMeta[] {
   return scored.slice(0, 2).map((s) => s.post)
 }
 
+function getAdjacentPosts(currentSlug: string): { prev: PostMeta | null; next: PostMeta | null } {
+  const sorted = [...allPosts].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+  const idx = sorted.findIndex((p) => p.slug === currentSlug)
+  return {
+    prev: idx > 0 ? sorted[idx - 1] : null,
+    next: idx < sorted.length - 1 ? sorted[idx + 1] : null,
+  }
+}
+
 export default function BlogPost() {
   const { slug } = useParams<{ slug: string }>()
   const [post, setPost] = useState<{ meta: PostMeta; content: string } | null>(null)
@@ -77,6 +86,7 @@ export default function BlogPost() {
   const [progress, setProgress] = useState(0)
   const [copied, setCopied] = useState(false)
   const relatedPosts = useMemo(() => post?.meta ? getRelated(post.meta.slug, post.meta.tags) : [], [post?.meta])
+  const adjacentPosts = useMemo(() => post?.meta ? getAdjacentPosts(post.meta.slug) : { prev: null, next: null }, [post?.meta])
 
   useEffect(() => {
     if (!slug) return
@@ -272,6 +282,23 @@ export default function BlogPost() {
             </ReactMarkdown>
           )}
         </article>
+
+        {(adjacentPosts.prev || adjacentPosts.next) && (
+          <nav className="post-nav">
+            {adjacentPosts.prev && (
+              <Link to={`/blog/${adjacentPosts.prev.slug}`} className="post-nav__link">
+                <span className="post-nav__label">‹ Previous</span>
+                <span className="post-nav__title">{adjacentPosts.prev.title}</span>
+              </Link>
+            )}
+            {adjacentPosts.next && (
+              <Link to={`/blog/${adjacentPosts.next.slug}`} className="post-nav__link post-nav__link--next">
+                <span className="post-nav__label">Next ›</span>
+                <span className="post-nav__title">{adjacentPosts.next.title}</span>
+              </Link>
+            )}
+          </nav>
+        )}
 
         {relatedPosts.length > 0 && (
           <section className="mb-16 related-posts">
