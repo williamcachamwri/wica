@@ -124,7 +124,7 @@ async function loadFonts() {
   ]
 }
 
-function ogTemplate({ title, description, subtitle, isHome }) {
+function ogTemplate({ title, description, subtitle, isHome, tags }) {
   return {
     type: 'div',
     props: {
@@ -245,6 +245,33 @@ function ogTemplate({ title, description, subtitle, isHome }) {
                   children: subtitle,
                 },
               },
+              tags && tags.length > 0 && {
+                type: 'div',
+                props: {
+                  style: {
+                    display: 'flex',
+                    gap: '8px',
+                    marginTop: '16px',
+                    flexWrap: 'wrap',
+                  },
+                  children: tags.map((tag) => ({
+                    type: 'span',
+                    props: {
+                      style: {
+                        display: 'flex',
+                        padding: '6px 14px',
+                        borderRadius: '9999px',
+                        fontSize: '15px',
+                        fontWeight: 400,
+                        color: '#a1a1aa',
+                        backgroundColor: '#18181b',
+                        border: '1px solid #27272a',
+                      },
+                      children: tag,
+                    },
+                  })),
+                },
+              },
             ].filter(Boolean),
           },
         },
@@ -317,6 +344,7 @@ async function main() {
           month: 'long',
           day: 'numeric',
         }),
+        tags: post.tags,
       }),
       fonts,
       outPath,
