@@ -51,7 +51,7 @@
   display: flex;
   gap: 0.35rem;
   flex-wrap: wrap;
-  margin-bottom: 0.6rem;
+  padding: 1.25rem 1.5rem 0;
 }
 
 .blog-item__tag {
@@ -63,6 +63,20 @@
   color: var(--text-muted);
   letter-spacing: 0.02em;
   text-transform: lowercase;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.blog-item__tag:hover {
+  background: color-mix(in srgb, var(--accent) 18%, transparent);
+  color: var(--accent);
+  transform: translateY(-1px);
+}
+
+.blog-item__tag--active {
+  background: color-mix(in srgb, var(--accent) 25%, transparent);
+  color: var(--accent);
+  font-weight: 600;
 }
 
 /* ── Blog search ───────────────────────────────────────────────── */
