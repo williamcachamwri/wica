@@ -1,18 +1,20 @@
 /**
- * Sync external blog posts via dev.to API + free AI (Hugging Face / NVIDIA / Alibaba).
+ * Sync external blog posts via dev.to API + AI rewrite (Gemini Web / Hugging Face / NVIDIA / Alibaba).
  *
  * Sources:
  *   - dev.to (https://dev.to/api/articles?username=...)
  *
  * AI providers (checked in order, first available key wins):
- *   1. Hugging Face (HF_TOKEN) — free 30k req/month
- *   2. NVIDIA (NVIDIA_API_KEY) — free tier
- *   3. Alibaba Qwen (ALIBABA_API_KEY) — free tier
+ *   1. Gemini Web (GEMINI_COOKIES + GEMINI_AT + GEMINI_SID) — via browser cookies
+ *   2. Hugging Face (HF_TOKEN) — free 30k req/month
+ *   3. NVIDIA (NVIDIA_API_KEY) — free tier
+ *   4. Alibaba Qwen (ALIBABA_API_KEY) — free tier
  *
  * If no API key is set, falls back to raw content (no AI rewrite).
  * Dry-run: set DRY_RUN=1 to skip writing files.
  */
 
+const MAX_ARTICLES = 2
 const IMPORTS_FILE = new URL('imported-posts.json', import.meta.url)
 const TRACKING_MARKER = '--- imported via sync-blogs ---\n'
 
@@ -87,7 +89,7 @@ const SOURCES = [
       if (!res.ok) throw new Error(`${this.feedUrl}: ${res.status}`)
       const xml = await res.text()
       const items = parseRssFeed(xml, this.id)
-      return items.map((item, i) => ({
+      return items.slice(0, MAX_ARTICLES).map((item, i) => ({
         sourceId: `${this.id}-${slugify(item.title)}-${i}`,
         url: item.url,
         title: item.title,
@@ -125,6 +127,64 @@ function slugify(text) {
 }
 
 const AI_PROVIDERS = [
+  {
+    name: 'Gemini Web',
+    key: () => process.env.GEMINI_COOKIES || '',
+    async call(prompt) {
+      const cookieStr = this.key()
+      const at = process.env.GEMINI_AT || ''
+      const sid = process.env.GEMINI_SID || ''
+      const bl = process.env.GEMINI_BL || 'boq_assistant-bard-web-server_20260615.04_p0'
+      const payload = new URLSearchParams({
+        'f.req': JSON.stringify([null, JSON.stringify([
+          [prompt, 0, null, null, null, null, 0],
+          ['en-GB'],
+          ['', '', '', null, null, null, null, null, null, ''],
+        ])]),
+        at,
+      }).toString()
+      const ac = new AbortController()
+      const timer = setTimeout(() => ac.abort(), 120000)
+      const res = await fetch(
+        `https://gemini.google.com/_/BardChatUi/data/assistant.lamda.BardFrontendService/StreamGenerate?bl=${bl}&f.sid=${sid}&hl=en-GB&_reqid=${Date.now()}&rt=c`,
+        {
+          signal: ac.signal,
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded;charset=utf-8',
+            Cookie: cookieStr,
+            Origin: 'https://gemini.google.com',
+            Referer: 'https://gemini.google.com/',
+            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:151.0) Gecko/20100101 Firefox/151.0',
+          },
+          body: payload,
+        }
+      ).finally(() => clearTimeout(timer))
+      if (!res.ok) {
+        const err = await res.text()
+        throw new Error(`Gemini ${res.status}: ${err.slice(0, 200)}`)
+      }
+      const body = await res.text()
+      let result = ''
+      for (const line of body.split('\n')) {
+        if (!line.startsWith('[')) continue
+        try {
+          const outer = JSON.parse(line)
+          const inner = JSON.parse(outer[0]?.[2])
+          const chunks = inner?.[4]
+          if (!Array.isArray(chunks)) continue
+          for (const chunk of chunks) {
+            const parts = chunk?.[1]
+            if (!Array.isArray(parts)) continue
+            const text = parts.filter(p => typeof p === 'string' && !p.startsWith('http')).join('')
+            if (text) result = text
+          }
+        } catch {}
+      }
+      if (!result) throw new Error('Could not parse Gemini response')
+      return result
+    },
+  },
   {
     name: 'NVIDIA',
     key: () => process.env.NVIDIA_API_KEY || '',
@@ -367,7 +427,7 @@ async function main() {
     console.log(`🤖 AI providers: ${providers.map(p => `${p.name} (${p.model})`).join(', ')}`)
   } else {
     console.log('⚠️  No AI API key set — posts will be saved raw without AI rewrite.')
-    console.log('   Set one of: HF_TOKEN, NVIDIA_API_KEY, ALIBABA_API_KEY')
+    console.log('   Set one of: GEMINI_COOKIES+GEMINI_AT+GEMINI_SID, HF_TOKEN, NVIDIA_API_KEY, ALIBABA_API_KEY')
   }
 
   const imported = await loadImported()

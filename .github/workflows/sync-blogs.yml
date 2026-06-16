@@ -26,6 +26,9 @@ jobs:
       - name: Sync blog posts
         run: node scripts/sync-blogs.mjs
         env:
+          GEMINI_COOKIES: ${{ secrets.GEMINI_COOKIES }}
+          GEMINI_AT: ${{ secrets.GEMINI_AT }}
+          GEMINI_SID: ${{ secrets.GEMINI_SID }}
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
           NVIDIA_API_KEY: ${{ secrets.NVIDIA_API_KEY }}
           ALIBABA_API_KEY: ${{ secrets.ALIBABA_API_KEY }}
