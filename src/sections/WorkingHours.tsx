@@ -54,10 +54,6 @@ export function WorkingHours() {
   const mm = pad(m)
   const ss = pad(s)
 
-  const shortTz = tz.includes('/')
-    ? tz.split('/').pop()!.replace(/_/g, ' ')
-    : tz
-
   return (
     <div className="wh">
       <div className="wh__row">
@@ -76,10 +72,8 @@ export function WorkingHours() {
         <span className="wh__status" style={{ color: status.color }}>
           {status.label}
         </span>
-      </div>
-
-      <div className="wh__meta">
-        <span className="wh__tz">{shortTz}</span>
+        <span className="wh__sep" />
+        <span className="wh__tz">{tz}</span>
         <span className="wh__date">{WEEKDAYS[dow]}, {month}/{day}</span>
       </div>
     </div>
