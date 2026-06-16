@@ -38,7 +38,7 @@ export function BlogInteractions({ slug, title }: BlogInteractionsProps) {
 
   const loadComments = async () => {
     try {
-      const res = await fetch(`/api/blog/comment?slug=${encodeURIComponent(slug)}&title=${encodeURIComponent(title)}`)
+      const res = await fetch(`/api/auth/blog/comment?slug=${encodeURIComponent(slug)}&title=${encodeURIComponent(title)}`)
       if (!res.ok) throw new Error('Failed to load comments')
       const data = (await res.json()) as { comments: Comment[]; likes: number }
       setComments(data.comments)
@@ -70,7 +70,7 @@ export function BlogInteractions({ slug, title }: BlogInteractionsProps) {
   const checkLiked = async (): Promise<boolean> => {
     if (!user) return false
     try {
-      const res = await fetch(`/api/blog/like/status?slug=${encodeURIComponent(slug)}&title=${encodeURIComponent(title)}`)
+      const res = await fetch(`/api/auth/blog/like/status?slug=${encodeURIComponent(slug)}&title=${encodeURIComponent(title)}`)
       if (!res.ok) return false
       const data = (await res.json()) as { liked: boolean }
       return data.liked
@@ -95,7 +95,7 @@ export function BlogInteractions({ slug, title }: BlogInteractionsProps) {
       return
     }
     try {
-      const res = await fetch('/api/blog/like', {
+      const res = await fetch('/api/auth/blog/like', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ slug, title }),
@@ -116,7 +116,7 @@ export function BlogInteractions({ slug, title }: BlogInteractionsProps) {
 
     setSubmitting(true)
     try {
-      const res = await fetch('/api/blog/comment', {
+      const res = await fetch('/api/auth/blog/comment', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ slug, title, body: commentBody.trim() }),

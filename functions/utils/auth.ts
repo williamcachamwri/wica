@@ -42,12 +42,13 @@ export function getRedirectFromCookie(request: Request): string | null {
 
 export function setTokenCookie(token: string, secure: boolean): string[] {
   const s = secure ? '; Secure' : ''
-  const newCookie = `${COOKIE_NAME}=${encodeURIComponent(token)}; Path=/api/; Max-Age=${COOKIE_MAX_AGE}; HttpOnly; SameSite=Lax${s}`
+  const newCookie = `${COOKIE_NAME}=${encodeURIComponent(token)}; Path=/api/auth/; Max-Age=${COOKIE_MAX_AGE}; HttpOnly; SameSite=Lax${s}`
   const clearOld = `${COOKIE_NAME}=; Path=/; Max-Age=0; HttpOnly; SameSite=Lax${s}`
-  return [newCookie, clearOld]
+  const clearApi = `${COOKIE_NAME}=; Path=/api/; Max-Age=0; HttpOnly; SameSite=Lax${s}`
+  return [newCookie, clearOld, clearApi]
 }
 
 export function deleteTokenCookie(secure: boolean): string {
   const s = secure ? '; Secure' : ''
-  return `${COOKIE_NAME}=; Path=/api/; Max-Age=0; HttpOnly; SameSite=Lax${s}`
+  return `${COOKIE_NAME}=; Path=/api/auth/; Max-Age=0; HttpOnly; SameSite=Lax${s}`
 }

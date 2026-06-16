@@ -1,5 +1,5 @@
-import { getCookieToken } from '../../utils/auth'
-import { jsonOK, jsonError } from '../../utils/security'
+import { getCookieToken } from '../../../utils/auth'
+import { jsonOK, jsonError } from '../../../utils/security'
 
 const GITHUB_GRAPHQL = 'https://api.github.com/graphql'
 const REPO_ID = 'R_kgDOS6MeVw'
@@ -7,17 +7,10 @@ const CATEGORY_ID = 'DIC_kwDOS6MeV84C_Jgv'
 
 const ALLOWED_ORIGINS = ['https://wica.info', 'https://wica.pages.dev', 'http://localhost:5173', 'http://127.0.0.1:5173']
 
-interface Env {
-  GITHUB_TOKEN: string
-}
+interface Env { GITHUB_TOKEN: string }
 
 function ghHeaders(token: string): Record<string, string> {
-  return {
-    Accept: 'application/vnd.github.v3+json',
-    'User-Agent': 'wica-blog/1.0',
-    'Content-Type': 'application/json',
-    Authorization: `Bearer ${token}`,
-  }
+  return { Accept: 'application/vnd.github.v3+json', 'User-Agent': 'wica-blog/1.0', 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }
 }
 
 function getDiscussionTitle(slug: string, title: string): string {
@@ -25,14 +18,7 @@ function getDiscussionTitle(slug: string, title: string): string {
 }
 
 function formatComment(node: { id: string; author?: { login: string; avatarUrl?: string }; body: string; createdAt: string; url: string }) {
-  return {
-    id: node.id,
-    author: node.author?.login || 'anonymous',
-    avatar: node.author?.avatarUrl,
-    body: node.body,
-    date: node.createdAt,
-    url: node.url,
-  }
+  return { id: node.id, author: node.author?.login || 'anonymous', avatar: node.author?.avatarUrl, body: node.body, date: node.createdAt, url: node.url }
 }
 
 async function ghFetch(query: string, token: string, variables?: Record<string, unknown>) {
@@ -48,9 +34,7 @@ async function ghFetch(query: string, token: string, variables?: Record<string, 
 
 function csrfCheck(request: Request): Response | null {
   const origin = request.headers.get('Origin')
-  if (origin && !ALLOWED_ORIGINS.includes(origin)) {
-    return jsonError('Forbidden', 403, request)
-  }
+  if (origin && !ALLOWED_ORIGINS.includes(origin)) return jsonError('Forbidden', 403, request)
   return null
 }
 
@@ -59,114 +43,72 @@ export async function onRequest(context: { request: Request; env: Env }): Promis
   const url = new URL(request.url)
   const token = getCookieToken(request)
 
-  // GET: list comments
   if (request.method === 'GET') {
     const slug = url.searchParams.get('slug')
     const title = url.searchParams.get('title')
-    if (!slug || !title || slug.length > 200 || title.length > 200) {
-      return jsonError('Invalid slug or title', 400, request)
-    }
+    if (!slug || !title || slug.length > 200 || title.length > 200) return jsonError('Invalid slug or title', 400, request)
 
     try {
-      const query = `query($categoryId: ID!) {
+      const data = await ghFetch(`query($categoryId: ID!) {
         repository(owner: "williamcachamwri", name: "wica") {
           discussions(first: 10, orderBy: {field: CREATED_AT, direction: DESC}, categoryId: $categoryId) {
-            nodes {
-              id title body url createdAt
-              comments(first: 50) {
-                nodes { id author { login avatarUrl } body createdAt url }
-              }
-              reactions(first: 100) { nodes { content } }
-            }
+            nodes { id title body url createdAt comments(first: 50) { nodes { id author { login avatarUrl } body createdAt url } } reactions(first: 100) { nodes { content } } }
           }
         }
-      }`
-      const data = await ghFetch(query, env.GITHUB_TOKEN, { categoryId: CATEGORY_ID }) as any
+      }`, env.GITHUB_TOKEN, { categoryId: CATEGORY_ID }) as any
       const discussions = data?.repository?.discussions?.nodes || []
       const discussion = discussions.find((d: any) => d.title === getDiscussionTitle(slug, title))
       const comments = discussion?.comments?.nodes?.map(formatComment) || []
       const likes = (discussion?.reactions?.nodes || []).filter((r: any) => r.content === 'HEART').length
-
       return jsonOK({ comments, discussionId: discussion?.id, likes }, request)
-    } catch (err) {
-      return jsonError('Failed to fetch comments', 500, request)
-    }
+    } catch { return jsonError('Failed to fetch comments', 500, request) }
   }
 
-  // POST: add comment
   if (request.method === 'POST') {
     const csrf = csrfCheck(request)
     if (csrf) return csrf
-
-    if (!token) {
-      return jsonError('Not authenticated', 401, request)
-    }
+    if (!token) return jsonError('Not authenticated', 401, request)
 
     try {
       const { slug, title, body } = (await request.json()) as { slug: string; title: string; body: string }
-      if (!slug || !title || !body || !body.trim()) {
-        return jsonError('Slug, title and body are required', 400, request)
-      }
-      if (slug.length > 200 || title.length > 200 || body.length > 5000) {
-        return jsonError('Input too long', 400, request)
-      }
+      if (!slug || !title || !body || !body.trim()) return jsonError('Slug, title and body are required', 400, request)
+      if (slug.length > 200 || title.length > 200 || body.length > 5000) return jsonError('Input too long', 400, request)
 
       const discussionTitle = getDiscussionTitle(slug, title)
 
-      // Find existing discussion
-      const searchQuery = `query($categoryId: ID!) {
+      const searchData = await ghFetch(`query($categoryId: ID!) {
         repository(owner: "williamcachamwri", name: "wica") {
           discussions(first: 10, orderBy: {field: CREATED_AT, direction: DESC}, categoryId: $categoryId) {
             nodes { id title body url createdAt }
           }
         }
-      }`
-      const searchData = await ghFetch(searchQuery, env.GITHUB_TOKEN, { categoryId: CATEGORY_ID }) as any
+      }`, env.GITHUB_TOKEN, { categoryId: CATEGORY_ID }) as any
       const discussions = searchData?.repository?.discussions?.nodes || []
       let discussionId = discussions.find((d: any) => d.title === discussionTitle)?.id
 
-      // Create discussion if not found
       if (!discussionId) {
-        const createMutation = `mutation($repoId: ID!, $categoryId: ID!, $dTitle: String!, $dBody: String!) {
+        const createData = await ghFetch(`mutation($repoId: ID!, $categoryId: ID!, $dTitle: String!, $dBody: String!) {
           createDiscussion(input: {repositoryId: $repoId, categoryId: $categoryId, title: $dTitle, body: $dBody}) {
             discussion { id title body url createdAt }
           }
-        }`
-        const createData = await ghFetch(createMutation, env.GITHUB_TOKEN, {
-          repoId: REPO_ID,
-          categoryId: CATEGORY_ID,
-          dTitle: discussionTitle,
-          dBody: `Comments and likes for "${title}"\n\n<!--blog:likes:0-->`,
-        }) as any
+        }`, env.GITHUB_TOKEN, { repoId: REPO_ID, categoryId: CATEGORY_ID, dTitle: discussionTitle, dBody: `Comments and likes for "${title}"\n\n<!--blog:likes:0-->` }) as any
         discussionId = createData?.createDiscussion?.discussion?.id
         if (!discussionId) throw new Error('Failed to create discussion')
       }
 
-      // Add comment
-      const commentMutation = `mutation($discussionId: ID!, $body: String!) {
+      const commentData = await ghFetch(`mutation($discussionId: ID!, $body: String!) {
         addDiscussionComment(input: {discussionId: $discussionId, body: $body}) {
           comment { id author { login avatarUrl } body createdAt url }
         }
-      }`
-      const commentData = await ghFetch(commentMutation, token, {
-        discussionId,
-        body: body.trim(),
-      }) as any
+      }`, token, { discussionId, body: body.trim() }) as any
       const comment = commentData?.addDiscussionComment?.comment
       if (!comment) throw new Error('Failed to create comment')
 
       return new Response(JSON.stringify(formatComment(comment)), {
         status: 201,
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Content-Type-Options': 'nosniff',
-          'X-Frame-Options': 'DENY',
-          'Referrer-Policy': 'strict-origin-when-cross-origin',
-        },
+        headers: { 'Content-Type': 'application/json', 'X-Content-Type-Options': 'nosniff', 'X-Frame-Options': 'DENY', 'Referrer-Policy': 'strict-origin-when-cross-origin' },
       })
-    } catch (err) {
-      return jsonError('Failed to post comment', 500, request)
-    }
+    } catch { return jsonError('Failed to post comment', 500, request) }
   }
 
   return jsonError('Method not allowed', 405, request)

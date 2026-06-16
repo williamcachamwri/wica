@@ -1,5 +1,5 @@
-import { getCookieToken } from '../../../utils/auth'
-import { jsonOK, jsonError } from '../../../utils/security'
+import { getCookieToken } from '../../../../utils/auth'
+import { jsonOK, jsonError } from '../../../../utils/security'
 
 const GITHUB_GRAPHQL = 'https://api.github.com/graphql'
 const GITHUB_API = 'https://api.github.com'
@@ -8,23 +8,7 @@ const CATEGORY_ID = 'DIC_kwDOS6MeV84C_Jgv'
 interface Env { GITHUB_TOKEN: string }
 
 function ghHeaders(token: string): Record<string, string> {
-  return {
-    Accept: 'application/vnd.github.v3+json',
-    'User-Agent': 'wica-blog/1.0',
-    'Content-Type': 'application/json',
-    Authorization: `Bearer ${token}`,
-  }
-}
-
-async function getViewerLogin(token: string): Promise<string | null> {
-  try {
-    const res = await fetch(`${GITHUB_API}/user`, {
-      headers: { Accept: 'application/vnd.github.v3+json', Authorization: `Bearer ${token}`, 'User-Agent': 'wica-blog/1.0' },
-    })
-    if (!res.ok) return null
-    const data = (await res.json()) as { login: string }
-    return data.login
-  } catch { return null }
+  return { Accept: 'application/vnd.github.v3+json', 'User-Agent': 'wica-blog/1.0', 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }
 }
 
 async function ghFetch(query: string, token: string, variables?: Record<string, unknown>) {
@@ -38,26 +22,30 @@ async function ghFetch(query: string, token: string, variables?: Record<string, 
   return json.data
 }
 
+async function getViewerLogin(token: string): Promise<string | null> {
+  try {
+    const res = await fetch(`${GITHUB_API}/user`, {
+      headers: { Accept: 'application/vnd.github.v3+json', Authorization: `Bearer ${token}`, 'User-Agent': 'wica-blog/1.0' },
+    })
+    if (!res.ok) return null
+    return ((await res.json()) as { login: string }).login
+  } catch { return null }
+}
+
 export async function onRequest(context: { request: Request; env: Env }): Promise<Response> {
   const { request, env } = context
   const url = new URL(request.url)
   const token = getCookieToken(request)
 
-  if (!token) {
-    return jsonOK({ liked: false }, request)
-  }
+  if (!token) return jsonOK({ liked: false }, request)
 
   const slug = url.searchParams.get('slug')
   const title = url.searchParams.get('title')
-  if (!slug || !title || slug.length > 200 || title.length > 200) {
-    return jsonError('Invalid slug or title', 400, request)
-  }
+  if (!slug || !title || slug.length > 200 || title.length > 200) return jsonError('Invalid slug or title', 400, request)
 
   try {
     const viewerLogin = await getViewerLogin(token)
-    if (!viewerLogin) {
-      return jsonOK({ liked: false }, request)
-    }
+    if (!viewerLogin) return jsonOK({ liked: false }, request)
 
     const discussionTitle = `[blog-post:${slug}] ${title}`
     const data = await ghFetch(`query($categoryId: ID!) {
@@ -70,12 +58,8 @@ export async function onRequest(context: { request: Request; env: Env }): Promis
 
     const discussions = data?.repository?.discussions?.nodes || []
     const discussion = discussions.find((d: any) => d.title === discussionTitle)
-    const hasLiked = (discussion?.reactions?.nodes || []).some(
-      (r: any) => r.content === 'HEART' && r.user?.login === viewerLogin
-    )
+    const hasLiked = (discussion?.reactions?.nodes || []).some((r: any) => r.content === 'HEART' && r.user?.login === viewerLogin)
 
     return jsonOK({ liked: hasLiked }, request)
-  } catch {
-    return jsonError('Failed to check like status', 500, request)
-  }
+  } catch { return jsonError('Failed to check like status', 500, request) }
 }
