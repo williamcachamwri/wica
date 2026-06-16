@@ -47,7 +47,6 @@ export function Hero({ typewriterStart, nameStartDelay }: HeroProps) {
         </h1>
         <span className="block mt-2 text-muted text-lg">Developer & maker</span>
         <NowPlaying />
-        <div className="hero-divider" />
         <WorkingHours />
       </div>
 

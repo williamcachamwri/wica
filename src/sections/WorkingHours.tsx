@@ -23,7 +23,7 @@ function DigitRoll({ digit, label }: { digit: number; label: string }) {
     <div className="wh__digit-wrap" aria-label={`${label}: ${digit}`}>
       <motion.div
         className="wh__digit-strip"
-        animate={{ y: -digit * 1.35 }}
+        animate={{ y: `-${digit * 1.35}rem` }}
         transition={{ type: 'spring', stiffness: 180, damping: 22, mass: 0.8 }}
       >
         {DIGITS.map((d) => (
