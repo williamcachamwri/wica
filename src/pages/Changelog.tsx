@@ -21,6 +21,7 @@ interface CommitData {
   files: CommitFile[]
   totalAdditions: number
   totalDeletions: number
+  ogImage?: string
 }
 
 const STATUS_LABEL: Record<string, string> = {
@@ -83,6 +84,7 @@ export default function Changelog() {
           files,
           totalAdditions: files.reduce((s: number, f: CommitFile) => s + f.additions, 0),
           totalDeletions: files.reduce((s: number, f: CommitFile) => s + f.deletions, 0),
+          ogImage: json.ogImage,
         })
         setError(false)
       } catch {
@@ -181,6 +183,17 @@ export default function Changelog() {
 
       <main id="main" className="max-w-[760px] mx-auto px-6 pt-16 md:pt-24 pb-20">
         <Link to="/" className="inline-link text-sm mb-6 inline-block">‹ back home</Link>
+
+        {data.ogImage && (
+          <div className="changelog-og">
+            <img
+              src={data.ogImage}
+              alt={`Commit ${data.sha} OG image`}
+              className="changelog-og__img"
+              loading="lazy"
+            />
+          </div>
+        )}
 
         <div className="changelog-header">
           <div className="changelog-header__row">
