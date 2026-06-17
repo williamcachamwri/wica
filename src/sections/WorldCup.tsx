@@ -170,7 +170,7 @@ export function WorldCup() {
                   ))}
                 </div>
               )}
-              {liveMatches.length === 0 && nextMatch && (!groupFilter || nextMatch.group === groupFilter) && (
+              {nextMatch && (!groupFilter || nextMatch.group === groupFilter) && (
                 <div className="project-card p-4 border-accent/40 border-2 bg-accent/[0.03] relative overflow-hidden mb-6">
                   <div className="absolute top-0 right-0 px-3 py-1 bg-accent/10 text-[8px] font-mono uppercase tracking-widest text-accent rounded-bl-lg">Next Match</div>
                   <div className="flex items-center gap-2 mb-2">
