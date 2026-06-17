@@ -1,9 +1,10 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useMemo, useCallback } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { SEO } from '../components/SEO'
 import { Footer } from '../components/Footer'
 import { FormationDiagram } from '../components/FormationDiagram'
+import { PlayerStatsModal } from '../components/PlayerStatsModal'
 import { Lightbox } from '../components/Lightbox'
 
 import '../styles/worldcup.css'
@@ -83,6 +84,7 @@ export default function WorldCupMatch() {
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState<'Timeline' | 'Lineups' | 'Stats' | 'Table' | 'Power Ranking'>('Timeline')
   const [lightbox, setLightbox] = useState<{ photos: { src: string; caption: string }[]; index: number } | null>(null)
+  const [selectedPlayer, setSelectedPlayer] = useState<{ playerId: string; side: 'home' | 'away' } | null>(null)
 
   useEffect(() => {
     if (!matchId) return
@@ -101,6 +103,33 @@ export default function WorldCupMatch() {
   const awayName = match?.AwayTeam?.TeamName?.[0]?.Description || 'Away'
   const homePossession = match?.BallPossession?.Home
   const awayPossession = match?.BallPossession?.Away
+
+  const allPlayers = useMemo(() => {
+    if (!match) return { home: [], away: [] }
+    return {
+      home: (match.HomeTeam?.Players || []).filter((p: any) => p.Status === 1),
+      away: (match.AwayTeam?.Players || []).filter((p: any) => p.Status === 1),
+    }
+  }, [match])
+
+  const handlePlayerClick = useCallback((playerId: string, side: 'home' | 'away') => {
+    setSelectedPlayer({ playerId, side })
+  }, [])
+
+  const selectedPlayerData = useMemo(() => {
+    if (!selectedPlayer || !match) return null
+    const players = allPlayers[selectedPlayer.side]
+    const player = players.find((p: any) => (p.IdPlayer ?? p.PlayerId ?? '') === selectedPlayer.playerId)
+    if (!player) return null
+    const isHome = selectedPlayer.side === 'home'
+    const team = isHome ? match.HomeTeam : match.AwayTeam
+    return {
+      player,
+      teamLogo: (team?.PictureUrl || '').replace('{format}', 'sq').replace('{size}', '4'),
+      teamName: team?.TeamName?.[0]?.Description || '',
+      stats: data?.playerStats?.[selectedPlayer.playerId] || null,
+    }
+  }, [selectedPlayer, match, data, allPlayers])
 
   return (
     <>
@@ -254,8 +283,8 @@ export default function WorldCupMatch() {
                     if (!homeFormation || !awayFormation) return <p className="text-center text-muted font-mono text-[10px] uppercase py-12">Formation data not available</p>
                     return (
                       <FormationDiagram
-                        homePlayers={(match?.HomeTeam?.Players || []).filter((p: any) => p.Status === 1)}
-                        awayPlayers={(match?.AwayTeam?.Players || []).filter((p: any) => p.Status === 1)}
+                        homePlayers={allPlayers.home}
+                        awayPlayers={allPlayers.away}
                         homeFormation={homeFormation}
                         awayFormation={awayFormation}
                         homeTeam={{
@@ -266,6 +295,7 @@ export default function WorldCupMatch() {
                           name: match?.AwayTeam?.TeamName?.[0]?.Description || 'Away',
                           logo: (match?.AwayTeam?.PictureUrl || '').replace('{format}','sq').replace('{size}','4'),
                         }}
+                        onPlayerClick={handlePlayerClick}
                       />
                     )
                   })()}
@@ -454,6 +484,19 @@ export default function WorldCupMatch() {
           onClose={() => setLightbox(null)}
           onPrev={() => setLightbox(lb => lb ? { ...lb, index: lb.index - 1 } : lb)}
           onNext={() => setLightbox(lb => lb ? { ...lb, index: lb.index + 1 } : lb)}
+        />
+      )}
+      {selectedPlayerData && (
+        <PlayerStatsModal
+          playerId={selectedPlayerData.player.IdPlayer ?? selectedPlayerData.player.PlayerId ?? ''}
+          side={selectedPlayer!.side}
+          playerName={selectedPlayerData.player.PlayerName?.[0]?.Description || ''}
+          shirtNumber={selectedPlayerData.player.ShirtNumber}
+          playerPicture={selectedPlayerData.player.PlayerPicture?.PictureUrl}
+          teamLogo={selectedPlayerData.teamLogo}
+          teamName={selectedPlayerData.teamName}
+          stats={selectedPlayerData.stats}
+          onClose={() => setSelectedPlayer(null)}
         />
       )}
     </>

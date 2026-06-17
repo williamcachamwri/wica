@@ -1,5 +1,13 @@
 import { useMemo } from 'react'
 
+interface PlayerSummary {
+  id: string
+  number: number
+  name: string
+  fullName: string
+  picture?: string
+}
+
 interface FormationDiagramProps {
   homePlayers: any[]
   awayPlayers: any[]
@@ -7,6 +15,7 @@ interface FormationDiagramProps {
   awayFormation: number[]
   homeTeam: { name: string; logo: string }
   awayTeam: { name: string; logo: string }
+  onPlayerClick?: (playerId: string, side: 'home' | 'away') => void
 }
 
 function shortName(name: string): string {
@@ -19,13 +28,15 @@ function shortName(name: string): string {
 function buildRows(players: any[], formation: number[]) {
   const sorted = [...players].sort((a, b) => (a.Position ?? 0) - (b.Position ?? 0))
   const counts = [1, ...formation]
-  const rows: { number: number; name: string; picture?: string }[][] = []
+  const rows: PlayerSummary[][] = []
   let idx = 0
   for (const c of counts) {
     rows.push(
       sorted.slice(idx, idx + c).map(p => ({
+        id: p.IdPlayer ?? p.PlayerId ?? '',
         number: p.ShirtNumber,
         name: shortName(p.PlayerName?.[0]?.Description || ''),
+        fullName: p.PlayerName?.[0]?.Description || '',
         picture: p.PlayerPicture?.PictureUrl,
       }))
     )
@@ -48,7 +59,7 @@ const FIELD_R = W - PAD
 const FIELD_W = FIELD_R - FIELD_L
 const CENTER_X = W / 2
 
-export function FormationDiagram({ homePlayers, awayPlayers, homeFormation, awayFormation, homeTeam, awayTeam }: FormationDiagramProps) {
+export function FormationDiagram({ homePlayers, awayPlayers, homeFormation, awayFormation, homeTeam, awayTeam, onPlayerClick }: FormationDiagramProps) {
   const homeRows = useMemo(() => buildRows(homePlayers, homeFormation), [homePlayers, homeFormation])
   const awayRows = useMemo(() => buildRows(awayPlayers, awayFormation), [awayPlayers, awayFormation])
 
@@ -131,7 +142,7 @@ export function FormationDiagram({ homePlayers, awayPlayers, homeFormation, away
             const x = FIELD_L + (j + 1) * FIELD_W / (row.length + 1)
             const y = awayCY(i)
             return (
-              <g key={`away-${i}-${j}`}>
+              <g key={`away-${i}-${j}`} style={{ cursor: onPlayerClick ? 'pointer' : undefined }} onClick={() => onPlayerClick?.(player.id, 'away')}>
                 <circle cx={x} cy={y} r={22} fill="rgba(0,0,0,0.4)" stroke="rgba(255,255,255,0.5)" strokeWidth={1.5} />
                 {player.picture ? (
                   <image
@@ -164,7 +175,7 @@ export function FormationDiagram({ homePlayers, awayPlayers, homeFormation, away
             const x = FIELD_L + (j + 1) * FIELD_W / (row.length + 1)
             const y = homeCY(i)
             return (
-              <g key={`home-${i}-${j}`}>
+              <g key={`home-${i}-${j}`} style={{ cursor: onPlayerClick ? 'pointer' : undefined }} onClick={() => onPlayerClick?.(player.id, 'home')}>
                 <circle cx={x} cy={y} r={22} fill="rgba(0,0,0,0.4)" stroke="rgba(255,255,255,0.5)" strokeWidth={1.5} />
                 {player.picture ? (
                   <image
