@@ -26,7 +26,9 @@ export function WorldCup() {
     fetch('/api/worldcup')
       .then((res) => res.json())
       .then((json) => {
-        setData(json)
+        if (json && !json.error) {
+          setData(json)
+        }
         setLoading(false)
       })
       .catch(() => setLoading(false))
