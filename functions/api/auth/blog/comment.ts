@@ -17,8 +17,8 @@ function getDiscussionTitle(slug: string, title: string): string {
   return `[blog-post:${slug}] ${title}`
 }
 
-function formatComment(node: { id: string; author?: { login: string; avatarUrl?: string }; body: string; createdAt: string; url: string }) {
-  return { id: node.id, author: node.author?.login || 'anonymous', avatar: node.author?.avatarUrl, body: node.body, date: node.createdAt, url: node.url }
+function formatComment(node: { id: string; author?: { login: string; avatarUrl?: string }; body: string; createdAt: string; url: string }, parentId?: string) {
+  return { id: node.id, author: node.author?.login || 'anonymous', avatar: node.author?.avatarUrl, body: node.body, date: node.createdAt, url: node.url, ...(parentId ? { parentId } : {}) }
 }
 
 async function ghFetch(query: string, token: string, variables?: Record<string, unknown>) {
@@ -52,13 +52,17 @@ export async function onRequest(context: { request: Request; env: Env }): Promis
       const data = await ghFetch(`query($categoryId: ID!) {
         repository(owner: "williamcachamwri", name: "wica") {
           discussions(first: 10, orderBy: {field: CREATED_AT, direction: DESC}, categoryId: $categoryId) {
-            nodes { id title body url createdAt comments(first: 50) { nodes { id author { login avatarUrl } body createdAt url } } reactions(first: 100) { nodes { content } } }
+            nodes { id title body url createdAt comments(first: 50) { nodes { id author { login avatarUrl } body createdAt url replies(first: 10) { nodes { id author { login avatarUrl } body createdAt url } } } } reactions(first: 100) { nodes { content } } }
           }
         }
       }`, env.GITHUB_TOKEN, { categoryId: CATEGORY_ID }) as any
       const discussions = data?.repository?.discussions?.nodes || []
       const discussion = discussions.find((d: any) => d.title === getDiscussionTitle(slug, title))
-      const comments = discussion?.comments?.nodes?.map(formatComment) || []
+      const comments = discussion?.comments?.nodes?.flatMap((c: any) => {
+        const top = formatComment(c)
+        const replies = (c.replies?.nodes || []).map((r: any) => formatComment(r, c.id))
+        return [top, ...replies]
+      }) || []
       const likes = (discussion?.reactions?.nodes || []).filter((r: any) => r.content === 'HEART').length
       return jsonOK({ comments, discussionId: discussion?.id, likes }, request)
     } catch { return jsonError('Failed to fetch comments', 500, request) }
@@ -70,7 +74,7 @@ export async function onRequest(context: { request: Request; env: Env }): Promis
     if (!token) return jsonError('Not authenticated', 401, request)
 
     try {
-      const { slug, title, body } = (await request.json()) as { slug: string; title: string; body: string }
+      const { slug, title, body, replyTo } = (await request.json()) as { slug: string; title: string; body: string; replyTo?: string }
       if (!slug || !title || !body || !body.trim()) return jsonError('Slug, title and body are required', 400, request)
       if (slug.length > 200 || title.length > 200 || body.length > 5000) return jsonError('Input too long', 400, request)
 
@@ -96,15 +100,15 @@ export async function onRequest(context: { request: Request; env: Env }): Promis
         if (!discussionId) throw new Error('Failed to create discussion')
       }
 
-      const commentData = await ghFetch(`mutation($discussionId: ID!, $body: String!) {
-        addDiscussionComment(input: {discussionId: $discussionId, body: $body}) {
+      const commentData = await ghFetch(`mutation($discussionId: ID!, $body: String!, $replyToId: ID) {
+        addDiscussionComment(input: {discussionId: $discussionId, body: $body, replyToId: $replyToId}) {
           comment { id author { login avatarUrl } body createdAt url }
         }
-      }`, token, { discussionId, body: body.trim() }) as any
+      }`, token, { discussionId, body: body.trim(), ...(replyTo ? { replyToId: replyTo } : {}) }) as any
       const comment = commentData?.addDiscussionComment?.comment
       if (!comment) throw new Error('Failed to create comment')
 
-      return new Response(JSON.stringify(formatComment(comment)), {
+      return new Response(JSON.stringify(formatComment(comment, replyTo)), {
         status: 201,
         headers: { 'Content-Type': 'application/json', 'X-Content-Type-Options': 'nosniff', 'X-Frame-Options': 'DENY', 'Referrer-Policy': 'strict-origin-when-cross-origin' },
       })

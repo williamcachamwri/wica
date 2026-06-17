@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { showToast } from './Toast'
 
 interface BlogInteractionsProps {
@@ -13,6 +13,31 @@ interface Comment {
   body: string
   date: string
   url: string
+  parentId?: string
+}
+
+function linkifyMentions(text: string): React.ReactNode {
+  const parts = text.split(/(@\w[\w.-]*\w)/g)
+  return parts.map((part, i) => {
+    if (part.startsWith('@') && part.length > 1) {
+      const username = part.slice(1)
+      return (
+        <a key={i} href={`https://github.com/${username}`} target="_blank" rel="noopener noreferrer" className="blog-interactions__mention">
+          {part}
+        </a>
+      )
+    }
+    return part
+  })
+}
+
+function renderBody(body: string): React.ReactNode {
+  return body.split('\n').map((line, i, arr) => (
+    <span key={i}>
+      {linkifyMentions(line)}
+      {i < arr.length - 1 && <br />}
+    </span>
+  ))
 }
 
 export function BlogInteractions({ slug, title }: BlogInteractionsProps) {
@@ -23,6 +48,17 @@ export function BlogInteractions({ slug, title }: BlogInteractionsProps) {
   const [commentBody, setCommentBody] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [user, setUser] = useState<{ login: string; avatar?: string } | null>(null)
+  const [replyTo, setReplyTo] = useState<{ id: string; author: string } | null>(null)
+  const [mentionQuery, setMentionQuery] = useState('')
+  const [mentionIndex, setMentionIndex] = useState(-1)
+  const textareaRef = useRef<HTMLTextAreaElement>(null)
+  const mentionDropdownRef = useRef<HTMLDivElement>(null)
+
+  const knownAuthors = [...new Set(comments.map(c => c.author))].sort()
+
+  const filteredMentions = mentionQuery
+    ? knownAuthors.filter(a => a.toLowerCase().includes(mentionQuery.toLowerCase()))
+    : knownAuthors
 
   const checkAuth = async () => {
     try {
@@ -67,6 +103,25 @@ export function BlogInteractions({ slug, title }: BlogInteractionsProps) {
     }
   }, [user, slug, title])
 
+  useEffect(() => {
+    if (replyTo && textareaRef.current) {
+      textareaRef.current.focus()
+    }
+  }, [replyTo])
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (mentionDropdownRef.current && !mentionDropdownRef.current.contains(e.target as Node)) {
+        setMentionQuery('')
+        setMentionIndex(-1)
+      }
+    }
+    if (mentionQuery) {
+      document.addEventListener('mousedown', handleClickOutside)
+      return () => document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [mentionQuery])
+
   const checkLiked = async (): Promise<boolean> => {
     if (!user) return false
     try {
@@ -110,6 +165,59 @@ export function BlogInteractions({ slug, title }: BlogInteractionsProps) {
     }
   }
 
+  const handleTextareaChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const val = e.target.value
+    setCommentBody(val)
+
+    const textBeforeCursor = val.slice(0, e.target.selectionStart)
+    const atIdx = textBeforeCursor.lastIndexOf('@')
+    if (atIdx >= 0 && (atIdx === 0 || textBeforeCursor[atIdx - 1] === ' ' || textBeforeCursor[atIdx - 1] === '\n')) {
+      const query = textBeforeCursor.slice(atIdx + 1)
+      if (/^[\w.-]*$/.test(query) && query.length > 0) {
+        setMentionQuery(query)
+        setMentionIndex(0)
+        return
+      }
+    }
+    setMentionQuery('')
+    setMentionIndex(-1)
+  }
+
+  const insertMention = (username: string) => {
+    const ta = textareaRef.current
+    if (!ta) return
+    const pos = ta.selectionStart
+    const textBefore = commentBody.slice(0, pos)
+    const atIdx = textBefore.lastIndexOf('@')
+    const beforeAt = commentBody.slice(0, atIdx)
+    const afterAt = commentBody.slice(pos)
+    const newVal = beforeAt + `@${username} ` + afterAt
+    setCommentBody(newVal)
+    setMentionQuery('')
+    setMentionIndex(-1)
+    const newCursor = atIdx + username.length + 2
+    setTimeout(() => { ta.setSelectionRange(newCursor, newCursor); ta.focus() }, 0)
+  }
+
+  const handleMentionKeyDown = (e: React.KeyboardEvent) => {
+    if (!mentionQuery) return
+    if (e.key === 'ArrowDown') {
+      e.preventDefault()
+      setMentionIndex(i => Math.min(i + 1, filteredMentions.length - 1))
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault()
+      setMentionIndex(i => Math.max(i - 1, 0))
+    } else if (e.key === 'Enter' || e.key === 'Tab') {
+      if (filteredMentions[mentionIndex]) {
+        e.preventDefault()
+        insertMention(filteredMentions[mentionIndex])
+      }
+    } else if (e.key === 'Escape') {
+      setMentionQuery('')
+      setMentionIndex(-1)
+    }
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!commentBody.trim() || submitting) return
@@ -119,17 +227,32 @@ export function BlogInteractions({ slug, title }: BlogInteractionsProps) {
       const res = await fetch('/api/auth/blog/comment', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ slug, title, body: commentBody.trim() }),
+        body: JSON.stringify({
+          slug,
+          title,
+          body: commentBody.trim(),
+          ...(replyTo ? { replyTo: replyTo.id } : {}),
+        }),
       })
       if (!res.ok) throw new Error('Failed to post comment')
       const comment = (await res.json()) as Comment
       setComments((prev) => [comment, ...prev])
       setCommentBody('')
+      setReplyTo(null)
       showToast('Comment posted')
     } catch {
       showToast('Failed to post comment')
     } finally {
       setSubmitting(false)
+    }
+  }
+
+  const topLevelComments = comments.filter(c => !c.parentId)
+  const replyMap = new Map<string, Comment[]>()
+  for (const c of comments) {
+    if (c.parentId) {
+      if (!replyMap.has(c.parentId)) replyMap.set(c.parentId, [])
+      replyMap.get(c.parentId)!.push(c)
     }
   }
 
@@ -164,23 +287,51 @@ export function BlogInteractions({ slug, title }: BlogInteractionsProps) {
       </div>
 
       {user && (
-        <form onSubmit={handleSubmit} className="blog-interactions__form">
-          <textarea
-            value={commentBody}
-            onChange={(e) => setCommentBody(e.target.value)}
-            placeholder="Write a comment…"
-            rows={3}
-            disabled={submitting}
-            className="blog-interactions__input"
-          />
-          <button
-            type="submit"
-            disabled={submitting || !commentBody.trim()}
-            className="blog-interactions__submit"
-          >
-            {submitting ? 'Posting…' : 'Post comment'}
-          </button>
-        </form>
+        <>
+          <form onSubmit={handleSubmit} className="blog-interactions__form">
+            {replyTo && (
+              <div className="blog-interactions__reply-indicator">
+                <span>Replying to <strong>@{replyTo.author}</strong></span>
+                <button type="button" className="blog-interactions__reply-cancel" onClick={() => { setReplyTo(null); setCommentBody('') }}>
+                  Cancel
+                </button>
+              </div>
+            )}
+            <div className="blog-interactions__textarea-wrapper">
+              <textarea
+                ref={textareaRef}
+                value={commentBody}
+                onChange={handleTextareaChange}
+                onKeyDown={handleMentionKeyDown}
+                placeholder={replyTo ? `Reply to @${replyTo.author}…` : 'Write a comment…'}
+                rows={3}
+                disabled={submitting}
+                className="blog-interactions__input"
+              />
+              {mentionQuery && filteredMentions.length > 0 && (
+                <div className="blog-interactions__mentions" ref={mentionDropdownRef}>
+                  {filteredMentions.slice(0, 8).map((name, i) => (
+                    <button
+                      key={name}
+                      type="button"
+                      className={`blog-interactions__mentions-item ${i === mentionIndex ? 'blog-interactions__mentions-item--active' : ''}`}
+                      onMouseDown={(e) => { e.preventDefault(); insertMention(name) }}
+                    >
+                      @{name}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+            <button
+              type="submit"
+              disabled={submitting || !commentBody.trim()}
+              className="blog-interactions__submit"
+            >
+              {submitting ? 'Posting…' : replyTo ? 'Reply' : 'Post comment'}
+            </button>
+          </form>
+        </>
       )}
 
       <div className="blog-interactions__comments">
@@ -201,44 +352,54 @@ export function BlogInteractions({ slug, title }: BlogInteractionsProps) {
                 <div className="guestbook-skeleton__line guestbook-skeleton__line--meta" />
               </div>
             </div>
-            <div className="guestbook-skeleton__item">
-              <div className="guestbook-skeleton__avatar" />
-              <div className="guestbook-skeleton__content">
-                <div className="guestbook-skeleton__line" />
-                <div className="guestbook-skeleton__line guestbook-skeleton__line--short" />
-                <div className="guestbook-skeleton__line guestbook-skeleton__line--meta" />
-              </div>
-            </div>
           </div>
         ) : comments.length === 0 ? (
           <p className="blog-interactions__empty">No comments yet. Be the first.</p>
         ) : (
-          comments.map((comment) => (
-            <a
-              key={comment.id}
-              href={comment.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="blog-interactions__comment"
-            >
-              <div className="blog-interactions__comment-meta">
-                {comment.avatar && (
-                  <img src={comment.avatar} alt="" className="blog-interactions__comment-avatar" />
-                )}
-                <span className="blog-interactions__comment-author">{comment.author}</span>
-                <span className="blog-interactions__comment-date">
-                  {new Date(comment.date).toLocaleDateString('en-US', {
-                    year: 'numeric',
-                    month: 'short',
-                    day: 'numeric',
-                  })}
-                </span>
-              </div>
-              <p className="blog-interactions__comment-body">{comment.body}</p>
-            </a>
+          topLevelComments.map((comment) => (
+            <div key={comment.id}>
+              <CommentCard comment={comment} onReply={(id, author) => { setReplyTo({ id, author }); setCommentBody('') }} user={user} />
+              {replyMap.get(comment.id)?.map(reply => (
+                <CommentCard key={reply.id} comment={reply} isReply onReply={(id, author) => { setReplyTo({ id, author }); setCommentBody(`@${author} `) }} user={user} />
+              ))}
+            </div>
           ))
         )}
       </div>
     </section>
+  )
+}
+
+function CommentCard({ comment, isReply, onReply, user }: { comment: Comment; isReply?: boolean; onReply: (id: string, author: string) => void; user: { login: string; avatar?: string } | null }) {
+  return (
+    <div className={`blog-interactions__comment ${isReply ? 'blog-interactions__comment--reply' : ''}`}>
+      <div className="blog-interactions__comment-meta">
+        {comment.avatar && (
+          <img src={comment.avatar} alt="" className="blog-interactions__comment-avatar" />
+        )}
+        <span className="blog-interactions__comment-author">{comment.author}</span>
+        <span className="blog-interactions__comment-date">
+          {new Date(comment.date).toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric',
+          })}
+        </span>
+      </div>
+      <div className="blog-interactions__comment-body">{renderBody(comment.body)}</div>
+      {user && (
+        <button
+          type="button"
+          className="blog-interactions__reply-btn"
+          onClick={() => onReply(comment.id, comment.author)}
+        >
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="9 17 4 12 9 7" />
+            <path d="M20 18v-2a4 4 0 0 0-4-4H4" />
+          </svg>
+          Reply
+        </button>
+      )}
+    </div>
   )
 }

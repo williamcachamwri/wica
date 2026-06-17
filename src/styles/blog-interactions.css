@@ -219,3 +219,135 @@
   margin: 0;
   word-break: break-word;
 }
+
+/* ── Reply indicator ───────────────────────────── */
+.blog-interactions__reply-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 12px;
+  font-family: "JetBrains Mono", monospace;
+  color: var(--text-muted);
+  padding: 0.35rem 0.25rem;
+}
+
+.blog-interactions__reply-indicator strong {
+  color: var(--accent);
+}
+
+.blog-interactions__reply-cancel {
+  background: transparent;
+  border: none;
+  color: var(--text-subtle);
+  font-size: 11px;
+  font-family: "JetBrains Mono", monospace;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  padding: 0;
+  transition: color 0.2s;
+}
+
+.blog-interactions__reply-cancel:hover {
+  color: var(--text-muted);
+}
+
+/* ── Reply button on comments ───────────────────── */
+.blog-interactions__reply-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  margin-top: 0.5rem;
+  padding: 0.2rem 0;
+  background: transparent;
+  border: none;
+  color: var(--text-subtle);
+  font-size: 11px;
+  font-family: "JetBrains Mono", monospace;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.blog-interactions__reply-btn:hover {
+  color: var(--accent);
+}
+
+/* ── Threaded replies ────────────────────────────── */
+.blog-interactions__comment--reply {
+  margin-left: 1.25rem;
+  border-left: 2px solid var(--border);
+  border-radius: 0 12px 12px 0;
+  padding-left: 1rem;
+}
+
+.blog-interactions__comment--reply:hover {
+  border-left-color: var(--accent);
+}
+
+/* ── Textarea wrapper (for mention dropdown) ─────── */
+.blog-interactions__textarea-wrapper {
+  position: relative;
+}
+
+/* ── Mention dropdown ─────────────────────────────── */
+.blog-interactions__mentions {
+  position: absolute;
+  bottom: 100%;
+  left: 0;
+  right: 0;
+  margin-bottom: 0.25rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  overflow: hidden;
+  z-index: 10;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.blog-interactions__mentions-item {
+  display: block;
+  width: 100%;
+  padding: 0.45rem 0.85rem;
+  background: transparent;
+  border: none;
+  color: var(--text);
+  font-size: 13px;
+  font-family: "JetBrains Mono", monospace;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.blog-interactions__mentions-item:hover,
+.blog-interactions__mentions-item--active {
+  background: color-mix(in srgb, var(--accent) 8%, transparent);
+  color: var(--accent);
+}
+
+/* ── @mention links in comment body ───────────────── */
+.blog-interactions__mention {
+  color: var(--accent);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.blog-interactions__mention:hover {
+  text-decoration: underline;
+}
+
+/* ── Remove old comment link styling ──────────────── */
+.blog-interactions__comment {
+  display: block;
+  padding: 1rem 1.15rem;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+  transition:
+    border-color 0.2s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.blog-interactions__comment:hover {
+  border-color: var(--accent);
+}
