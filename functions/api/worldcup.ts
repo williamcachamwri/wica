@@ -13,6 +13,13 @@ export interface Team {
   score: number | null
 }
 
+export interface Goal {
+  minute: string
+  scorer: string
+  team: 'home' | 'away'
+  assist?: string
+}
+
 export interface Match {
   id: string
   homeTeam: Team
@@ -23,6 +30,7 @@ export interface Match {
   group: string
   stage: string
   matchNumber: number
+  goals?: Goal[]
 }
 
 export interface Standing {
@@ -73,23 +81,36 @@ function mapTeam(data: any): Team {
   }
 }
 
-function mapMatch(m: any): Match {
-  return {
-    id: m.IdMatch,
-    homeTeam: mapTeam(m.Home),
-    awayTeam: mapTeam(m.Away),
-    date: m.Date,
-    status: m.MatchStatus === 0 ? 'FT' : m.MatchStatus === 3 ? 'LIVE' : 'UPCOMING',
-    venue: desc(m.Stadium?.Name),
-    group: desc(m.GroupName),
-    stage: desc(m.StageName),
-    matchNumber: m.MatchNumber
-  }
+const GOAL_RE = /^(.+?)\s+\(.*?\)\s+scores!!$/
+
+function extractScorer(desc: string): string {
+  const m = desc.match(GOAL_RE)
+  return m ? m[1].trim() : desc.replace(/\s+scores!!$/, '')
 }
 
-function statValue(stats: [string, number, boolean][], name: string): number | null {
-  const entry = stats.find(s => s[0] === name)
-  return entry ? entry[1] : null
+function extractGoals(timeline: any, homeId: string): Goal[] {
+  const events = timeline?.Event || []
+  const goalEvents = events.filter((e: any) => e.Type === 0)
+  const assistEvents = events.filter((e: any) => e.Type === 1)
+
+  return goalEvents.map((ge: any) => {
+    const minute = (ge.MatchMinute || '').replace(/['']/g, '')
+    const descText = ge.EventDescription?.[0]?.Description || ''
+    const scorer = extractScorer(descText)
+    const team: 'home' | 'away' = ge.IdTeam === homeId ? 'home' : 'away'
+
+    // Find matching assist (same minute period)
+    const assist = assistEvents.find((ae: any) => ae.MatchMinute === ge.MatchMinute)
+    const assistDesc = assist?.EventDescription?.[0]?.Description || ''
+    const assistName = assistDesc.replace(/^Assisted by /, '').replace(/\.$/, '')
+
+    return {
+      minute,
+      scorer,
+      team,
+      ...(assistName ? { assist: assistName } : {}),
+    }
+  })
 }
 
 export async function onRequest(context: { request: Request }): Promise<Response> {
@@ -103,10 +124,11 @@ export async function onRequest(context: { request: Request }): Promise<Response
       count: '500',
       idSeason: SEASON_ID,
     })
-    const matches = matchesData.Results.map(mapMatch)
+    const rawMatches: any[] = matchesData.Results || []
+    const matches: Match[] = rawMatches.map(mapMatch)
 
     // Fetch standings for each stage
-    const stageIds = [...new Set<string>(matchesData.Results.map((m: any) => m.IdStage))].filter(Boolean)
+    const stageIds = [...new Set<string>(rawMatches.map((m: any) => m.IdStage))].filter(Boolean)
     const standingsResults = await Promise.all(
       stageIds.map((stageId: string) =>
         fetchFromFifa(`/calendar/${COMPETITION_ID}/${SEASON_ID}/${stageId}/standing`, {
@@ -142,6 +164,12 @@ export async function onRequest(context: { request: Request }): Promise<Response
       }
     }
 
+    // Sort matches: LIVE first, then FT newest-first, then UPCOMING oldest-first
+    const now = new Date().toISOString()
+    const ftMatches = matches.filter(m => m.status === 'FT').sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+    const liveMatches = matches.filter(m => m.status === 'LIVE')
+    const upcomingMatches = matches.filter(m => m.status === 'UPCOMING').sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+
     if (matchId) {
       const [details, timeline] = await Promise.all([
         fetchFromFifa(`/live/football/${matchId}`, { language: 'en' }),
@@ -174,10 +202,36 @@ export async function onRequest(context: { request: Request }): Promise<Response
         if (powerRaw) powerRanking = powerRaw
       }
 
-      return jsonOK({ details, timeline, stats, playerStats, powerRanking, matches, standings })
+      const allMatches = [...liveMatches, ...ftMatches, ...upcomingMatches]
+      return jsonOK({ details, timeline, stats, playerStats, powerRanking, matches: allMatches, standings })
     }
 
-    return jsonOK({ matches, standings })
+    // Fetch goals for recent FT matches (up to 5)
+    const recentFt = ftMatches.slice(0, 5)
+    const rawLookup = new Map(rawMatches.map((m: any) => [String(m.IdMatch), m]))
+    const timelineResults = await Promise.all(
+      recentFt.map(m =>
+        fetchFromFifa(`/timelines/${m.id}`, { language: 'en' })
+          .then(tl => ({ id: m.id, timeline: tl }))
+          .catch(() => null)
+      )
+    )
+
+    for (const result of timelineResults) {
+      if (!result) continue
+      const raw = rawLookup.get(String(result.id))
+      const homeId = raw?.Home?.IdTeam
+      if (!homeId) continue
+      const matchObj = matches.find(m => m.id === result.id)
+      if (matchObj) {
+        matchObj.goals = extractGoals(result.timeline, homeId)
+      }
+    }
+
+    const sortedMatches = [...liveMatches, ...ftMatches, ...upcomingMatches]
+    const nextMatch = upcomingMatches.length > 0 ? upcomingMatches[0] : null
+
+    return jsonOK({ matches: sortedMatches, standings, nextMatch })
   } catch (error: any) {
     return jsonError(`Failed to fetch World Cup data: ${error.message}`, 500)
   }

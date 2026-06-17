@@ -2,18 +2,27 @@ import { SectionDivider } from '../components/SectionDivider'
 import type { Match, Standing } from '../types'
 import { motion } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import '../styles/worldcup.css'
 
 type Tab = 'Matches' | 'Standings' | 'Power Rankings'
+const PER_PAGE = 5
+const REFRESH_INTERVAL = 30000
+
+function getStatusScore(m: Match): number {
+  if (m.status === 'LIVE') return 0
+  if (m.status === 'FT') return 1
+  return 2
+}
 
 export function WorldCup() {
   const navigate = useNavigate()
-  const [data, setData] = useState<{ matches: Match[]; standings: Standing[] } | null>(null)
+  const [data, setData] = useState<{ matches: Match[]; standings: Standing[]; nextMatch?: Match | null } | null>(null)
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState<Tab>('Matches')
+  const [page, setPage] = useState(0)
 
-  useEffect(() => {
+  const fetchData = useCallback(() => {
     fetch('/api/worldcup')
       .then((res) => res.json())
       .then((json) => {
@@ -22,6 +31,15 @@ export function WorldCup() {
       })
       .catch(() => setLoading(false))
   }, [])
+
+  useEffect(() => {
+    fetchData()
+    const interval = setInterval(fetchData, REFRESH_INTERVAL)
+    return () => clearInterval(interval)
+  }, [fetchData])
+
+  // Reset page when tab changes
+  useEffect(() => { setPage(0) }, [activeTab])
 
   if (loading || !data) {
     return (
@@ -54,7 +72,13 @@ export function WorldCup() {
     )
   }
 
-  const { matches, standings } = data
+  const { matches, standings, nextMatch } = data
+
+  // Filter to FT matches only for pagination; LIVE shown separately at top
+  const ftMatches = matches.filter(m => m.status === 'FT')
+  const liveMatches = matches.filter(m => m.status === 'LIVE')
+  const totalPages = Math.max(1, Math.ceil(ftMatches.length / PER_PAGE))
+  const currentFt = ftMatches.slice(page * PER_PAGE, (page + 1) * PER_PAGE)
 
   return (
     <section id="worldcup" className="mb-14 scroll-mt-20">
@@ -78,15 +102,59 @@ export function WorldCup() {
 
       <div className="space-y-6">
         {activeTab === 'Matches' && (
-          <div className="grid grid-cols-1 gap-3">
-            {matches.slice(0, 10).map((match) => (
-              <MatchCard 
-                key={match.id} 
-                match={match} 
-                onClick={() => navigate(`/worldcup/${match.id}`)} 
-              />
+          <>
+            {/* Next match */}
+            {nextMatch && (
+              <div className="project-card p-4 border-accent/40 border-2 bg-accent/[0.03] relative overflow-hidden">
+                <div className="absolute top-0 right-0 px-3 py-1 bg-accent/10 text-[8px] font-mono uppercase tracking-widest text-accent rounded-bl-lg">Next Match</div>
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="w-1.5 h-1.5 rounded-full bg-accent animate-pulse" />
+                  <span className="text-[10px] font-mono uppercase tracking-widest text-accent font-semibold">Upcoming</span>
+                  <span className="text-[10px] font-mono text-muted">{new Date(nextMatch.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>
+                </div>
+                <MatchCard match={nextMatch} onClick={() => navigate(`/worldcup/${nextMatch.id}`)} prominent />
+              </div>
+            )}
+
+            {/* Live matches */}
+            {liveMatches.map(match => (
+              <MatchCard key={match.id} match={match} onClick={() => navigate(`/worldcup/${match.id}`)} />
             ))}
-          </div>
+
+            {/* FT matches (paginated) */}
+            <div className="grid grid-cols-1 gap-3">
+              {currentFt.map((match) => (
+                <MatchCard 
+                  key={match.id} 
+                  match={match} 
+                  onClick={() => navigate(`/worldcup/${match.id}`)} 
+                />
+              ))}
+            </div>
+
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <div className="flex items-center justify-center gap-3 pt-2">
+                <button
+                  onClick={() => setPage(p => Math.max(0, p - 1))}
+                  disabled={page === 0}
+                  className="text-[10px] font-mono uppercase tracking-widest px-3 py-1.5 rounded-lg border border-border/40 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-surface transition-colors text-muted hover:text-text"
+                >
+                  Previous
+                </button>
+                <span className="text-[10px] font-mono text-muted">
+                  {page + 1} / {totalPages}
+                </span>
+                <button
+                  onClick={() => setPage(p => Math.min(totalPages - 1, p + 1))}
+                  disabled={page >= totalPages - 1}
+                  className="text-[10px] font-mono uppercase tracking-widest px-3 py-1.5 rounded-lg border border-border/40 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-surface transition-colors text-muted hover:text-text"
+                >
+                  Next
+                </button>
+              </div>
+            )}
+          </>
         )}
 
         {activeTab === 'Standings' && (
@@ -151,14 +219,18 @@ export function WorldCup() {
   )
 }
 
-function MatchCard({ match, onClick }: { match: Match; onClick: () => void }) {
+function MatchCard({ match, onClick, prominent }: { match: Match; onClick: () => void; prominent?: boolean }) {
+  const homeGoals = match.goals?.filter(g => g.team === 'home') || []
+  const awayGoals = match.goals?.filter(g => g.team === 'away') || []
+  const hasGoals = homeGoals.length > 0 || awayGoals.length > 0
+
   return (
     <motion.article
       initial={{ opacity: 0, y: 10 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true }}
+      whileInView={prominent ? undefined : { opacity: 1, y: 0 }}
+      viewport={prominent ? undefined : { once: true }}
       onClick={onClick}
-      className="project-card wc-card group p-4 cursor-pointer"
+      className={`project-card wc-card group p-4 cursor-pointer transition-all ${prominent ? 'hover:border-accent/60' : ''}`}
     >
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
@@ -202,6 +274,23 @@ function MatchCard({ match, onClick }: { match: Match; onClick: () => void }) {
           <span className="text-xs font-semibold text-center leading-tight truncate w-full px-1 text-text">{match.awayTeam.name}</span>
         </div>
       </div>
+
+      {/* Goal scorers */}
+      {hasGoals && (
+        <div className="mt-2 pt-2 border-t border-border/10 flex justify-center gap-6 text-[10px] font-mono">
+          <div className="flex flex-col items-end gap-0.5 w-[40%]">
+            {homeGoals.map((g, i) => (
+              <span key={i} className="text-accent/80 truncate max-w-full">{g.scorer} <span className="text-muted/60">{g.minute}'</span></span>
+            ))}
+          </div>
+          <div className="w-8 shrink-0" />
+          <div className="flex flex-col items-start gap-0.5 w-[40%]">
+            {awayGoals.map((g, i) => (
+              <span key={i} className="text-blue-400/80 truncate max-w-full">{g.scorer} <span className="text-muted/60">{g.minute}'</span></span>
+            ))}
+          </div>
+        </div>
+      )}
     </motion.article>
   )
 }

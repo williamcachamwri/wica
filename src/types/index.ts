@@ -43,6 +43,13 @@ export interface Team {
   score: number | null
 }
 
+export interface Goal {
+  minute: string
+  scorer: string
+  team: 'home' | 'away'
+  assist?: string
+}
+
 export interface Match {
   id: string
   homeTeam: Team
@@ -53,6 +60,7 @@ export interface Match {
   group: string
   stage: string
   matchNumber: number
+  goals?: Goal[]
 }
 
 export interface Standing {
