@@ -101,20 +101,26 @@
   position: relative;
   width: clamp(1.6rem, 4.5vw, 2.8rem);
   height: clamp(1.6rem, 4.5vw, 2.8rem);
-  border-radius: 50%;
-  overflow: hidden;
   vertical-align: super;
   margin-left: 0.25rem;
   margin-top: -0.15em;
   opacity: 0;
   transform: scale(0) rotate(-45deg);
   animation: flag-stamp 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) 1.6s forwards;
+  cursor: default;
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.hero__flag-badge-inner {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  overflow: hidden;
   box-shadow:
     0 0 0 2px color-mix(in srgb, #daa520 40%, transparent),
     0 0 0 4px color-mix(in srgb, #daa520 15%, transparent),
     0 4px 12px rgba(0, 0, 0, 0.12);
-  cursor: default;
-  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .hero__flag-img {
@@ -134,7 +140,7 @@
     transparent 50%
   );
   pointer-events: none;
-  border-radius: inherit;
+  border-radius: 50%;
 }
 
 @keyframes flag-stamp {
@@ -148,6 +154,8 @@
 @media (hover: hover) {
   .hero__flag-badge:hover {
     transform: scale(1.15) rotate(5deg);
+  }
+  .hero__flag-badge:hover .hero__flag-badge-inner {
     box-shadow:
       0 0 0 2px #daa520,
       0 0 0 5px color-mix(in srgb, #daa520 20%, transparent),
