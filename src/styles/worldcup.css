@@ -291,17 +291,16 @@ tr:hover .wc-team-logo-small {
   }
 
   .worldcup-sticky__name {
-    max-width: 55px;
-    font-size: 11px;
+    display: none;
   }
 
   .worldcup-sticky__crest {
-    width: 14px;
-    height: 14px;
+    width: 18px;
+    height: 18px;
   }
 
   .worldcup-sticky__score {
-    font-size: 12px;
+    font-size: 13px;
   }
 
   .worldcup-sticky__meta {
