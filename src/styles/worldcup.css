@@ -419,8 +419,8 @@ tr:hover .wc-team-logo-small {
   border: 1px solid var(--border);
   border-radius: 16px;
   width: 100%;
-  max-width: 360px;
-  max-height: 75vh;
+  max-width: 440px;
+  max-height: 80vh;
   overflow-y: auto;
   box-shadow: 0 16px 48px rgba(0, 0, 0, 0.25);
   animation: wc-modal-pop 0.25s cubic-bezier(0.22, 1, 0.36, 1);
@@ -435,13 +435,13 @@ tr:hover .wc-team-logo-small {
   display: flex;
   align-items: center;
   gap: 1rem;
-  padding: 1.25rem 1.25rem 0.75rem;
+  padding: 1.25rem 1.25rem 0.85rem;
   border-bottom: 1px solid var(--border);
 }
 
 .player-stats-avatar {
-  width: 52px;
-  height: 52px;
+  width: 56px;
+  height: 56px;
   border-radius: 50%;
   overflow: hidden;
   flex-shrink: 0;
@@ -455,6 +455,7 @@ tr:hover .wc-team-logo-small {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  object-position: 50% 0%;
 }
 
 .player-stats-avatar-fallback {
@@ -528,16 +529,29 @@ tr:hover .wc-team-logo-small {
 .player-stats-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 0.5rem;
+  gap: 0.6rem;
   padding: 1rem 1.25rem;
+}
+
+@media (max-width: 400px) {
+  .player-stats-grid {
+    gap: 0.4rem;
+    padding: 0.75rem 0.75rem;
+  }
+  .player-stats-item {
+    padding: 0.5rem 0.3rem;
+  }
+  .player-stats-item-value {
+    font-size: 17px;
+  }
 }
 
 .player-stats-item {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.15rem;
-  padding: 0.6rem 0.4rem;
+  gap: 0.2rem;
+  padding: 0.65rem 0.5rem;
   border-radius: 10px;
   background: var(--code-bg);
   min-width: 0;
@@ -545,7 +559,7 @@ tr:hover .wc-team-logo-small {
 }
 
 .player-stats-item-value {
-  font-size: 18px;
+  font-size: 20px;
   font-weight: 700;
   color: var(--text);
   font-family: var(--font-mono, ui-monospace, monospace);

@@ -129,8 +129,8 @@ export function PlayerStatsModal({
           </div>
           <button type="button" className="player-stats-close" onClick={onClose} aria-label="Close">
             <svg width="14" height="14" viewBox="0 0 14 14" shapeRendering="crispEdges">
-              <rect x="2" y="0" width="2" height="14" transform="rotate(45 7 7)" fill="currentColor" />
-              <rect x="2" y="0" width="2" height="14" transform="rotate(-45 7 7)" fill="currentColor" />
+              <rect x="5" y="1" width="4" height="12" transform="rotate(45 7 7)" fill="currentColor" />
+              <rect x="5" y="1" width="4" height="12" transform="rotate(-45 7 7)" fill="currentColor" />
             </svg>
           </button>
         </div>
