@@ -65,7 +65,7 @@ export async function onRequest(context: { request: Request; env: Env }): Promis
       }) || []
       const likes = (discussion?.reactions?.nodes || []).filter((r: any) => r.content === 'HEART').length
       return jsonOK({ comments, discussionId: discussion?.id, likes }, request)
-    } catch { return jsonError('Failed to fetch comments', 500, request) }
+    } catch (err) { console.error('[comment GET]', err); return jsonError('Failed to fetch comments', 500, request) }
   }
 
   if (request.method === 'POST') {
@@ -112,7 +112,11 @@ export async function onRequest(context: { request: Request; env: Env }): Promis
         status: 201,
         headers: { 'Content-Type': 'application/json', 'X-Content-Type-Options': 'nosniff', 'X-Frame-Options': 'DENY', 'Referrer-Policy': 'strict-origin-when-cross-origin' },
       })
-    } catch { return jsonError('Failed to post comment', 500, request) }
+    } catch (err) {
+      console.error('[comment POST]', err)
+      const msg = err instanceof Error ? err.message : 'Failed to post comment'
+      return jsonError(msg, 500, request)
+    }
   }
 
   return jsonError('Method not allowed', 405, request)
