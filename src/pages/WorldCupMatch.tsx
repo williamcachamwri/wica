@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { SEO } from '../components/SEO'
 import { Footer } from '../components/Footer'
+import { Lightbox } from '../components/Lightbox'
 
 import '../styles/worldcup.css'
 
@@ -80,6 +81,7 @@ export default function WorldCupMatch() {
   } | null>(null)
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState<'Timeline' | 'Lineups' | 'Stats' | 'Table' | 'Power Ranking'>('Timeline')
+  const [lightbox, setLightbox] = useState<{ photos: { src: string; caption: string }[]; index: number } | null>(null)
 
   useEffect(() => {
     if (!matchId) return
@@ -254,21 +256,34 @@ export default function WorldCupMatch() {
                         {/* Starting XI */}
                         <div className="space-y-1.5">
                           <p className="text-[8px] font-mono uppercase tracking-widest text-muted/40">Starting XI</p>
-                          {(team?.Players || []).filter((p: any) => p.FieldStatus === 0).map((player: any) => (
-                            <div key={player.IdPlayer} className="flex items-center gap-2.5 text-[11px] font-mono group py-1 px-2 rounded-lg hover:bg-surface transition-colors">
-                              <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0 bg-code-bg ring-1 ring-border/40">
-                                {player.PlayerPicture?.PictureUrl ? (
-                                  <img src={player.PlayerPicture.PictureUrl + "?imwidth=120"} alt="" className="w-full h-full object-cover object-top" loading="lazy" decoding="async" />
-                                ) : (
-                                  <div className="w-full h-full flex items-center justify-center text-[8px] text-muted/40 font-bold">{player.ShirtNumber}</div>
-                                )}
+                          {(team?.Players || []).filter((p: any) => p.FieldStatus === 0).map((player: any) => {
+                            const starters = (team?.Players || []).filter((p: any) => p.FieldStatus === 0)
+                            const photos = starters
+                              .filter((p: any) => p.PlayerPicture?.PictureUrl)
+                              .map((p: any) => ({
+                                src: p.PlayerPicture.PictureUrl as string,
+                                caption: p.PlayerName?.[0]?.Description || '',
+                              }))
+                            const photoIdx = photos.findIndex((ph: { src: string; caption: string }) => ph.src === player.PlayerPicture?.PictureUrl)
+                            return (
+                              <div key={player.IdPlayer} className="flex items-center gap-2.5 text-[11px] font-mono group py-1 px-2 rounded-lg hover:bg-surface transition-colors">
+                                <div
+                                  className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0 bg-code-bg ring-1 ring-border/40 cursor-pointer hover:ring-accent/60 transition-all"
+                                  onClick={() => player.PlayerPicture?.PictureUrl && setLightbox({ photos, index: photoIdx >= 0 ? photoIdx : 0 })}
+                                >
+                                  {player.PlayerPicture?.PictureUrl ? (
+                                    <img src={player.PlayerPicture.PictureUrl + "?imwidth=120"} alt="" className="w-full h-full object-cover object-top" loading="lazy" decoding="async" />
+                                  ) : (
+                                    <div className="w-full h-full flex items-center justify-center text-[8px] text-muted/40 font-bold">{player.ShirtNumber}</div>
+                                  )}
+                                </div>
+                                <span className="text-muted/60 w-4 text-center text-[10px]">{player.ShirtNumber}</span>
+                                <span className="flex-1 truncate text-text/80 group-hover:text-text font-medium">{player.PlayerName?.[0]?.Description}</span>
+                                {player.Captain && <span className="text-[8px] text-accent/70 font-bold">C</span>}
+                                <span className="text-[8px] text-muted/50 uppercase">{player.PositionLocalized?.[0]?.Description?.charAt(0)}</span>
                               </div>
-                              <span className="text-muted/60 w-4 text-center text-[10px]">{player.ShirtNumber}</span>
-                              <span className="flex-1 truncate text-text/80 group-hover:text-text font-medium">{player.PlayerName?.[0]?.Description}</span>
-                              {player.Captain && <span className="text-[8px] text-accent/70 font-bold">C</span>}
-                              <span className="text-[8px] text-muted/50 uppercase">{player.PositionLocalized?.[0]?.Description?.charAt(0)}</span>
-                            </div>
-                          ))}
+                            )
+                          })}
                         </div>
                         {/* Substitutes */}
                         {(team?.Players || []).filter((p: any) => p.FieldStatus !== 0).length > 0 && (
@@ -458,6 +473,20 @@ export default function WorldCupMatch() {
         )}
         <Footer />
       </main>
+      {lightbox && (
+        <Lightbox
+          src={lightbox.photos[lightbox.index].src}
+          caption={lightbox.photos[lightbox.index].caption}
+          index={lightbox.index}
+          total={lightbox.photos.length}
+          allPhotos={lightbox.photos}
+          hasPrev={lightbox.index > 0}
+          hasNext={lightbox.index < lightbox.photos.length - 1}
+          onClose={() => setLightbox(null)}
+          onPrev={() => setLightbox(lb => lb ? { ...lb, index: lb.index - 1 } : lb)}
+          onNext={() => setLightbox(lb => lb ? { ...lb, index: lb.index + 1 } : lb)}
+        />
+      )}
     </>
   )
 }
