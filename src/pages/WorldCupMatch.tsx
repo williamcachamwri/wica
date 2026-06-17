@@ -6,6 +6,8 @@ import { Footer } from '../components/Footer'
 
 import '../styles/worldcup.css'
 
+type Tab = 'Timeline' | 'Lineups' | 'Stats' | 'Table' | 'Power Ranking'
+
 const STAT_LABELS: Record<string, string> = {
   Possession: 'Possession',
   AttemptAtGoalOnTarget: 'Shots on Target',
@@ -30,7 +32,7 @@ const STAT_ORDER = ['Possession', 'AttemptAtGoalOnTarget', 'AttemptAtGoalOffTarg
 
 const tabVariants = {
   enter: { opacity: 0, y: 8, scale: 0.98 },
-  center: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.3, ease: [0.16, 1, 0.3, 1] } },
+  center: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.3, ease: 'easeOut' as const } },
   exit: { opacity: 0, y: -6, scale: 0.97, transition: { duration: 0.15 } },
 }
 
@@ -125,7 +127,7 @@ export default function WorldCupMatch() {
               <div className="flex items-center justify-center gap-4 mb-3">
                 <div className="flex flex-col items-center gap-2 w-28">
                   <div className="w-10 h-10 flex items-center justify-center">
-                    <img src={match.HomeTeam?.PictureUrl?.replace('{format}','sq').replace('{size}','4')} alt="" className="max-w-full max-h-full object-contain" />
+                    <img src={match.HomeTeam?.PictureUrl?.replace('{format}', 'sq').replace('{size}', '4')} alt="" className="max-w-full max-h-full object-contain" />
                   </div>
                   <span className="text-sm font-semibold leading-tight">{homeName}</span>
                 </div>
@@ -136,7 +138,7 @@ export default function WorldCupMatch() {
                 </div>
                 <div className="flex flex-col items-center gap-2 w-28">
                   <div className="w-10 h-10 flex items-center justify-center">
-                    <img src={match.AwayTeam?.PictureUrl?.replace('{format}','sq').replace('{size}','4')} alt="" className="max-w-full max-h-full object-contain" />
+                    <img src={match.AwayTeam?.PictureUrl?.replace('{format}', 'sq').replace('{size}', '4')} alt="" className="max-w-full max-h-full object-contain" />
                   </div>
                   <span className="text-sm font-semibold leading-tight">{awayName}</span>
                 </div>
@@ -177,9 +179,8 @@ export default function WorldCupMatch() {
             <div className="flex items-center gap-1 border-b border-border/30 pb-3 mb-6 overflow-x-auto">
               {(['Timeline', 'Lineups', 'Stats', 'Table', 'Power Ranking'] as Tab[]).map(tab => (
                 <button key={tab} onClick={() => setActiveTab(tab)}
-                  className={`text-[11px] font-mono uppercase tracking-widest pb-1 px-2 transition-all shrink-0 ${
-                    activeTab === tab ? 'text-accent border-b-2 border-accent font-bold' : 'text-muted hover:text-text'
-                  }`}
+                  className={`text-[11px] font-mono uppercase tracking-widest pb-1 px-2 transition-all shrink-0 ${activeTab === tab ? 'text-accent border-b-2 border-accent font-bold' : 'text-muted hover:text-text'
+                    }`}
                 >{tab}</button>
               ))}
             </div>
@@ -206,16 +207,15 @@ export default function WorldCupMatch() {
                           initial={{ opacity: 0, x: isHome ? -10 : 10 }}
                           animate={{ opacity: 1, x: 0 }}
                           transition={{ delay: idx * 0.05 }}
-                          className={`flex items-center gap-3 text-[11px] font-mono py-2 px-3 rounded-lg transition-colors ${
-                            isGoal ? 'bg-accent/5' : isRed ? 'bg-red-500/5' : isCard ? 'bg-yellow-500/5' : 'hover:bg-surface'
-                          }`}
+                          className={`flex items-center gap-3 text-[11px] font-mono py-2 px-3 rounded-lg transition-colors ${isGoal ? 'bg-accent/5' : isRed ? 'bg-red-500/5' : isCard ? 'bg-yellow-500/5' : 'hover:bg-surface'
+                            }`}
                         >
                           <span className={`font-bold w-10 shrink-0 text-right ${isGoal ? 'text-accent' : 'text-muted/80'}`}>{minute}</span>
                           <span className="text-xs shrink-0 w-5 text-center">{eventTypeIcon(type)}</span>
                           {isOwnGoal ? (
                             <span className="flex-1 text-text font-semibold flex items-center gap-1.5">
                               <img
-                                src={(eventIsHome ? match.HomeTeam?.PictureUrl : match.AwayTeam?.PictureUrl)?.replace('{format}','sq').replace('{size}','4')}
+                                src={(eventIsHome ? match.HomeTeam?.PictureUrl : match.AwayTeam?.PictureUrl)?.replace('{format}', 'sq').replace('{size}', '4')}
                                 alt=""
                                 className="w-4 h-4 object-contain"
                               />
@@ -258,9 +258,9 @@ export default function WorldCupMatch() {
                           <p className="text-[8px] font-mono uppercase tracking-widest text-muted/40">Starting XI</p>
                           {(team?.Players || []).filter((p: any) => p.FieldStatus === 0).map((player: any) => (
                             <div key={player.IdPlayer} className="flex items-center gap-2.5 text-[11px] font-mono group py-1 px-2 rounded-lg hover:bg-surface transition-colors">
-                              <div className="w-7 h-7 rounded-full overflow-hidden flex-shrink-0 bg-code-bg ring-1 ring-border/40">
+                              <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0 bg-code-bg ring-1 ring-border/40">
                                 {player.PlayerPicture?.PictureUrl ? (
-                                  <img src={player.PlayerPicture.PictureUrl} alt="" className="w-full h-full object-cover" />
+                                  <img src={player.PlayerPicture.PictureUrl + "?imwidth=120"} alt="" className="w-full h-full object-cover object-top" loading="lazy" decoding="async" />
                                 ) : (
                                   <div className="w-full h-full flex items-center justify-center text-[8px] text-muted/40 font-bold">{player.ShirtNumber}</div>
                                 )}
