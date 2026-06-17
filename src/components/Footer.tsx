@@ -8,7 +8,12 @@ export function Footer() {
     <footer className="footer">
       <div className="footer__top">
         <div className="footer__brand">
-          <span className="footer__name">Lê Vĩnh Khang</span>
+          <span className="footer__name">
+            Lê Vĩnh Khang
+            <span className="footer__flag-wrap">
+              <img src="https://api.fifa.com/api/v3/picture/flags-sq-4/POR" alt="Portugal" className="footer__flag" />
+            </span>
+          </span>
           <span className="footer__role">Developer & maker</span>
         </div>
         <nav className="footer__links">

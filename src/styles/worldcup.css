@@ -91,12 +91,12 @@ tr:hover .wc-team-logo-small {
   white-space: nowrap;
 }
 
-/* ── Sticky World Cup widget (score bug style — top-right) ─────────── */
+/* ── Sticky World Cup widget (bottom-right, above NowPlaying) ──────── */
 .worldcup-sticky {
   position: fixed;
-  top: 5rem;
+  bottom: 5rem;
   right: 1.5rem;
-  z-index: 69;
+  z-index: 71;
   display: flex;
   align-items: center;
   flex-direction: row-reverse;
@@ -131,33 +131,12 @@ tr:hover .wc-team-logo-small {
   background: transparent;
   color: var(--text-muted);
   cursor: pointer;
-  transition: color 0.15s ease;
   flex-shrink: 0;
+  transition: color 0.15s ease;
 }
 
 .worldcup-sticky__toggle:hover {
   color: var(--text);
-}
-
-.worldcup-sticky__toggle-dot {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background: #ef4444;
-  display: block;
-}
-
-.worldcup-sticky__toggle-trophy {
-  width: 16px;
-  height: 16px;
-  display: block;
-  color: var(--accent);
-  opacity: 0.65;
-  transition: opacity 0.15s ease;
-}
-
-.worldcup-sticky__toggle:hover .worldcup-sticky__toggle-trophy {
-  opacity: 1;
 }
 
 .worldcup-sticky__body-wrapper {
@@ -275,18 +254,13 @@ tr:hover .wc-team-logo-small {
 
 @media (max-width: 640px) {
   .worldcup-sticky {
-    top: 4.5rem;
+    bottom: 4.5rem;
     right: 0.75rem;
   }
 
   .worldcup-sticky__toggle {
     width: 32px;
     height: 32px;
-  }
-
-  .worldcup-sticky__toggle-trophy {
-    width: 14px;
-    height: 14px;
   }
 
   .worldcup-sticky__body {
