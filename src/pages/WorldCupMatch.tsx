@@ -246,15 +246,16 @@ export default function WorldCupMatch() {
               {activeTab === 'Lineups' && (
                 <motion.div key="lineups" variants={tabVariants} initial="enter" animate="center" exit="exit">
                   {(() => {
-                    const homeTactics = match?.HomeTeam?.Tactics?.[0]
-                    const awayTactics = match?.AwayTeam?.Tactics?.[0]
-                    if (!homeTactics?.Formation || !awayTactics?.Formation) return <p className="text-center text-muted font-mono text-[10px] uppercase py-12">Formation data not available</p>
+                    const rawTactics = match?.HomeTeam?.Tactics
+                    const homeFormation = typeof rawTactics === 'string' ? rawTactics.split('-').map(Number) : null
+                    const awayFormation = typeof match?.AwayTeam?.Tactics === 'string' ? match.AwayTeam.Tactics.split('-').map(Number) : null
+                    if (!homeFormation || !awayFormation) return <p className="text-center text-muted font-mono text-[10px] uppercase py-12">Formation data not available</p>
                     return (
                       <FormationDiagram
-                        homePlayers={(match?.HomeTeam?.Players || []).filter((p: any) => p.FieldStatus === 0)}
-                        awayPlayers={(match?.AwayTeam?.Players || []).filter((p: any) => p.FieldStatus === 0)}
-                        homeFormation={homeTactics.Formation}
-                        awayFormation={awayTactics.Formation}
+                        homePlayers={(match?.HomeTeam?.Players || []).filter((p: any) => p.Status === 1)}
+                        awayPlayers={(match?.AwayTeam?.Players || []).filter((p: any) => p.Status === 1)}
+                        homeFormation={homeFormation}
+                        awayFormation={awayFormation}
                         homeTeam={{
                           name: match?.HomeTeam?.TeamName?.[0]?.Description || 'Home',
                           logo: (match?.HomeTeam?.PictureUrl || '').replace('{format}','sq').replace('{size}','4'),

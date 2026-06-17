@@ -9,8 +9,6 @@ interface FormationDiagramProps {
   awayTeam: { name: string; logo: string }
 }
 
-const POS_ORDER = ['Goalkeeper', 'Defender', 'Midfielder', 'Forward']
-
 function shortName(name: string): string {
   const parts = name.trim().split(/\s+/)
   if (parts.length <= 1) return parts[0] || ''
@@ -19,11 +17,7 @@ function shortName(name: string): string {
 }
 
 function buildRows(players: any[], formation: number[]) {
-  const sorted = [...players].sort((a, b) => {
-    const pa = POS_ORDER.indexOf(a.PositionLocalized?.[0]?.Description || '')
-    const pb = POS_ORDER.indexOf(b.PositionLocalized?.[0]?.Description || '')
-    return pa - pb
-  })
+  const sorted = [...players].sort((a, b) => (a.Position ?? 0) - (b.Position ?? 0))
   const counts = [1, ...formation]
   const rows: { number: number; name: string; picture?: string }[][] = []
   let idx = 0
