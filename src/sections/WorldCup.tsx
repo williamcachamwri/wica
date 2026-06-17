@@ -214,7 +214,8 @@ function MatchCard({ match, onClick, prominent }: { match: Match; onClick: () =>
 
   return (
     <motion.article
-      initial={{ opacity: 0, y: 10 }}
+      initial={prominent ? { opacity: 1, y: 0 } : { opacity: 0, y: 10 }}
+      animate={prominent ? { opacity: 1, y: 0 } : undefined}
       whileInView={prominent ? undefined : { opacity: 1, y: 0 }}
       viewport={prominent ? undefined : { once: true }}
       onClick={onClick}
