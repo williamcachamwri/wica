@@ -278,23 +278,24 @@
   position: relative;
 }
 
-.blog-interactions__thread::before {
+.blog-interactions__replies {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.blog-interactions__replies::before {
   content: '';
   position: absolute;
   left: 1.25rem;
-  top: 0;
+  top: -0.5rem;
   bottom: 0;
   width: 2px;
   background: var(--border);
   border-radius: 1px;
   pointer-events: none;
-}
-
-.blog-interactions__replies {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  margin-top: 0.5rem;
 }
 
 .blog-interactions__comment--reply {
