@@ -211,10 +211,8 @@
 /* ── Toast ───────────────────────────────────────────────────────── */
 .toast-container {
   position: fixed !important;
-  bottom: 5.5rem !important;
+  bottom: 1.5rem !important;
   right: 1.5rem !important;
-  top: auto !important;
-  left: auto !important;
   z-index: 9999 !important;
   display: flex;
   flex-direction: column;
@@ -224,7 +222,7 @@
 
 @media (max-width: 640px) {
   .toast-container {
-    bottom: 5rem !important;
+    bottom: 1rem !important;
     right: 1rem !important;
   }
 }

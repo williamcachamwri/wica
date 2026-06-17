@@ -17,8 +17,18 @@ function getDiscussionTitle(slug: string, title: string): string {
   return `[blog-post:${slug}] ${title}`
 }
 
+function parseReplyMarker(body: string): { cleanBody: string; parentId?: string } {
+  const match = body.match(/^<!--reply:([^>]+)-->/)
+  if (match) {
+    return { cleanBody: body.replace(/^<!--reply:[^>]+-->/, ''), parentId: match[1] }
+  }
+  return { cleanBody: body }
+}
+
 function formatComment(node: { id: string; author?: { login: string; avatarUrl?: string }; body: string; createdAt: string; url: string }, parentId?: string) {
-  return { id: node.id, author: node.author?.login || 'anonymous', avatar: node.author?.avatarUrl, body: node.body, date: node.createdAt, url: node.url, ...(parentId ? { parentId } : {}) }
+  const { cleanBody, parentId: markerParent } = parseReplyMarker(node.body)
+  const effectiveParent = parentId || markerParent
+  return { id: node.id, author: node.author?.login || 'anonymous', avatar: node.author?.avatarUrl, body: cleanBody, date: node.createdAt, url: node.url, ...(effectiveParent ? { parentId: effectiveParent } : {}) }
 }
 
 async function ghFetch(query: string, token: string, variables?: Record<string, unknown>) {
@@ -100,11 +110,13 @@ export async function onRequest(context: { request: Request; env: Env }): Promis
         if (!discussionId) throw new Error('Failed to create discussion')
       }
 
-      const commentData = await ghFetch(`mutation($discussionId: ID!, $body: String!, $replyToId: ID) {
-        addDiscussionComment(input: {discussionId: $discussionId, body: $body, replyToId: $replyToId}) {
+      const bodyWithMarker = replyTo ? `<!--reply:${replyTo}-->${body.trim()}` : body.trim()
+
+      const commentData = await ghFetch(`mutation($discussionId: ID!, $body: String!) {
+        addDiscussionComment(input: {discussionId: $discussionId, body: $body}) {
           comment { id author { login avatarUrl } body createdAt url }
         }
-      }`, token, { discussionId, body: body.trim(), ...(replyTo ? { replyToId: replyTo } : {}) }) as any
+      }`, token, { discussionId, body: bodyWithMarker }) as any
       const comment = commentData?.addDiscussionComment?.comment
       if (!comment) throw new Error('Failed to create comment')
 
