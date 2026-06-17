@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { SEO } from '../components/SEO'
 import { Footer } from '../components/Footer'
+import { FormationDiagram } from '../components/FormationDiagram'
 import { Lightbox } from '../components/Lightbox'
 
 import '../styles/worldcup.css'
@@ -253,6 +254,14 @@ export default function WorldCupMatch() {
                           <h4 className="text-[10px] font-mono uppercase tracking-widest text-muted">{team?.TeamName?.[0]?.Description}</h4>
                           {formation && <span className="text-[9px] font-mono text-muted/60">{formation.join('-')}</span>}
                         </div>
+                        {/* Formation diagram */}
+                        {formation && (
+                          <FormationDiagram
+                            formation={formation}
+                            players={(team?.Players || []).filter((p: any) => p.FieldStatus === 0)}
+                            side={side === 'HomeTeam' ? 'home' : 'away'}
+                          />
+                        )}
                         {/* Starting XI */}
                         <div className="space-y-1.5">
                           <p className="text-[8px] font-mono uppercase tracking-widest text-muted/40">Starting XI</p>

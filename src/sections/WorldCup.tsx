@@ -27,8 +27,11 @@ export function WorldCup() {
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState<Tab>('Matches')
   const [page, setPage] = useState(0)
+  const [countdown, setCountdown] = useState(REFRESH_INTERVAL / 1000)
+  const [groupFilter, setGroupFilter] = useState('')
 
   const fetchData = useCallback(() => {
+    setCountdown(REFRESH_INTERVAL / 1000)
     fetch('/api/worldcup')
       .then((res) => res.json())
       .then((json) => {
@@ -46,8 +49,15 @@ export function WorldCup() {
     return () => clearInterval(interval)
   }, [fetchData])
 
-  // Reset page when tab changes
-  useEffect(() => { setPage(0) }, [activeTab])
+  useEffect(() => {
+    const tick = setInterval(() => {
+      setCountdown(prev => Math.max(0, prev - 1))
+    }, 1000)
+    return () => clearInterval(tick)
+  }, [])
+
+  // Reset page & filter when tab changes
+  useEffect(() => { setPage(0); setGroupFilter('') }, [activeTab])
 
   const location = useLocation()
   useEffect(() => {
@@ -96,9 +106,10 @@ export function WorldCup() {
 
   const { matches, standings, nextMatch } = data
 
-  // Filter to FT matches only for pagination; LIVE shown separately at top
-  const ftMatches = matches.filter(m => m.status === 'FT')
-  const liveMatches = matches.filter(m => m.status === 'LIVE')
+  const groups = [...new Set(matches.map(m => m.group).filter(Boolean))].sort()
+  const filtered = groupFilter ? matches.filter(m => m.group === groupFilter) : matches
+  const ftMatches = filtered.filter(m => m.status === 'FT')
+  const liveMatches = filtered.filter(m => m.status === 'LIVE')
   const totalPages = Math.max(1, Math.ceil(ftMatches.length / PER_PAGE))
   const currentFt = ftMatches.slice(page * PER_PAGE, (page + 1) * PER_PAGE)
 
@@ -129,7 +140,31 @@ export function WorldCup() {
         <AnimatePresence mode="wait">
           {activeTab === 'Matches' && (
             <motion.div key="matches" variants={tabVariants} initial="enter" animate="center" exit="exit">
-              {nextMatch && (
+              {/* Refresh countdown */}
+              <div className="flex items-center justify-center gap-2 mb-4 text-[9px] font-mono text-muted/50 uppercase tracking-wider">
+                <span className={`inline-block w-1.5 h-1.5 rounded-full ${countdown <= 5 ? 'bg-accent animate-pulse' : 'bg-muted/30'}`} />
+                {countdown}s
+              </div>
+
+              {/* Group filter */}
+              {groups.length > 0 && (
+                <div className="flex flex-wrap items-center justify-center gap-1.5 mb-5">
+                  <button onClick={() => setGroupFilter('')}
+                    className={`px-2.5 py-1 rounded-full text-[9px] font-mono uppercase tracking-wider transition-colors ${
+                      !groupFilter ? 'bg-accent/15 text-accent font-semibold' : 'text-muted/60 hover:text-text bg-surface-lighter'
+                    }`}
+                  >All</button>
+                  {groups.map(g => (
+                    <button key={g} onClick={() => setGroupFilter(g)}
+                      className={`px-2.5 py-1 rounded-full text-[9px] font-mono uppercase tracking-wider transition-colors ${
+                        groupFilter === g ? 'bg-accent/15 text-accent font-semibold' : 'text-muted/60 hover:text-text bg-surface-lighter'
+                      }`}
+                    >{g}</button>
+                  ))}
+                </div>
+              )}
+
+              {nextMatch && (!groupFilter || nextMatch.group === groupFilter) && (
                 <div className="project-card p-4 border-accent/40 border-2 bg-accent/[0.03] relative overflow-hidden mb-6">
                   <div className="absolute top-0 right-0 px-3 py-1 bg-accent/10 text-[8px] font-mono uppercase tracking-widest text-accent rounded-bl-lg">Next Match</div>
                   <div className="flex items-center gap-2 mb-2">
@@ -154,6 +189,12 @@ export function WorldCup() {
                   <span className="text-[10px] font-mono text-muted">{page + 1} / {totalPages}</span>
                   <button onClick={() => setPage(p => Math.min(totalPages - 1, p + 1))} disabled={page >= totalPages - 1} className="text-[10px] font-mono uppercase tracking-widest px-3 py-1.5 rounded-lg border border-border/40 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-surface transition-colors text-muted hover:text-text">Next</button>
                 </div>
+              )}
+              {!groupFilter && ftMatches.length === 0 && liveMatches.length === 0 && (
+                <p className="text-center text-muted font-mono text-[10px] uppercase py-12">No matches found</p>
+              )}
+              {groupFilter && filtered.length === 0 && (
+                <p className="text-center text-muted font-mono text-[10px] uppercase py-12">No matches in {groupFilter}</p>
               )}
             </motion.div>
           )}
