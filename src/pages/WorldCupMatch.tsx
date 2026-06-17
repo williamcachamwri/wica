@@ -244,12 +244,11 @@ export default function WorldCupMatch() {
               )}
 
               {activeTab === 'Lineups' && (
-                <motion.div key="lineups" variants={tabVariants} initial="enter" animate="center" exit="exit" className="space-y-6">
-                  {/* Formation diagram (both teams on one pitch) */}
+                <motion.div key="lineups" variants={tabVariants} initial="enter" animate="center" exit="exit">
                   {(() => {
                     const homeTactics = match?.HomeTeam?.Tactics?.[0]
                     const awayTactics = match?.AwayTeam?.Tactics?.[0]
-                    if (!homeTactics?.Formation || !awayTactics?.Formation) return null
+                    if (!homeTactics?.Formation || !awayTactics?.Formation) return <p className="text-center text-muted font-mono text-[10px] uppercase py-12">Formation data not available</p>
                     return (
                       <FormationDiagram
                         homePlayers={(match?.HomeTeam?.Players || []).filter((p: any) => p.FieldStatus === 0)}
@@ -267,64 +266,6 @@ export default function WorldCupMatch() {
                       />
                     )
                   })()}
-
-                  {/* Player lists */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {['HomeTeam', 'AwayTeam'].map((side) => {
-                      const team = match?.[side]
-                      return (
-                        <div key={side} className="space-y-3">
-                          <div className="flex items-center justify-between border-b border-border/20 pb-2">
-                            <h4 className="text-[10px] font-mono uppercase tracking-widest text-muted">{team?.TeamName?.[0]?.Description}</h4>
-                          </div>
-                          {/* Starting XI */}
-                          <div className="space-y-1.5">
-                            <p className="text-[8px] font-mono uppercase tracking-widest text-muted/40">Starting XI</p>
-                            {(team?.Players || []).filter((p: any) => p.FieldStatus === 0).map((player: any) => {
-                              const starters = (team?.Players || []).filter((p: any) => p.FieldStatus === 0)
-                              const photos = starters
-                                .filter((p: any) => p.PlayerPicture?.PictureUrl)
-                                .map((p: any) => ({
-                                  src: p.PlayerPicture.PictureUrl as string,
-                                  caption: p.PlayerName?.[0]?.Description || '',
-                                }))
-                              const photoIdx = photos.findIndex((ph: { src: string; caption: string }) => ph.src === player.PlayerPicture?.PictureUrl)
-                              return (
-                                <div key={player.IdPlayer} className="flex items-center gap-2.5 text-[11px] font-mono group py-1 px-2 rounded-lg hover:bg-surface transition-colors">
-                                  <div
-                                    className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0 bg-code-bg ring-1 ring-border/40 cursor-pointer hover:ring-accent/60 transition-all"
-                                    onClick={() => player.PlayerPicture?.PictureUrl && setLightbox({ photos, index: photoIdx >= 0 ? photoIdx : 0 })}
-                                  >
-                                    {player.PlayerPicture?.PictureUrl ? (
-                                      <img src={player.PlayerPicture.PictureUrl + "?imwidth=120"} alt="" className="w-full h-full object-cover object-top" loading="lazy" decoding="async" />
-                                    ) : (
-                                      <div className="w-full h-full flex items-center justify-center text-[8px] text-muted/40 font-bold">{player.ShirtNumber}</div>
-                                    )}
-                                  </div>
-                                  <span className="text-muted/60 w-4 text-center text-[10px]">{player.ShirtNumber}</span>
-                                  <span className="flex-1 truncate text-text/80 group-hover:text-text font-medium">{player.PlayerName?.[0]?.Description}</span>
-                                  {player.Captain && <span className="text-[8px] text-accent/70 font-bold">C</span>}
-                                  <span className="text-[8px] text-muted/50 uppercase">{player.PositionLocalized?.[0]?.Description?.charAt(0)}</span>
-                                </div>
-                              )
-                            })}
-                          </div>
-                          {/* Substitutes */}
-                          {(team?.Players || []).filter((p: any) => p.FieldStatus !== 0).length > 0 && (
-                            <div className="space-y-1.5 pt-1 border-t border-border/10">
-                              <p className="text-[8px] font-mono uppercase tracking-widest text-muted/40">Substitutes</p>
-                              {team?.Players?.filter((p: any) => p.FieldStatus !== 0).map((player: any) => (
-                                <div key={player.IdPlayer} className="flex items-center gap-2.5 text-[11px] font-mono py-0.5 px-2 text-text/60">
-                                  <span className="text-muted/40 w-4 text-center text-[10px]">{player.ShirtNumber}</span>
-                                  <span className="flex-1 truncate">{player.PlayerName?.[0]?.Description}</span>
-                                </div>
-                              ))}
-                            </div>
-                          )}
-                        </div>
-                    )
-                  })}
-                  </div>
                 </motion.div>
               )}
 
