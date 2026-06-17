@@ -44,6 +44,10 @@ export function Hero({ typewriterStart, nameStartDelay }: HeroProps) {
       <div className="mb-6">
         <h1 className="name-title name-title--hero text-[clamp(2rem,7vw,3.75rem)] font-bold tracking-[-0.03em] leading-[1.08]">
           <AnimatedName startDelay={nameStartDelay}>Lê Vĩnh Khang</AnimatedName>
+          <span className="hero__flag-badge">
+            <img src="https://api.fifa.com/api/v3/picture/flags-sq-4/POR" alt="Portugal" className="hero__flag-img" />
+            <span className="hero__flag-shine" />
+          </span>
         </h1>
         <span className="block mt-2 text-muted text-lg">Developer & maker</span>
         <NowPlaying />
