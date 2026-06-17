@@ -2,6 +2,7 @@
 .blog-interactions {
   margin-top: 2.5rem;
   padding-top: 2rem;
+  padding-bottom: 2rem;
   border-top: 1px solid var(--border);
 }
 
@@ -273,6 +274,13 @@
 }
 
 /* ── Threaded replies ────────────────────────────── */
+.blog-interactions__replies {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
 .blog-interactions__comment--reply {
   margin-left: 1.25rem;
   border-left: 2px solid var(--border);
@@ -282,6 +290,37 @@
 
 .blog-interactions__comment--reply:hover {
   border-left-color: var(--accent);
+}
+
+/* ── Inline reply form ───────────────────────────── */
+.blog-interactions__form--inline {
+  margin-top: 0.5rem;
+  padding: 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--bg);
+}
+
+.blog-interactions__form-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.blog-interactions__form-cancel {
+  background: transparent;
+  border: none;
+  color: var(--text-subtle);
+  font-size: 12px;
+  font-family: "JetBrains Mono", monospace;
+  cursor: pointer;
+  padding: 0;
+  transition: color 0.2s;
+}
+
+.blog-interactions__form-cancel:hover {
+  color: var(--text-muted);
 }
 
 /* ── Textarea wrapper (for mention dropdown) ─────── */
