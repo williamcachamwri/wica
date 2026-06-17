@@ -5,7 +5,7 @@ import { SpriteWithFirework } from '../components/SpriteWithFirework'
 import { AnimatedName } from '../components/AnimatedName'
 import { NowPlaying } from '../components/NowPlaying'
 import { WorkingHours } from './WorkingHours'
-import { sprites } from '../data/sprites'
+import { sprites, portugalSprite } from '../data/sprites'
 
 interface HeroProps {
   typewriterStart: boolean
@@ -44,9 +44,11 @@ export function Hero({ typewriterStart, nameStartDelay }: HeroProps) {
       <div className="mb-6">
         <h1 className="name-title name-title--hero text-[clamp(2rem,6vw,3.25rem)] font-bold tracking-[-0.03em] leading-[1.08] relative">
           <AnimatedName startDelay={nameStartDelay}>Lê Vĩnh Khang</AnimatedName>
-          <SpriteWithFirework delay={0}>
-            <img src="https://api.fifa.com/api/v3/picture/flags-sq-4/POR" alt="Portugal" className="hero__flag-sprite" />
-          </SpriteWithFirework>
+          <span className="hero__flag-sprite">
+            <SpriteWithFirework delay={0}>
+              {portugalSprite.el}
+            </SpriteWithFirework>
+          </span>
         </h1>
         <span className="block mt-2 text-muted text-lg">Developer & maker</span>
         <NowPlaying />

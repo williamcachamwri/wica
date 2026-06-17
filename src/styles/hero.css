@@ -98,21 +98,14 @@
 /* ── Portugal flag sprite on title ─────────────────────────────────── */
 .hero__flag-sprite {
   position: absolute;
-  top: -0.5em;
-  right: -2.2em;
-  width: 1.6em;
-  height: 1.6em;
-  border-radius: 4px;
-  object-fit: cover;
-  display: block;
-  image-rendering: auto;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  top: -1.2em;
+  right: -1.8em;
   animation: flag-float 3s ease-in-out infinite;
 }
 
 @keyframes flag-float {
   0%, 100% { transform: translateY(0) rotate(0deg); }
-  30% { transform: translateY(-3px) rotate(2deg); }
+  30% { transform: translateY(-3px) rotate(3deg); }
   60% { transform: translateY(-1px) rotate(-1deg); }
 }
 

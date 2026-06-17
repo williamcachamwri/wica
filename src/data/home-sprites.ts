@@ -60,7 +60,43 @@ const BONSAI: PixelFrame = [
   [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
 ];
 
-export type HomeSpriteType = "cat" | "bonsai";
+// ── Portugal Flag ───────────────────────────────────────────────────
+// Vamos Portugal! Pixel art flag com esfera armilar.
+const PORTUGAL_PALETTE: Record<number, string> = {
+  0: 'transparent',
+  1: '#006633',  // green field
+  2: '#CC0000',  // red field
+  3: '#FFD700',  // gold (armillary sphere / castles)
+  4: '#FFFFFF',  // white (shield)
+  5: '#0055A4',  // blue (shield interior)
+};
+
+const PORTUGAL_CONFIG: PixelSpriteConfig = {
+  palette: PORTUGAL_PALETTE,
+  gridWidth: 16,
+  gridHeight: 16,
+};
+
+const PORTUGAL_FLAG: PixelFrame = [
+  [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+  [1,1,1,1,1,1,2,2,2,2,2,2,2,2,2,2],
+  [1,1,1,1,1,1,2,2,2,2,2,2,2,2,2,2],
+  [1,1,1,1,1,1,2,2,2,2,2,2,2,2,2,2],
+  [1,1,1,1,1,1,2,2,2,2,2,2,2,2,2,2],
+  [1,1,1,1,1,1,2,2,3,3,3,2,2,2,2,2],
+  [1,1,1,1,1,1,2,3,3,3,3,3,2,2,2,2],
+  [1,1,1,1,1,1,3,4,5,5,4,3,2,2,2,2],
+  [1,1,1,1,1,1,3,4,5,5,4,3,2,2,2,2],
+  [1,1,1,1,1,1,2,3,3,3,3,3,2,2,2,2],
+  [1,1,1,1,1,1,2,2,3,3,3,2,2,2,2,2],
+  [1,1,1,1,1,1,2,2,2,2,2,2,2,2,2,2],
+  [1,1,1,1,1,1,2,2,2,2,2,2,2,2,2,2],
+  [1,1,1,1,1,1,2,2,2,2,2,2,2,2,2,2],
+  [1,1,1,1,1,1,2,2,2,2,2,2,2,2,2,2],
+  [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+];
+
+export type HomeSpriteType = "cat" | "bonsai" | "portugal";
 
 export const HOME_SPRITES: Record<
   HomeSpriteType,
@@ -68,4 +104,5 @@ export const HOME_SPRITES: Record<
 > = {
   cat: { config: HOME_CONFIG, frame: CAT },
   bonsai: { config: HOME_CONFIG, frame: BONSAI },
+  portugal: { config: PORTUGAL_CONFIG, frame: PORTUGAL_FLAG },
 };
