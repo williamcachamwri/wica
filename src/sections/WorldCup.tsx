@@ -1,9 +1,15 @@
 import { SectionDivider } from '../components/SectionDivider'
 import type { Match, Standing } from '../types'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
 import { useEffect, useState, useCallback } from 'react'
 import '../styles/worldcup.css'
+
+const tabVariants = {
+  enter: { opacity: 0, y: 8, scale: 0.98 },
+  center: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.3, ease: [0.16, 1, 0.3, 1] } },
+  exit: { opacity: 0, y: -6, scale: 0.97, transition: { duration: 0.15 } },
+}
 
 type Tab = 'Matches' | 'Standings' | 'Power Rankings'
 const PER_PAGE = 5
@@ -86,136 +92,116 @@ export function WorldCup() {
     <section id="worldcup" className="mb-14 scroll-mt-20">
       <SectionDivider label="FIFA World Cup 2026™" />
 
-      <div className="flex items-center gap-1 mb-6 p-1 bg-surface-lighter rounded-lg border border-border/40 w-fit mx-auto">
+      <div className="flex items-center gap-1 mb-6 p-1 bg-surface-lighter rounded-lg border border-border/40 w-fit mx-auto relative">
         {(['Matches', 'Standings', 'Power Rankings'] as Tab[]).map((tab) => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
-            className={`px-4 py-1.5 rounded-md text-[11px] font-mono uppercase tracking-wider transition-all ${
+            className={`px-4 py-1.5 rounded-md text-[11px] font-mono uppercase tracking-wider transition-colors relative ${
               activeTab === tab 
-                ? 'bg-surface shadow-sm text-accent font-bold' 
-                : 'text-muted hover:text-text hover:bg-surface/50'
+                ? 'text-accent font-bold' 
+                : 'text-muted hover:text-text'
             }`}
           >
             {tab}
+            {activeTab === tab && (
+              <motion.div layoutId="wc-tab-indicator" className="absolute bottom-0 left-2 right-2 h-0.5 bg-accent rounded-full" transition={{ type: 'spring', stiffness: 380, damping: 30 }} />
+            )}
           </button>
         ))}
       </div>
 
       <div className="space-y-6">
-        {activeTab === 'Matches' && (
-          <>
-            {/* Next match */}
-            {nextMatch && (
-              <div className="project-card p-4 border-accent/40 border-2 bg-accent/[0.03] relative overflow-hidden">
-                <div className="absolute top-0 right-0 px-3 py-1 bg-accent/10 text-[8px] font-mono uppercase tracking-widest text-accent rounded-bl-lg">Next Match</div>
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="w-1.5 h-1.5 rounded-full bg-accent animate-pulse" />
-                  <span className="text-[10px] font-mono uppercase tracking-widest text-accent font-semibold">Upcoming</span>
-                  <span className="text-[10px] font-mono text-muted">{new Date(nextMatch.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>
+        <AnimatePresence mode="wait">
+          {activeTab === 'Matches' && (
+            <motion.div key="matches" variants={tabVariants} initial="enter" animate="center" exit="exit">
+              {nextMatch && (
+                <div className="project-card p-4 border-accent/40 border-2 bg-accent/[0.03] relative overflow-hidden mb-6">
+                  <div className="absolute top-0 right-0 px-3 py-1 bg-accent/10 text-[8px] font-mono uppercase tracking-widest text-accent rounded-bl-lg">Next Match</div>
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="w-1.5 h-1.5 rounded-full bg-accent animate-pulse" />
+                    <span className="text-[10px] font-mono uppercase tracking-widest text-accent font-semibold">Upcoming</span>
+                    <span className="text-[10px] font-mono text-muted">{new Date(nextMatch.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>
+                  </div>
+                  <MatchCard match={nextMatch} onClick={() => navigate(`/worldcup/${nextMatch.id}`)} prominent />
                 </div>
-                <MatchCard match={nextMatch} onClick={() => navigate(`/worldcup/${nextMatch.id}`)} prominent />
-              </div>
-            )}
-
-            {/* Live matches */}
-            {liveMatches.map(match => (
-              <MatchCard key={match.id} match={match} onClick={() => navigate(`/worldcup/${match.id}`)} />
-            ))}
-
-            {/* FT matches (paginated) */}
-            <div className="grid grid-cols-1 gap-3">
-              {currentFt.map((match) => (
-                <MatchCard 
-                  key={match.id} 
-                  match={match} 
-                  onClick={() => navigate(`/worldcup/${match.id}`)} 
-                />
+              )}
+              {liveMatches.map(match => (
+                <MatchCard key={match.id} match={match} onClick={() => navigate(`/worldcup/${match.id}`)} />
               ))}
-            </div>
-
-            {/* Pagination */}
-            {totalPages > 1 && (
-              <div className="flex items-center justify-center gap-3 pt-2">
-                <button
-                  onClick={() => setPage(p => Math.max(0, p - 1))}
-                  disabled={page === 0}
-                  className="text-[10px] font-mono uppercase tracking-widest px-3 py-1.5 rounded-lg border border-border/40 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-surface transition-colors text-muted hover:text-text"
-                >
-                  Previous
-                </button>
-                <span className="text-[10px] font-mono text-muted">
-                  {page + 1} / {totalPages}
-                </span>
-                <button
-                  onClick={() => setPage(p => Math.min(totalPages - 1, p + 1))}
-                  disabled={page >= totalPages - 1}
-                  className="text-[10px] font-mono uppercase tracking-widest px-3 py-1.5 rounded-lg border border-border/40 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-surface transition-colors text-muted hover:text-text"
-                >
-                  Next
-                </button>
+              <div className="grid grid-cols-1 gap-3">
+                {currentFt.map((match) => (
+                  <MatchCard key={match.id} match={match} onClick={() => navigate(`/worldcup/${match.id}`)} />
+                ))}
               </div>
-            )}
-          </>
-        )}
+              {totalPages > 1 && (
+                <div className="flex items-center justify-center gap-3 pt-2">
+                  <button onClick={() => setPage(p => Math.max(0, p - 1))} disabled={page === 0} className="text-[10px] font-mono uppercase tracking-widest px-3 py-1.5 rounded-lg border border-border/40 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-surface transition-colors text-muted hover:text-text">Previous</button>
+                  <span className="text-[10px] font-mono text-muted">{page + 1} / {totalPages}</span>
+                  <button onClick={() => setPage(p => Math.min(totalPages - 1, p + 1))} disabled={page >= totalPages - 1} className="text-[10px] font-mono uppercase tracking-widest px-3 py-1.5 rounded-lg border border-border/40 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-surface transition-colors text-muted hover:text-text">Next</button>
+                </div>
+              )}
+            </motion.div>
+          )}
 
-        {activeTab === 'Standings' && (
-          <div className="space-y-8">
-            {standings.map((group) => (
-              <div key={group.group} className="project-card p-4 overflow-hidden border-border/30">
-                <h3 className="wc-table-header mb-4 px-1 flex items-center gap-2 text-xs">
-                  <span className="w-1.5 h-1.5 rounded-full bg-accent/60" />
-                  {group.group}
-                </h3>
-                <div className="overflow-x-auto">
-                  <table className="w-full wc-table text-[11px] font-mono">
-                    <thead>
-                      <tr className="text-muted/60 border-b border-border/50">
-                        <th className="w-8">#</th>
-                        <th>Team</th>
-                        <th className="text-center w-8">MP</th>
-                        <th className="text-center w-8">GD</th>
-                        <th className="text-center w-8 font-bold">Pts</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-border/10">
-                      {group.teams.map((team) => (
-                        <tr key={team.code} className="hover:bg-accent/[0.03] transition-colors group">
-                          <td className="text-muted/60">{team.rank}</td>
-                          <td>
-                            <div className="flex items-center gap-2 py-0.5">
-                              <div className="w-4 h-4 flex items-center justify-center overflow-hidden">
-                                <img src={team.logo} alt={team.code} className="wc-team-logo-small" />
-                              </div>
-                              <span className="font-semibold text-text/80 group-hover:text-accent transition-colors">
-                                {team.name}
-                              </span>
-                            </div>
-                          </td>
-                          <td className="text-center text-muted/80">{team.mp}</td>
-                          <td className="text-center text-muted/80">{team.gd > 0 ? `+${team.gd}` : team.gd}</td>
-                          <td className="text-center font-bold text-text">{team.pts}</td>
+          {activeTab === 'Standings' && (
+            <motion.div key="standings" variants={tabVariants} initial="enter" animate="center" exit="exit" className="space-y-8">
+              {standings.map((group) => (
+                <div key={group.group} className="project-card p-4 overflow-hidden border-border/30">
+                  <h3 className="wc-table-header mb-4 px-1 flex items-center gap-2 text-xs">
+                    <span className="w-1.5 h-1.5 rounded-full bg-accent/60" />
+                    {group.group}
+                  </h3>
+                  <div className="overflow-x-auto">
+                    <table className="w-full wc-table text-[11px] font-mono">
+                      <thead>
+                        <tr className="text-muted/60 border-b border-border/50">
+                          <th className="w-8">#</th>
+                          <th>Team</th>
+                          <th className="text-center w-8">MP</th>
+                          <th className="text-center w-8">GD</th>
+                          <th className="text-center w-8 font-bold">Pts</th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                      </thead>
+                      <tbody className="divide-y divide-border/10">
+                        {group.teams.map((team) => (
+                          <tr key={team.code} className="hover:bg-accent/[0.03] transition-colors group">
+                            <td className="text-muted/60">{team.rank}</td>
+                            <td>
+                              <div className="flex items-center gap-2 py-0.5">
+                                <div className="w-4 h-4 flex items-center justify-center overflow-hidden">
+                                  <img src={team.logo} alt={team.code} className="wc-team-logo-small" />
+                                </div>
+                                <span className="font-semibold text-text/80 group-hover:text-accent transition-colors">{team.name}</span>
+                              </div>
+                            </td>
+                            <td className="text-center text-muted/80">{team.mp}</td>
+                            <td className="text-center text-muted/80">{team.gd > 0 ? `+${team.gd}` : team.gd}</td>
+                            <td className="text-center font-bold text-text">{team.pts}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              ))}
+            </motion.div>
+          )}
+
+          {activeTab === 'Power Rankings' && (
+            <motion.div key="power" variants={tabVariants} initial="enter" animate="center" exit="exit">
+              <div className="project-card p-8 flex flex-col items-center justify-center gap-4 text-center border-dashed">
+                <div className="w-12 h-12 bg-accent/10 rounded-full flex items-center justify-center text-accent">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg>
+                </div>
+                <div>
+                  <p className="text-sm font-semibold mb-1 text-text">Power Rankings coming soon</p>
+                  <p className="text-[10px] text-muted font-mono uppercase tracking-tighter">Realtime analysis of team performance</p>
                 </div>
               </div>
-            ))}
-          </div>
-        )}
-
-        {activeTab === 'Power Rankings' && (
-          <div className="project-card p-8 flex flex-col items-center justify-center gap-4 text-center border-dashed">
-            <div className="w-12 h-12 bg-accent/10 rounded-full flex items-center justify-center text-accent">
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg>
-            </div>
-            <div>
-              <p className="text-sm font-semibold mb-1 text-text">Power Rankings coming soon</p>
-              <p className="text-[10px] text-muted font-mono uppercase tracking-tighter">Realtime analysis of team performance</p>
-            </div>
-          </div>
-        )}
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </section>
   )
