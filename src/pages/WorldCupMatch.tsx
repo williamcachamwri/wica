@@ -96,7 +96,7 @@ export default function WorldCupMatch() {
         pathname={`/worldcup/${matchId}`}
       />
       <main id="main" className="max-w-[680px] mx-auto px-6 pt-16 md:pt-24 pb-20">
-        <button onClick={() => { navigateBack('/'); setTimeout(() => document.getElementById('worldcup')?.scrollIntoView({ behavior: 'smooth' }), 200) }} className="text-[10px] font-mono text-muted hover:text-accent flex items-center gap-1 transition-colors uppercase tracking-widest mb-6 cursor-pointer bg-transparent border-none">
+        <button onClick={() => navigateBack('/?scrollTo=worldcup')} className="text-[10px] font-mono text-muted hover:text-accent flex items-center gap-1 transition-colors uppercase tracking-widest mb-6 cursor-pointer bg-transparent border-none">
           ← Back to World Cup
         </button>
 

@@ -1,7 +1,7 @@
 import { SectionDivider } from '../components/SectionDivider'
 import type { Match, Standing } from '../types'
 import { motion, AnimatePresence } from 'framer-motion'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { useEffect, useState, useCallback } from 'react'
 import '../styles/worldcup.css'
 
@@ -48,6 +48,20 @@ export function WorldCup() {
 
   // Reset page when tab changes
   useEffect(() => { setPage(0) }, [activeTab])
+
+  const location = useLocation()
+  useEffect(() => {
+    if (new URLSearchParams(location.search).get('scrollTo') !== 'worldcup') return
+    window.history.replaceState({}, '', location.pathname)
+    const el = document.getElementById('worldcup')
+    if (el) { el.scrollIntoView({ behavior: 'smooth' }); return }
+    const observer = new MutationObserver(() => {
+      const e = document.getElementById('worldcup')
+      if (e) { e.scrollIntoView({ behavior: 'smooth' }); observer.disconnect() }
+    })
+    observer.observe(document.body, { childList: true, subtree: true })
+    return () => observer.disconnect()
+  }, [location.search, location.pathname])
 
   if (loading || !data) {
     return (
