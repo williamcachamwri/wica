@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { SEO } from '../components/SEO'
@@ -35,33 +35,25 @@ function fmtStat(name: string, val: number): string {
   return String(Math.round(val))
 }
 
-function fmtStatUnit(name: string): string {
-  if (name === 'TopSpeed') return ' km/h'
-  if (name === 'TotalDistance') return ' km'
-  if (name === 'Possession') return '%'
-  return ''
-}
-
 function findStat(stats: any[], name: string): number | null {
   if (!Array.isArray(stats)) return null
   const entry = stats.find((s: any) => Array.isArray(s) && s[0] === name)
   return entry ? entry[1] : null
 }
 
+const KEY_EVENT_TYPES = new Set([0, 2, 3, 4, 5, 6, 34, 38, 39, 40])
+
 const EVENT_ICONS: Record<number, string> = {
   0: '⚽',
-  1: '🎯',
   2: '🟨',
+  3: '🟥',
+  4: '⚽',
   5: '🔄',
-  7: '▶',
-  8: '⏹',
-  12: '↗',
-  15: '🚩',
-  16: '⛳',
-  18: '🟢',
-  26: '🏁',
+  6: '❌',
   34: '😬',
-  78: '▶',
+  38: '🟨➡️🟥',
+  39: '⚽',
+  40: '❌',
 }
 
 function eventTypeIcon(type: number): string {
@@ -142,6 +134,20 @@ export default function WorldCupMatch() {
               <div className="text-[10px] font-mono text-muted uppercase tracking-wider">
                 {match.StageName?.[0]?.Description} · {match.GroupName?.[0]?.Description} · {new Date(match.Date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
               </div>
+
+              {/* Match info */}
+              <div className="flex flex-wrap justify-center gap-x-4 gap-y-1 mt-3 text-[9px] font-mono text-muted/70 uppercase tracking-wider">
+                {match.Stadium?.Name?.[0]?.Description && (
+                  <span>{match.Stadium.Name[0].Description}</span>
+                )}
+                {match.Attendance && (
+                  <span>{Number(match.Attendance).toLocaleString()} attendance</span>
+                )}
+                {match.Officials?.[0]?.Name?.[0]?.Description && (
+                  <span>Ref: {match.Officials[0].Name[0].Description}</span>
+                )}
+              </div>
+
               {homePossession && awayPossession && (
                 <div className="max-w-[220px] mx-auto mt-4">
                   <div className="flex justify-between text-[10px] font-mono text-muted mb-1">
@@ -170,36 +176,39 @@ export default function WorldCupMatch() {
 
             {activeTab === 'Timeline' && (
               <div className="space-y-1">
-                {(timeline?.Event || []).map((event: any, idx: number) => {
-                  const isHome = event.IdTeam === match.HomeTeam?.IdTeam
-                  const type = event.Type
-                  const desc = event.EventDescription?.[0]?.Description || ''
-                  const minute = event.MatchMinute
-                  const isGoal = type === 0
-                  const isCard = type === 2
-                  const isSub = type === 5
-                  const isKeyEvent = isGoal || type === 34 || type === 57
+                {(timeline?.Event || [])
+                  .filter((e: any) => KEY_EVENT_TYPES.has(e.Type))
+                  .map((event: any, idx: number) => {
+                    const isHome = event.IdTeam === match.HomeTeam?.IdTeam
+                    const type = event.Type
+                    const desc = event.EventDescription?.[0]?.Description || ''
+                    const minute = event.MatchMinute
+                    const isGoal = type === 0 || type === 4 || type === 34 || type === 39
+                    const isCard = type === 2
+                    const isRed = type === 3 || type === 38
 
-                  return (
-                    <motion.div
-                      key={event.EventId || idx}
-                      initial={{ opacity: 0, x: isHome ? -10 : 10 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: idx * 0.03 }}
-                      className={`flex items-center gap-3 text-[11px] font-mono py-2 px-3 rounded-lg transition-colors ${
-                        isGoal ? 'bg-accent/5' : isCard ? 'bg-yellow-500/5' : 'hover:bg-surface'
-                      }`}
-                    >
-                      <span className={`font-bold w-10 shrink-0 text-right ${isGoal ? 'text-accent' : 'text-muted/80'}`}>{minute}</span>
-                      <span className="text-xs shrink-0 w-5 text-center">{eventTypeIcon(type)}</span>
-                      <span className={`flex-1 ${isGoal ? 'text-text font-semibold' : 'text-text/70'}`}>{desc}</span>
-                      <span className={`text-[9px] ${isHome ? 'text-accent/60' : 'text-blue-400/60'} uppercase`}>{isHome ? 'H' : 'A'}</span>
-                    </motion.div>
-                  )
-                })}
-                {(!timeline?.Event || timeline.Event.length === 0) && (
+                    return (
+                      <motion.div
+                        key={event.EventId || idx}
+                        initial={{ opacity: 0, x: isHome ? -10 : 10 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: idx * 0.05 }}
+                        className={`flex items-center gap-3 text-[11px] font-mono py-2 px-3 rounded-lg transition-colors ${
+                          isGoal ? 'bg-accent/5' : isRed ? 'bg-red-500/5' : isCard ? 'bg-yellow-500/5' : 'hover:bg-surface'
+                        }`}
+                      >
+                        <span className={`font-bold w-10 shrink-0 text-right ${isGoal ? 'text-accent' : 'text-muted/80'}`}>{minute}</span>
+                        <span className="text-xs shrink-0 w-5 text-center">{eventTypeIcon(type)}</span>
+                        <span className={`flex-1 ${isGoal ? 'text-text font-semibold' : 'text-text/70'}`}>{desc}</span>
+                        <span className={`text-[9px] ${isHome ? 'text-accent/60' : 'text-blue-400/60'} uppercase`}>{isHome ? 'H' : 'A'}</span>
+                      </motion.div>
+                    )
+                  })}
+                {(!timeline?.Event || timeline.Event.length === 0) ? (
                   <p className="text-center text-muted font-mono text-[10px] uppercase py-12">No events recorded yet</p>
-                )}
+                ) : (timeline?.Event || []).filter((e: any) => KEY_EVENT_TYPES.has(e.Type)).length === 0 ? (
+                  <p className="text-center text-muted font-mono text-[10px] uppercase py-12">No key events recorded</p>
+                ) : null}
               </div>
             )}
 
