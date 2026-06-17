@@ -215,17 +215,15 @@ export default function WorldCupMatch() {
                           {isOwnGoal ? (
                             <span className="flex-1 text-text font-semibold flex items-center gap-1.5">
                               <img
-                                src={(eventIsHome ? match.HomeTeam?.PictureUrl : match.AwayTeam?.PictureUrl)?.replace('{format}', 'sq').replace('{size}', '4')}
+                                src={(eventIsHome ? match.AwayTeam?.PictureUrl : match.HomeTeam?.PictureUrl)?.replace('{format}', 'sq').replace('{size}', '4')}
                                 alt=""
                                 className="w-4 h-4 object-contain"
                               />
                               {(() => {
-                                const m = desc.match(/^(.+?)\s+\(.*?\)\s+scores!!$/)
-                                const n = m ? m[1].trim() : desc.replace(/\s+scores!!$/, '').replace(/ \(own goal\)$/i, '')
-                                return n
+                                const m = desc.match(/^(.+?)\s+\(/)
+                                return m ? m[1].trim() : desc.replace(/\s*\(own goal\).*$/i, '').replace(/\s+scores!!$/, '').trim()
                               })()}
-                              <span className="text-accent/80 font-bold ml-1">OG</span>
-                              <span className="text-muted/60">{minute}'</span>
+                              <span className="text-red-400/80 font-bold ml-1">OG</span>
                             </span>
                           ) : (
                             <span className={`flex-1 ${isGoal ? 'text-text font-semibold' : 'text-text/70'}`}>{desc}</span>
