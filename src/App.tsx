@@ -39,6 +39,7 @@ const Guestbook = lazy(() => import('./pages/Guestbook'))
 const Universe = lazy(() => import('./pages/Universe'))
 const Changelog = lazy(() => import('./pages/Changelog'))
 const Uses = lazy(() => import('./pages/Uses'))
+const WorldCupMatch = lazy(() => import('./pages/WorldCupMatch'))
 const NotFound = lazy(() => import('./pages/NotFound'))
 
 const DEFAULT_ACCENT = '#2563eb'
@@ -105,6 +106,7 @@ function AnimatedRoutes() {
             <Route path="/universe" element={<Universe />} />
             <Route path="/changelog/:sha" element={<Changelog />} />
             <Route path="/uses" element={<Uses />} />
+            <Route path="/worldcup/:matchId" element={<WorldCupMatch />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </Suspense>
