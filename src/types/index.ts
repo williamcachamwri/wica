@@ -34,3 +34,44 @@ export interface FireworkParticle {
   vy: number
   rot: number
 }
+
+export interface Team {
+  idTeam: string
+  name: string
+  abbreviation: string
+  logo: string
+  score: number | null
+}
+
+export interface Match {
+  id: string
+  homeTeam: Team
+  awayTeam: Team
+  date: string
+  status: string
+  venue: string
+  group: string
+  stage: string
+  matchNumber: number
+}
+
+export interface Standing {
+  group: string
+  teams: {
+    rank: number
+    name: string
+    code: string
+    mp: number
+    w: number
+    d: number
+    l: number
+    gd: number
+    pts: number
+    logo: string
+  }[]
+}
+
+export interface MatchDetails {
+  details: any
+  timeline: any
+}

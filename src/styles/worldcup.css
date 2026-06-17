@@ -1,0 +1,92 @@
+/* ── World Cup Section ─────────────────────────────────────────── */
+#worldcup {
+  --wc-red: #ef4444;
+}
+
+.wc-card {
+  position: relative;
+  transition: transform 0.2s cubic-bezier(0.2, 0, 0, 1), 
+              border-color 0.2s ease,
+              background-color 0.2s ease;
+}
+
+.wc-card:hover {
+  border-color: var(--accent-alpha);
+  background-color: var(--surface-lighter);
+}
+
+.wc-status-live {
+  background: color-mix(in srgb, var(--wc-red) 10%, transparent);
+  color: var(--wc-red);
+  border: 1px solid color-mix(in srgb, var(--wc-red) 20%, transparent);
+}
+
+.wc-logo-container {
+  width: 3rem;
+  height: 3rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--surface);
+  border-radius: 9999px;
+  padding: 0.5rem;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  transition: border-color 0.2s ease;
+}
+
+.wc-card:hover .wc-logo-container {
+  border-color: var(--accent-alpha);
+}
+
+.wc-score {
+  font-family: var(--font-mono);
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: -0.05em;
+}
+
+.wc-table-header {
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: var(--text-muted);
+}
+
+.wc-table th {
+  text-align: left;
+  padding: 0.5rem 0.25rem;
+  font-weight: 500;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.wc-table td {
+  padding: 0.625rem 0.25rem;
+  border-bottom: 1px solid color-mix(in srgb, var(--border) 20%, transparent);
+}
+
+.wc-team-logo-small {
+  width: 1rem;
+  height: 1rem;
+  filter: grayscale(1);
+  transition: filter 0.2s ease;
+}
+
+tr:hover .wc-team-logo-small {
+  filter: grayscale(0);
+}
+
+@keyframes wc-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.animate-wc-pulse {
+  animation: wc-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

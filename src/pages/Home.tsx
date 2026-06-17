@@ -2,6 +2,7 @@ import { Loader } from '../components/Loader'
 import { SEO } from '../components/SEO'
 import { Footer } from '../components/Footer'
 import { GithubActivity } from '../sections/GithubActivity'
+import { WorldCup } from '../sections/WorldCup'
 import { Hero } from '../sections/Hero'
 import { Insights } from '../sections/Insights'
 import { LighthouseSection } from '../sections/LighthouseSection'
@@ -39,6 +40,7 @@ export default function Home() {
         <main id="main" className="max-w-[680px] mx-auto px-6 pt-16 md:pt-24 pb-20">
           <Hero typewriterStart={!loading} nameStartDelay={1.5} />
           <GithubActivity />
+          <WorldCup />
           <Projects />
           <Insights />
           <LighthouseSection />
