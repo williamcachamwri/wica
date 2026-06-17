@@ -205,8 +205,9 @@ export async function onRequest(context: { request: Request }): Promise<Response
 
     const recentFt = ftMatches.slice(0, 5)
     const rawLookup = new Map(rawMatches.map((m: any) => [String(m.IdMatch), m]))
+    const timelineTargets = [...recentFt, ...liveMatches]
     const timelineResults = await Promise.all(
-      recentFt.map(m =>
+      timelineTargets.map(m =>
         fetchFromFifa(`/timelines/${m.id}`, { language: 'en' })
           .then(tl => ({ id: m.id, timeline: tl }))
           .catch(() => null)

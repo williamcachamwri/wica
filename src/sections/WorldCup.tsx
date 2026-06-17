@@ -159,7 +159,18 @@ export function WorldCup() {
                 </div>
               )}
 
-              {nextMatch && (!groupFilter || nextMatch.group === groupFilter) && (
+              {liveMatches.length > 0 && (
+                <div className="mb-6">
+                  <div className="flex items-center gap-2 mb-3">
+                    <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
+                    <span className="text-[10px] font-mono uppercase tracking-widest text-red-500 font-semibold">Live</span>
+                  </div>
+                  {liveMatches.map(match => (
+                    <MatchCard key={match.id} match={match} onClick={() => navigate(`/worldcup/${match.id}`)} />
+                  ))}
+                </div>
+              )}
+              {liveMatches.length === 0 && nextMatch && (!groupFilter || nextMatch.group === groupFilter) && (
                 <div className="project-card p-4 border-accent/40 border-2 bg-accent/[0.03] relative overflow-hidden mb-6">
                   <div className="absolute top-0 right-0 px-3 py-1 bg-accent/10 text-[8px] font-mono uppercase tracking-widest text-accent rounded-bl-lg">Next Match</div>
                   <div className="flex items-center gap-2 mb-2">
@@ -170,14 +181,19 @@ export function WorldCup() {
                   <MatchCard match={nextMatch} onClick={() => navigate(`/worldcup/${nextMatch.id}`)} prominent />
                 </div>
               )}
-              {liveMatches.map(match => (
-                <MatchCard key={match.id} match={match} onClick={() => navigate(`/worldcup/${match.id}`)} />
-              ))}
-              <div className="grid grid-cols-1 gap-3">
+              <div className="mt-6">
+                {ftMatches.length > 0 && (
+                  <>
+                <div className="flex items-center gap-2 mb-3">
+                  <span className="text-[10px] font-mono uppercase tracking-widest text-muted font-semibold">Finished</span>
+                </div>
+                <div className="grid grid-cols-1 gap-3">
                 {currentFt.map((match) => (
                   <MatchCard key={match.id} match={match} onClick={() => navigate(`/worldcup/${match.id}`)} />
                 ))}
               </div>
+                </>
+                )}
               {totalPages > 1 && (
                 <div className="flex items-center justify-center gap-3 pt-2">
                   <button onClick={() => setPage(p => Math.max(0, p - 1))} disabled={page === 0} className="text-[10px] font-mono uppercase tracking-widest px-3 py-1.5 rounded-lg border border-border/40 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-surface transition-colors text-muted hover:text-text">Previous</button>
@@ -191,6 +207,7 @@ export function WorldCup() {
               {groupFilter && filtered.length === 0 && (
                 <p className="text-center text-muted font-mono text-[10px] uppercase py-12">No matches in {groupFilter}</p>
               )}
+              </div>
             </motion.div>
           )}
 
