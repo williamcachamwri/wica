@@ -245,7 +245,9 @@ export default function WorldCupMatch() {
 
               {activeTab === 'Lineups' && (
                 <motion.div key="lineups" variants={tabVariants} initial="enter" animate="center" exit="exit" className="pb-6">
-                  {(() => {
+                  {loading ? (
+                    <div className="worldcup-skeleton__pitch" />
+                  ) : (() => {
                     const rawTactics = match?.HomeTeam?.Tactics
                     const homeFormation = typeof rawTactics === 'string' ? rawTactics.split('-').map(Number) : null
                     const awayFormation = typeof match?.AwayTeam?.Tactics === 'string' ? match.AwayTeam.Tactics.split('-').map(Number) : null

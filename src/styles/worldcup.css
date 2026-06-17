@@ -366,3 +366,31 @@ tr:hover .wc-team-logo-small {
   width: 40%;
   margin: 0 auto;
 }
+
+.worldcup-skeleton__pitch {
+  width: 100%;
+  max-width: 680px;
+  margin: 0 auto;
+  aspect-ratio: 1;
+  border-radius: 12px;
+  background: linear-gradient(135deg, var(--code-bg) 0%, color-mix(in srgb, var(--code-bg) 80%, transparent) 50%, var(--code-bg) 100%);
+  background-size: 200% 200%;
+  animation: wc-skeleton-shimmer 2s cubic-bezier(0.22, 1, 0.36, 1) infinite;
+  position: relative;
+  overflow: hidden;
+}
+
+.worldcup-skeleton__pitch::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  opacity: 0.3;
+}
+
+@keyframes wc-skeleton-shimmer {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
