@@ -190,7 +190,7 @@ export default function WorldCupMatch() {
 
             <AnimatePresence mode="wait">
               {activeTab === 'Timeline' && (
-                <motion.div key="timeline" variants={tabVariants} initial="enter" animate="center" exit="exit" className="space-y-1">
+                <motion.div key="timeline" variants={tabVariants} initial="enter" animate="center" exit="exit" className="space-y-1 pb-6">
                   {(timeline?.Event || [])
                     .filter((e: any) => KEY_EVENT_TYPES.has(e.Type))
                     .map((event: any, idx: number) => {
@@ -244,7 +244,7 @@ export default function WorldCupMatch() {
               )}
 
               {activeTab === 'Lineups' && (
-                <motion.div key="lineups" variants={tabVariants} initial="enter" animate="center" exit="exit">
+                <motion.div key="lineups" variants={tabVariants} initial="enter" animate="center" exit="exit" className="pb-6">
                   {(() => {
                     const rawTactics = match?.HomeTeam?.Tactics
                     const homeFormation = typeof rawTactics === 'string' ? rawTactics.split('-').map(Number) : null
@@ -271,7 +271,7 @@ export default function WorldCupMatch() {
               )}
 
               {activeTab === 'Stats' && (
-                <motion.div key="stats" variants={tabVariants} initial="enter" animate="center" exit="exit" className="space-y-3">
+                <motion.div key="stats" variants={tabVariants} initial="enter" animate="center" exit="exit" className="space-y-3 pb-6">
                   {stats ? (
                     STAT_ORDER.map((key) => {
                       const homeVal = stats.home ? findStat(stats.home, key) : null
@@ -323,7 +323,7 @@ export default function WorldCupMatch() {
               )}
 
               {activeTab === 'Table' && (
-                <motion.div key="table" variants={tabVariants} initial="enter" animate="center" exit="exit">
+                <motion.div key="table" variants={tabVariants} initial="enter" animate="center" exit="exit" className="pb-6">
                   {(() => {
                     const groupName = match?.GroupName?.[0]?.Description
                     const group = standings?.find((g: any) => g.group === groupName)
@@ -382,7 +382,7 @@ export default function WorldCupMatch() {
               )}
 
               {activeTab === 'Power Ranking' && (
-                <motion.div key="power" variants={tabVariants} initial="enter" animate="center" exit="exit" className="space-y-6">
+                <motion.div key="power" variants={tabVariants} initial="enter" animate="center" exit="exit" className="space-y-6 pb-6">
                   {powerRanking ? (
                     (() => {
                       const teams = new Map<number, { name: string; flag: string; players: any[] }>()
