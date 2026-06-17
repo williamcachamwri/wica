@@ -61,6 +61,7 @@ export interface Match {
   group: string
   stage: string
   matchNumber: number
+  minute?: string
   goals?: Goal[]
 }
 

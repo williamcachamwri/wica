@@ -31,6 +31,7 @@ export interface Match {
   group: string
   stage: string
   matchNumber: number
+  minute?: string
   goals?: Goal[]
 }
 
@@ -91,6 +92,7 @@ const mapMatch = (m: any): Match => ({
   group: desc(m.GroupName),
   stage: desc(m.StageName),
   matchNumber: m.MatchNumber,
+  minute: m.MatchMinute ? String(m.MatchMinute) : undefined,
 })
 
 const extractGoals = (timeline: any, homeId: string): Goal[] => {

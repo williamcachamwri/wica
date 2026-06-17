@@ -74,7 +74,7 @@ export function WorldCupSticky() {
           </div>
           <span className="worldcup-sticky__meta">
             {isLive ? (
-              <span className="worldcup-sticky__live-label">LIVE</span>
+              <><span className="worldcup-sticky__live-label">LIVE</span>{match.minute && <span className="worldcup-sticky__minute">{match.minute}'</span>}</>
             ) : (
               new Date(match.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
             )}
