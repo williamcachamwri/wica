@@ -350,7 +350,7 @@ export function BlogInteractions({ slug, title }: BlogInteractionsProps) {
             const replyIds = [comment.id, ...(replyMap.get(comment.id)?.map(r => r.id) || [])]
             const showReplyForm = user && replyTo && replyIds.includes(replyTo.id)
             return (
-            <div key={comment.id}>
+            <div key={comment.id} className="blog-interactions__thread">
               <CommentCard comment={comment}>
                 {user && (
                   <button
