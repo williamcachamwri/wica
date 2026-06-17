@@ -90,3 +90,51 @@ tr:hover .wc-team-logo-small {
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+
+/* ── Skeleton loading ─────────────────────────────────────────── */
+@keyframes wc-skeleton-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.worldcup-skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.worldcup-skeleton__card {
+  padding: 1rem 1.15rem;
+  border-radius: 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  animation: wc-skeleton-pulse 1.5s cubic-bezier(0.22, 1, 0.36, 1) infinite;
+}
+
+.worldcup-skeleton__row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2rem;
+}
+
+.worldcup-skeleton__avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 9999px;
+  background: var(--code-bg);
+}
+
+.worldcup-skeleton__line {
+  height: 12px;
+  border-radius: 6px;
+  background: var(--code-bg);
+}
+
+.worldcup-skeleton__line--short {
+  width: 40%;
+  margin: 0 auto;
+}

@@ -74,4 +74,9 @@ export interface Standing {
 export interface MatchDetails {
   details: any
   timeline: any
+  stats: { home: any[]; away: any[] } | null
+  playerStats: Record<string, any[]> | null
+  powerRanking: any
+  matches: Match[]
+  standings: Standing[]
 }

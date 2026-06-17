@@ -1,6 +1,7 @@
 import { jsonOK, jsonError } from '../utils/security'
 
 const FIFA_API_BASE = 'https://api.fifa.com/api/v3'
+const FDH_API_BASE = 'https://fdh-api.fifa.com/v1'
 const COMPETITION_ID = '17'
 const SEASON_ID = '285023'
 
@@ -44,19 +45,21 @@ function desc(arr: { Description?: string }[] | undefined, fallback = ''): strin
   return arr?.[0]?.Description ?? fallback
 }
 
-async function fetchFromFifa(path: string, params: Record<string, string> = {}) {
-  const url = new URL(`${FIFA_API_BASE}${path}`)
-  Object.entries(params).forEach(([k, v]) => url.searchParams.set(k, v))
-
-  const res = await fetch(url.toString(), {
+async function fetchJson(url: string) {
+  const res = await fetch(url, {
     headers: {
       'Accept': 'application/json',
       'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:151.0) Gecko/20100101 Firefox/151.0'
     }
   })
-
   if (!res.ok) throw new Error(`FIFA API error: ${res.status}`)
   return res.json()
+}
+
+async function fetchFromFifa(path: string, params: Record<string, string> = {}) {
+  const url = new URL(`${FIFA_API_BASE}${path}`)
+  Object.entries(params).forEach(([k, v]) => url.searchParams.set(k, v))
+  return fetchJson(url.toString())
 }
 
 function mapTeam(data: any): Team {
@@ -71,17 +74,12 @@ function mapTeam(data: any): Team {
 }
 
 function mapMatch(m: any): Match {
-  const statusMap: Record<number, string> = {
-    0: 'FT',
-    1: 'UPCOMING',
-    3: 'LIVE',
-  }
   return {
     id: m.IdMatch,
     homeTeam: mapTeam(m.Home),
     awayTeam: mapTeam(m.Away),
     date: m.Date,
-    status: statusMap[m.MatchStatus] ?? 'UPCOMING',
+    status: m.MatchStatus === 0 ? 'FT' : m.MatchStatus === 3 ? 'LIVE' : 'UPCOMING',
     venue: desc(m.Stadium?.Name),
     group: desc(m.GroupName),
     stage: desc(m.StageName),
@@ -89,12 +87,17 @@ function mapMatch(m: any): Match {
   }
 }
 
+function statValue(stats: [string, number, boolean][], name: string): number | null {
+  const entry = stats.find(s => s[0] === name)
+  return entry ? entry[1] : null
+}
+
 export async function onRequest(context: { request: Request }): Promise<Response> {
   const url = new URL(context.request.url)
   const matchId = url.searchParams.get('matchId')
 
   try {
-    // Fetch matches always — we need them for stage IDs
+    // Fetch matches always
     const matchesData = await fetchFromFifa('/calendar/matches', {
       language: 'en',
       count: '500',
@@ -102,10 +105,8 @@ export async function onRequest(context: { request: Request }): Promise<Response
     })
     const matches = matchesData.Results.map(mapMatch)
 
-    // Extract stage IDs from matches (e.g. 289273 = group stage)
-    const stageIds = [...new Set<string>(matchesData.Results.map((m: any) => m.IdStage))].filter(Boolean)
-
     // Fetch standings for each stage
+    const stageIds = [...new Set<string>(matchesData.Results.map((m: any) => m.IdStage))].filter(Boolean)
     const standingsResults = await Promise.all(
       stageIds.map((stageId: string) =>
         fetchFromFifa(`/calendar/${COMPETITION_ID}/${SEASON_ID}/${stageId}/standing`, {
@@ -146,7 +147,34 @@ export async function onRequest(context: { request: Request }): Promise<Response
         fetchFromFifa(`/live/football/${matchId}`, { language: 'en' }),
         fetchFromFifa(`/timelines/${matchId}`, { language: 'en' })
       ])
-      return jsonOK({ details, timeline, matches, standings })
+
+      // Fetch FDH stats if available
+      const idIfes = details?.Properties?.IdIFES
+      let stats: { home: any[]; away: any[] } | null = null
+      let playerStats: Record<string, any[]> | null = null
+      let powerRanking: any = null
+
+      if (idIfes) {
+        const [teamsRaw, playersRaw, powerRaw] = await Promise.all([
+          fetchJson(`${FDH_API_BASE}/stats/match/${idIfes}/teams.json`).catch(() => null),
+          fetchJson(`${FDH_API_BASE}/stats/match/${idIfes}/players.json`).catch(() => null),
+          fetchJson(`${FDH_API_BASE}/powerranking/match/${idIfes}.json`).catch(() => null),
+        ])
+
+        if (teamsRaw) {
+          const homeId = details.HomeTeam?.IdTeam
+          const awayId = details.AwayTeam?.IdTeam
+          stats = {
+            home: teamsRaw[homeId] || [],
+            away: teamsRaw[awayId] || [],
+          }
+        }
+
+        if (playersRaw) playerStats = playersRaw
+        if (powerRaw) powerRanking = powerRaw
+      }
+
+      return jsonOK({ details, timeline, stats, playerStats, powerRanking, matches, standings })
     }
 
     return jsonOK({ matches, standings })
