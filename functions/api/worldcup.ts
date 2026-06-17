@@ -92,7 +92,7 @@ const mapMatch = (m: any): Match => ({
   group: desc(m.GroupName),
   stage: desc(m.StageName),
   matchNumber: m.MatchNumber,
-  minute: m.MatchMinute ? String(m.MatchMinute) : undefined,
+  minute: m.MatchTime || undefined,
 })
 
 const extractGoals = (timeline: any, homeId: string): Goal[] => {

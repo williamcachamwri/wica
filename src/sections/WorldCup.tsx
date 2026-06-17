@@ -295,7 +295,7 @@ function MatchCard({ match, onClick, prominent }: { match: Match; onClick: () =>
               ? 'wc-status-live animate-wc-pulse' 
               : 'bg-surface text-muted border border-border/50'
           }`}>
-            {match.status === 'LIVE' ? `LIVE${match.minute ? ` ${match.minute}'` : ''}` : match.status}
+            {match.status === 'LIVE' ? `LIVE${match.minute ? ` ${match.minute}` : ''}` : match.status}
           </span>
           <span className="text-[11px] text-muted font-mono">{new Date(match.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>
         </div>
