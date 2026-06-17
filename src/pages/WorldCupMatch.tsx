@@ -439,8 +439,8 @@ export default function WorldCupMatch() {
             </AnimatePresence>
           </>
         )}
+        <Footer />
       </main>
-      <Footer />
     </>
   )
 }
