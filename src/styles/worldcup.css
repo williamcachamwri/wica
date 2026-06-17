@@ -107,6 +107,7 @@ tr:hover .wc-team-logo-small {
   display: flex;
   align-items: center;
   flex-direction: row-reverse;
+  width: fit-content;
   background: var(--navbar-bg);
   border: 1px solid var(--navbar-border);
   border-radius: 999px;
@@ -269,7 +270,7 @@ tr:hover .wc-team-logo-small {
   }
 
   .worldcup-sticky:not(.worldcup-sticky--collapsed) .worldcup-sticky__body-wrapper {
-    max-width: 200px;
+    max-width: fit-content;
   }
 
   .worldcup-sticky__body {
