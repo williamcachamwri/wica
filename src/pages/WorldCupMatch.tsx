@@ -193,6 +193,8 @@ export default function WorldCupMatch() {
                       const isHome = event.IdTeam === match.HomeTeam?.IdTeam
                       const type = event.Type
                       const desc = event.EventDescription?.[0]?.Description || ''
+                      const isOwnGoal = type === 34 || /own goal/i.test(desc)
+                      const displayDesc = isOwnGoal ? `${desc.replace(/ \(own goal\)/i, '')} (OG)` : desc
                       const minute = event.MatchMinute
                       const isGoal = type === 0 || type === 4 || type === 34 || type === 39
                       const isCard = type === 2
@@ -210,7 +212,7 @@ export default function WorldCupMatch() {
                         >
                           <span className={`font-bold w-10 shrink-0 text-right ${isGoal ? 'text-accent' : 'text-muted/80'}`}>{minute}</span>
                           <span className="text-xs shrink-0 w-5 text-center">{eventTypeIcon(type)}</span>
-                          <span className={`flex-1 ${isGoal ? 'text-text font-semibold' : 'text-text/70'}`}>{desc}</span>
+                          <span className={`flex-1 ${isGoal ? 'text-text font-semibold' : 'text-text/70'}`}>{displayDesc}</span>
                           <span className={`text-[9px] ${isHome ? 'text-accent/60' : 'text-blue-400/60'} uppercase`}>{isHome ? 'H' : 'A'}</span>
                         </motion.div>
                       )

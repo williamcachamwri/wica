@@ -18,6 +18,7 @@ export interface Goal {
   scorer: string
   team: 'home' | 'away'
   assist?: string
+  ownGoal?: boolean
 }
 
 export interface Match {
@@ -95,19 +96,21 @@ const mapMatch = (m: any): Match => ({
 const extractGoals = (timeline: any, homeId: string): Goal[] => {
   const events = timeline?.Event || []
   return events
-    .filter((e: any) => e.Type === 0)
+    .filter((e: any) => e.Type === 0 || e.Type === 4 || e.Type === 34 || e.Type === 39)
     .map((ge: any) => {
       const descText = ge.EventDescription?.[0]?.Description || ''
       const match = descText.match(/^(.+?)\s+\(.*?\)\s+scores!!$/)
-      const scorer = match ? match[1].trim() : descText.replace(/\s+scores!!$/, '')
+      let scorer = match ? match[1].trim() : descText.replace(/\s+scores!!$/, '')
+      scorer = scorer.replace(/ \(own goal\)$/i, '')
       const team: 'home' | 'away' = ge.IdTeam === homeId ? 'home' : 'away'
+      const ownGoal = ge.Type === 34 || /own goal/i.test(descText)
 
       const assist = events.find((ae: any) => ae.Type === 1 && ae.MatchMinute === ge.MatchMinute)
       const assistName = assist?.EventDescription?.[0]?.Description
         ?.replace(/^Assisted by /, '')
         ?.replace(/\.$/, '') || ''
 
-      return { minute: (ge.MatchMinute || '').replace(/['']/g, ''), scorer, team, ...(assistName ? { assist: assistName } : {}) }
+      return { minute: (ge.MatchMinute || '').replace(/['']/g, ''), scorer, team, ...(assistName ? { assist: assistName } : {}), ...(ownGoal ? { ownGoal: true } : {}) }
     })
 }
 

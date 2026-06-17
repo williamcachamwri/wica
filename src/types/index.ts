@@ -48,6 +48,7 @@ export interface Goal {
   scorer: string
   team: 'home' | 'away'
   assist?: string
+  ownGoal?: boolean
 }
 
 export interface Match {

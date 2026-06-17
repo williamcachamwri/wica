@@ -283,13 +283,13 @@ function MatchCard({ match, onClick, prominent }: { match: Match; onClick: () =>
         <div className="mt-2 pt-2 border-t border-border/10 flex justify-center gap-6 text-[10px] font-mono">
           <div className="flex flex-col items-end gap-0.5 w-[40%]">
             {homeGoals.map((g, i) => (
-              <span key={i} className="text-accent/80 truncate max-w-full">{g.scorer} <span className="text-muted/60">{g.minute}'</span></span>
+              <span key={i} className="text-accent/80 truncate max-w-full">{g.scorer}{g.ownGoal ? ' (OG)' : ''} <span className="text-muted/60">{g.minute}'</span></span>
             ))}
           </div>
           <div className="w-8 shrink-0" />
           <div className="flex flex-col items-start gap-0.5 w-[40%]">
             {awayGoals.map((g, i) => (
-              <span key={i} className="text-blue-400/80 truncate max-w-full">{g.scorer} <span className="text-muted/60">{g.minute}'</span></span>
+              <span key={i} className="text-blue-400/80 truncate max-w-full">{g.scorer}{g.ownGoal ? ' (OG)' : ''} <span className="text-muted/60">{g.minute}'</span></span>
             ))}
           </div>
         </div>
