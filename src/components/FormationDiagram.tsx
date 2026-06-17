@@ -111,15 +111,15 @@ export function FormationDiagram({ homePlayers, awayPlayers, homeFormation, away
         <defs>
           {awayRows.flatMap((row, i) =>
             row.map((_, j) => (
-              <clipPath key={`away-${i}-${j}`} id={`ap-${i}-${j}`}>
-                <circle cx={0} cy={0} r={22} />
+              <clipPath key={`away-${i}-${j}`} id={`ap-${i}-${j}`} clipPathUnits="objectBoundingBox">
+                <circle cx={0.5} cy={0.37} r={0.5} />
               </clipPath>
             ))
           )}
           {homeRows.flatMap((row, i) =>
             row.map((_, j) => (
-              <clipPath key={`home-${i}-${j}`} id={`hp-${i}-${j}`}>
-                <circle cx={0} cy={0} r={22} />
+              <clipPath key={`home-${i}-${j}`} id={`hp-${i}-${j}`} clipPathUnits="objectBoundingBox">
+                <circle cx={0.5} cy={0.37} r={0.5} />
               </clipPath>
             ))
           )}
