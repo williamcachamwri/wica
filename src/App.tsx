@@ -8,6 +8,7 @@ import { FloatingNavbar } from './components/FloatingNavbar'
 import { InspectFloating } from './components/InspectFloating'
 import { Inspector } from './components/Inspector'
 import { NowPlayingSticky } from './components/NowPlayingSticky'
+import { WorldCupSticky } from './components/WorldCupSticky'
 import { ToastContainer } from './components/Toast'
 import { initSound, isMuted, toggleMuted, playClick, playSoftClick } from './lib/sound'
 import BlogList from './pages/BlogList'
@@ -266,6 +267,7 @@ export default function App() {
       <ColorPaletteFloating accent={accent} onAccentChange={handleAccentChange} />
       <InspectFloating active={inspectActive} onToggle={() => setInspectActive((v) => !v)} />
       <NowPlayingSticky />
+      <WorldCupSticky />
       <AnimatedRoutes />
       <ToastContainer />
       <CommandPalette
