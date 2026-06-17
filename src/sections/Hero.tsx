@@ -42,14 +42,11 @@ export function Hero({ typewriterStart, nameStartDelay }: HeroProps) {
       </div>
 
       <div className="mb-6">
-        <h1 className="name-title name-title--hero text-[clamp(2.4rem,8vw,4.5rem)] font-bold tracking-[-0.03em] leading-[1.08]">
+        <h1 className="name-title name-title--hero text-[clamp(2rem,6vw,3.25rem)] font-bold tracking-[-0.03em] leading-[1.08] relative">
           <AnimatedName startDelay={nameStartDelay}>Lê Vĩnh Khang</AnimatedName>
-          <span className="hero__flag-badge">
-            <span className="hero__flag-badge-inner">
-              <img src="https://api.fifa.com/api/v3/picture/flags-sq-4/POR" alt="Portugal" className="hero__flag-img" />
-              <span className="hero__flag-shine" />
-            </span>
-          </span>
+          <SpriteWithFirework delay={0}>
+            <img src="https://api.fifa.com/api/v3/picture/flags-sq-4/POR" alt="Portugal" className="hero__flag-sprite" />
+          </SpriteWithFirework>
         </h1>
         <span className="block mt-2 text-muted text-lg">Developer & maker</span>
         <NowPlaying />
