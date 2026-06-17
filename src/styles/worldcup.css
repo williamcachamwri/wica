@@ -153,6 +153,7 @@ tr:hover .wc-team-logo-small {
   white-space: nowrap;
   max-width: 0;
   opacity: 0;
+  min-width: 0;
   transition:
     max-width 0.5s cubic-bezier(0.16, 1, 0.3, 1),
     opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1) 0.05s;
@@ -202,12 +203,14 @@ tr:hover .wc-team-logo-small {
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  min-width: 0;
 }
 
 .worldcup-sticky__team {
   display: flex;
   align-items: center;
   gap: 0.3rem;
+  min-width: 0;
 }
 
 .worldcup-sticky__team--away {
@@ -263,25 +266,33 @@ tr:hover .wc-team-logo-small {
   .worldcup-sticky {
     bottom: 4.5rem;
     right: 0.5rem;
-    max-width: calc(100vw - 1rem);
-    font-size: 12px;
+    left: 0.5rem;
   }
 
-  .worldcup-sticky__toggle {
-    width: 32px;
-    height: 32px;
+  .worldcup-sticky:not(.worldcup-sticky--collapsed) .worldcup-sticky__body-wrapper {
+    flex: 1;
+    min-width: 0;
   }
 
   .worldcup-sticky__body {
-    padding: 0.35rem 0.4rem 0.35rem 0.75rem;
+    padding: 0.3rem 0.3rem 0.3rem 0.6rem;
+    gap: 0.3rem;
+    min-width: 0;
+  }
+
+  .worldcup-sticky__teams {
+    gap: 0.3rem;
+    min-width: 0;
+  }
+
+  .worldcup-sticky__team {
+    gap: 0.2rem;
+    min-width: 0;
   }
 
   .worldcup-sticky__name {
-    max-width: 50px;
-  }
-
-  .worldcup-sticky__score {
-    font-size: 12px;
+    max-width: 55px;
+    font-size: 11px;
   }
 
   .worldcup-sticky__crest {
@@ -289,7 +300,20 @@ tr:hover .wc-team-logo-small {
     height: 14px;
   }
 
+  .worldcup-sticky__score {
+    font-size: 12px;
+  }
+
   .worldcup-sticky__meta {
+    font-size: 8px;
+  }
+
+  .worldcup-sticky__toggle {
+    width: 30px;
+    height: 30px;
+  }
+
+  .worldcup-sticky__vs {
     font-size: 9px;
   }
 }
