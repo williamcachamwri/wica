@@ -94,9 +94,9 @@ tr:hover .wc-team-logo-small {
 /* ── Sticky World Cup widget ───────────────────────────────────────── */
 .worldcup-sticky {
   position: fixed;
-  bottom: 1.5rem;
+  bottom: 7rem;
   left: 1.5rem;
-  z-index: 70;
+  z-index: 69;
   display: flex;
   align-items: center;
   background: var(--navbar-bg);
@@ -253,8 +253,8 @@ tr:hover .wc-team-logo-small {
 
 @media (max-width: 640px) {
   .worldcup-sticky {
-    bottom: 1rem;
-    left: 1rem;
+    bottom: 6.5rem;
+    left: 0.75rem;
   }
 
   .worldcup-sticky__toggle {
