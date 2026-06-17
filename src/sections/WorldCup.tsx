@@ -140,11 +140,6 @@ export function WorldCup() {
         <AnimatePresence mode="wait">
           {activeTab === 'Matches' && (
             <motion.div key="matches" variants={tabVariants} initial="enter" animate="center" exit="exit">
-              {/* Refresh countdown */}
-              <div className="flex items-center justify-center gap-2 mb-4 text-[9px] font-mono text-muted/50 uppercase tracking-wider">
-                <span className={`inline-block w-1.5 h-1.5 rounded-full ${countdown <= 5 ? 'bg-accent animate-pulse' : 'bg-muted/30'}`} />
-                {countdown}s
-              </div>
 
               {/* Group filter */}
               {groups.length > 0 && (
