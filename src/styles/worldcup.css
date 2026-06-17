@@ -5,9 +5,9 @@
 
 .wc-card {
   position: relative;
-  transition: transform 0.2s cubic-bezier(0.2, 0, 0, 1), 
-              border-color 0.2s ease,
-              background-color 0.2s ease;
+  transition: transform 0.2s cubic-bezier(0.2, 0, 0, 1),
+    border-color 0.2s ease,
+    background-color 0.2s ease;
 }
 
 .wc-card:hover {
@@ -77,8 +77,15 @@ tr:hover .wc-team-logo-small {
 }
 
 @keyframes wc-pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.5; }
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.5;
+  }
 }
 
 .animate-wc-pulse {
@@ -157,7 +164,7 @@ tr:hover .wc-team-logo-small {
 }
 
 .worldcup-sticky:not(.worldcup-sticky--collapsed) .worldcup-sticky__body-wrapper {
-  max-width: 500px;
+  max-width: fit-content;
   opacity: 1;
 }
 
@@ -274,8 +281,15 @@ tr:hover .wc-team-logo-small {
 
 /* ── Skeleton loading ─────────────────────────────────────────── */
 @keyframes wc-skeleton-pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.5; }
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.5;
+  }
 }
 
 .worldcup-skeleton {
