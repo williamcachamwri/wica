@@ -17,6 +17,5 @@ const PortugalSprite = () => (
 export const sprites: SpriteItem[] = [
   { id: "cat", el: <CatSprite />, delay: 0 },
   { id: "bonsai", el: <BonsaiSprite />, delay: 0.18 },
+  { id: "portugal", el: <PortugalSprite />, delay: 0.36 },
 ];
-
-export const portugalSprite: SpriteItem = { id: "portugal", el: <PortugalSprite />, delay: 0 };
