@@ -190,15 +190,15 @@ export default function WorldCupMatch() {
                   {(timeline?.Event || [])
                     .filter((e: any) => KEY_EVENT_TYPES.has(e.Type))
                     .map((event: any, idx: number) => {
-                      const isHome = event.IdTeam === match.HomeTeam?.IdTeam
+                      const eventIsHome = event.IdTeam === match.HomeTeam?.IdTeam
                       const type = event.Type
                       const desc = event.EventDescription?.[0]?.Description || ''
                       const isOwnGoal = type === 34 || /own goal/i.test(desc)
-                      const displayDesc = isOwnGoal ? `${desc.replace(/ \(own goal\)/i, '')} (OG)` : desc
                       const minute = event.MatchMinute
                       const isGoal = type === 0 || type === 4 || type === 34 || type === 39
                       const isCard = type === 2
                       const isRed = type === 3 || type === 38
+                      const isHome = isOwnGoal ? !eventIsHome : eventIsHome
 
                       return (
                         <motion.div
@@ -212,7 +212,24 @@ export default function WorldCupMatch() {
                         >
                           <span className={`font-bold w-10 shrink-0 text-right ${isGoal ? 'text-accent' : 'text-muted/80'}`}>{minute}</span>
                           <span className="text-xs shrink-0 w-5 text-center">{eventTypeIcon(type)}</span>
-                          <span className={`flex-1 ${isGoal ? 'text-text font-semibold' : 'text-text/70'}`}>{displayDesc}</span>
+                          {isOwnGoal ? (
+                            <span className="flex-1 text-text font-semibold flex items-center gap-1.5">
+                              <img
+                                src={(eventIsHome ? match.HomeTeam?.PictureUrl : match.AwayTeam?.PictureUrl)?.replace('{format}','sq').replace('{size}','4')}
+                                alt=""
+                                className="w-4 h-4 object-contain"
+                              />
+                              {(() => {
+                                const m = desc.match(/^(.+?)\s+\(.*?\)\s+scores!!$/)
+                                const n = m ? m[1].trim() : desc.replace(/\s+scores!!$/, '').replace(/ \(own goal\)$/i, '')
+                                return n
+                              })()}
+                              <span className="text-accent/80 font-bold ml-1">OG</span>
+                              <span className="text-muted/60">{minute}'</span>
+                            </span>
+                          ) : (
+                            <span className={`flex-1 ${isGoal ? 'text-text font-semibold' : 'text-text/70'}`}>{desc}</span>
+                          )}
                           <span className={`text-[9px] ${isHome ? 'text-accent/60' : 'text-blue-400/60'} uppercase`}>{isHome ? 'H' : 'A'}</span>
                         </motion.div>
                       )

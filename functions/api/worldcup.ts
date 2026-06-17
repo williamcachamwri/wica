@@ -102,8 +102,9 @@ const extractGoals = (timeline: any, homeId: string): Goal[] => {
       const match = descText.match(/^(.+?)\s+\(.*?\)\s+scores!!$/)
       let scorer = match ? match[1].trim() : descText.replace(/\s+scores!!$/, '')
       scorer = scorer.replace(/ \(own goal\)$/i, '')
-      const team: 'home' | 'away' = ge.IdTeam === homeId ? 'home' : 'away'
+      let team: 'home' | 'away' = ge.IdTeam === homeId ? 'home' : 'away'
       const ownGoal = ge.Type === 34 || /own goal/i.test(descText)
+      if (ownGoal) team = team === 'home' ? 'away' : 'home'
 
       const assist = events.find((ae: any) => ae.Type === 1 && ae.MatchMinute === ge.MatchMinute)
       const assistName = assist?.EventDescription?.[0]?.Description
