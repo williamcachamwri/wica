@@ -13,6 +13,7 @@ interface InsightsChartProps {
   figLabel?: string
   onToggleMock?: () => void
   mockActive?: boolean
+  onClick?: () => void
 }
 
 function formatDateLabel(date: string) {
@@ -202,6 +203,7 @@ export function InsightsChart({
   figLabel,
   onToggleMock,
   mockActive,
+  onClick,
 }: InsightsChartProps) {
   const data = useMemo(() => dataProp && dataProp.length > 0 ? dataProp : generateMockInsightsData(), [dataProp])
   const dateRangeLabel = useMemo(() => {
@@ -358,12 +360,20 @@ export function InsightsChart({
   }, [hoverIndex, data])
 
   return (
-    <div ref={sectionRef} className="insights-chart" data-cursor-crosshair={isHovering || undefined}>
+    <div
+      ref={sectionRef}
+      className={`insights-chart ${onClick ? 'insights-chart--clickable' : ''}`}
+      data-cursor-crosshair={isHovering || undefined}
+      onClick={onClick}
+      role={onClick ? 'button' : undefined}
+      tabIndex={onClick ? 0 : undefined}
+      onKeyDown={onClick ? (e) => { if (e.key === 'Enter' || e.key === ' ') onClick() } : undefined}
+    >
       {figLabel && <span className="insights-chart__fig">{figLabel}</span>}
       {onToggleMock && (
         <button
           type="button"
-          onClick={onToggleMock}
+          onClick={(e) => { e.stopPropagation(); onToggleMock() }}
           className="insights-mock-toggle"
         >
           {mockActive ? 'Show live data' : 'Preview mock data'}

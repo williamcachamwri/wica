@@ -720,6 +720,17 @@
   }
 }
 
+/* ── Clickable region ─────────────────────────────────────────────── */
+.insights-chart--clickable {
+  cursor: pointer;
+}
+
+.insights-chart--clickable:hover {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px var(--accent);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
 /* ── Crosshair cursor region ──────────────────────────────────────── */
 [data-cursor-crosshair="true"] {
   cursor: crosshair !important;
