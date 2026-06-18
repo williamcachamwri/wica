@@ -42,7 +42,6 @@ const PLAYER_STAT_LABELS: Record<string, string> = {
   GoalkeeperSaves: 'Saves',
   Offside: 'Offsides',
   TakeOnsCompleted: 'Take-ons',
-  CrossesCompleted: 'Crosses',
 }
 
 function statValue(name: string, val: number): string {
@@ -70,8 +69,8 @@ interface PlayerStatsModalProps {
 }
 
 export function PlayerStatsModal({
-  playerId,
-  side,
+  playerId: _playerId,
+  side: _side,
   playerName,
   shirtNumber,
   playerPicture,

@@ -1,3 +1,5 @@
+import type { ReactNode } from 'react'
+
 const baseProps = {
   width: '20',
   height: '20',
@@ -202,7 +204,7 @@ const SpotifyIcon = () => (
   </svg>
 )
 
-export const USES_ICONS: Record<string, () => JSX.Element> = {
+export const USES_ICONS: Record<string, () => ReactNode> = {
   laptop: LaptopIcon,
   keyboard: KeyboardIcon,
   mouse: MouseIcon,

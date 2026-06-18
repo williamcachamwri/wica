@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import type { PixelFrame } from "../types";
-import type { GardenElementConfig } from "../utils/pixel-garden-elements";
+import type { GardenElementConfig } from "../types";
 
 export function useGardenElementAnimation(config: GardenElementConfig): PixelFrame {
   const { frames, frameDuration, loop } = config;

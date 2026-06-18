@@ -15,15 +15,9 @@ export async function onRequest(context: { request: Request; env: Env }): Promis
   // Logout
   if (url.pathname.endsWith('/logout')) {
     const redirect = safeRedirect(url.searchParams.get('redirect'), '/')
-    return new Response(null, {
-      status: 302,
-      headers: {
-        Location: redirect,
-        'Set-Cookie': [
-          deleteTokenCookie(secure),
-        ],
-      },
-    })
+    const headers = new Headers({ Location: redirect })
+    headers.append('Set-Cookie', deleteTokenCookie(secure))
+    return new Response(null, { status: 302, headers })
   }
 
   if (!env.GITHUB_CLIENT_ID || !env.GITHUB_CLIENT_SECRET) {
@@ -59,17 +53,12 @@ export async function onRequest(context: { request: Request; env: Env }): Promis
     }
 
     const redirect = safeRedirect(getRedirectFromCookie(request), '/')
-    const cookies = [
-      ...setTokenCookie(tokenData.access_token, secure),
-      clearNonceCookie(secure),
-    ]
-    return new Response(null, {
-      status: 302,
-      headers: {
-        Location: redirect,
-        'Set-Cookie': cookies,
-      },
-    })
+    const headers = new Headers({ Location: redirect })
+    for (const cookie of setTokenCookie(tokenData.access_token, secure)) {
+      headers.append('Set-Cookie', cookie)
+    }
+    headers.append('Set-Cookie', clearNonceCookie(secure))
+    return new Response(null, { status: 302, headers })
   }
 
   // Start OAuth flow
@@ -82,11 +71,8 @@ export async function onRequest(context: { request: Request; env: Env }): Promis
   authUrl.searchParams.set('scope', 'read:user public_repo')
   authUrl.searchParams.set('state', nonce)
 
-  return new Response(null, {
-    status: 302,
-    headers: {
-      Location: authUrl.toString(),
-      'Set-Cookie': [nonceCookie(nonce, secure), redirectCookie(redirect, secure)],
-    },
-  })
+  const headers = new Headers({ Location: authUrl.toString() })
+  headers.append('Set-Cookie', nonceCookie(nonce, secure))
+  headers.append('Set-Cookie', redirectCookie(redirect, secure))
+  return new Response(null, { status: 302, headers })
 }

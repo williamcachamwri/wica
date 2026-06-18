@@ -82,42 +82,6 @@ function smoothPath(points: { x: number; y: number }[], tension = 0.5): string {
   return catmullRom2bezier(points, tension)
 }
 
-function useCountUp(target: number, duration = 1200, start = false) {
-  const [value, setValue] = useState(0)
-  const startTime = useRef<number | null>(null)
-  const rafRef = useRef<number>()
-
-  useEffect(() => {
-    if (!start) {
-      setValue(0)
-      return
-    }
-
-    const ease = (t: number) => {
-      const x = Math.min(1, Math.max(0, t))
-      return 1 - Math.pow(1 - x, 3)
-    }
-
-    const animate = (timestamp: number) => {
-      if (startTime.current === null) startTime.current = timestamp
-      const elapsed = timestamp - startTime.current
-      const progress = Math.min(1, elapsed / duration)
-      setValue(Math.round(target * ease(progress)))
-
-      if (progress < 1) {
-        rafRef.current = requestAnimationFrame(animate)
-      }
-    }
-
-    rafRef.current = requestAnimationFrame(animate)
-    return () => {
-      if (rafRef.current) cancelAnimationFrame(rafRef.current)
-    }
-  }, [target, duration, start])
-
-  return value
-}
-
 function useInViewport<T extends HTMLElement>() {
   const ref = useRef<T>(null)
   const [visible, setVisible] = useState(false)
@@ -228,9 +192,6 @@ export function InsightsChart({
     return { visitors, sessions, views }
   }, [data])
 
-  const visitorsCount = useCountUp(totals.visitors, 1200, inView)
-  const sessionsCount = useCountUp(totals.sessions, 1200, inView)
-  const viewsCount = useCountUp(totals.views, 1200, inView)
 
   const maxY = useMemo(() => {
     const max = Math.max(...data.map((d) => Math.max(d.visitors, d.sessions)))
