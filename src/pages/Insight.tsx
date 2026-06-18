@@ -97,7 +97,7 @@ function useCountUpBatch(targets: number[], duration = 1200, start = false): num
   return values
 }
 
-function computeGrowth(data: DetailedTimePoint[]): number {
+function computeGrowth(data: InsightsDataPoint[]): number {
   const mid = Math.floor(data.length / 2)
   const first = data.slice(0, mid)
   const second = data.slice(mid)
@@ -107,7 +107,7 @@ function computeGrowth(data: DetailedTimePoint[]): number {
   return Math.round(((secondAvg - firstAvg) / firstAvg) * 100)
 }
 
-function getPeakDay(data: DetailedTimePoint[]): { date: string; visitors: number } {
+function getPeakDay(data: InsightsDataPoint[]): { date: string; visitors: number } {
   let peak = data[0]
   for (const d of data) {
     if (d.visitors > peak.visitors) peak = d
@@ -117,7 +117,7 @@ function getPeakDay(data: DetailedTimePoint[]): { date: string; visitors: number
 
 type DayStats = { day: string; avg: number; count: number }
 
-function getDayOfWeekBreakdown(data: DetailedTimePoint[]): DayStats[] {
+function getDayOfWeekBreakdown(data: InsightsDataPoint[]): DayStats[] {
   const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
   const buckets: { total: number; count: number }[] = Array.from({ length: 7 }, () => ({ total: 0, count: 0 }))
   for (const d of data) {
@@ -137,6 +137,7 @@ function getMaxCodeClass(code: string): string {
 }
 
 export default function Insight() {
+  const [insightsData, setInsightsData] = useState<InsightsDataPoint[] | null>(null)
   const [detailed, setDetailed] = useState<DetailedData | null>(null)
   const [loading, setLoading] = useState(true)
   const [countStarted, setCountStarted] = useState(false)
@@ -147,6 +148,13 @@ export default function Insight() {
   }, [])
 
   useEffect(() => {
+    fetch('/api/insights')
+      .then((res) => res.json())
+      .then((json) => setInsightsData(json.data ?? []))
+      .catch(() => setInsightsData([]))
+  }, [])
+
+  useEffect(() => {
     fetch('/api/insights/detailed')
       .then((res) => res.json())
       .then((json) => setDetailed(json))
@@ -154,30 +162,24 @@ export default function Insight() {
       .finally(() => setLoading(false))
   }, [])
 
-  const chartData: InsightsDataPoint[] = useMemo(() => {
-    if (!detailed || !detailed.timeSeries || detailed.timeSeries.length === 0) {
-      return generateMockInsightsData()
-    }
-    return detailed.timeSeries.map((d) => ({
-      date: d.date,
-      sessions: d.pageViews,
-      visitors: d.visitors,
-    }))
-  }, [detailed])
+  const chartData = useMemo(() => {
+    if (insightsData && insightsData.length > 0) return insightsData
+    return generateMockInsightsData()
+  }, [insightsData])
 
   const totals = detailed?.totals ?? { pageViews: 0, requests: 0, visitors: 0, bytes: 0, threats: 0 }
-  const days = detailed?.timeSeries?.length ?? 35
-  const growth = detailed?.timeSeries ? computeGrowth(detailed.timeSeries) : 0
-  const peak = detailed?.timeSeries ? getPeakDay(detailed.timeSeries) : { date: '', visitors: 0 }
-  const dayBreakdown = detailed?.timeSeries ? getDayOfWeekBreakdown(detailed.timeSeries) : []
+  const days = chartData.length
+  const growth = computeGrowth(chartData)
+  const peak = getPeakDay(chartData)
+  const dayBreakdown = getDayOfWeekBreakdown(chartData)
   const bestDay = dayBreakdown.length > 0 ? [...dayBreakdown].sort((a, b) => b.avg - a.avg)[0] : { day: '', avg: 0, count: 0 }
 
   const requestsCount = useCountUp(totals.requests, 1400, countStarted)
   const pageViewsCount = useCountUp(totals.pageViews, 1400, countStarted)
   const visitorsCount = useCountUp(totals.visitors, 1400, countStarted)
   const threatsCount = useCountUp(totals.threats, 1400, countStarted)
-  const dailyAvgVisitorsCount = useCountUp(days > 0 ? Math.round(totals.visitors / days) : 0, 1300, countStarted)
-  const dailyAvgPageViewsCount = useCountUp(days > 0 ? Math.round(totals.pageViews / days) : 0, 1300, countStarted)
+  const dailyAvgVisitorsCount = useCountUp(totals.visitors > 0 ? Math.round(totals.visitors / days) : 0, 1300, countStarted)
+  const dailyAvgPageViewsCount = useCountUp(totals.pageViews > 0 ? Math.round(totals.pageViews / days) : 0, 1300, countStarted)
   const growthCount = useCountUp(Math.abs(growth), 1200, countStarted)
   const peakVisitorsCount = useCountUp(peak.visitors, 1200, countStarted)
   const bestDayAvgCount = useCountUp(bestDay.avg, 1200, countStarted)
