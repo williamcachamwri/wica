@@ -1,4 +1,8 @@
-interface Env { STATUS_MAINTENANCE?: string }
+interface Env {
+  STATUS_MAINTENANCE?: string
+  CLOUDFLARE_API_TOKEN?: string
+  CLOUDFLARE_ZONE_ID?: string
+}
 
 const SERVICES = [
   { id: 'website', name: 'Website', description: 'Main site & routing', url: '/' },
@@ -26,6 +30,13 @@ interface CheckResult {
   statusCode: number
   checkedAt: string
   error?: string
+}
+
+interface DayHistory {
+  date: string
+  status: 'operational' | 'degraded' | 'outage' | 'empty'
+  requests: number
+  visitors: number
 }
 
 async function checkService(baseUrl: string, svc: typeof SERVICES[0]): Promise<CheckResult> {
@@ -58,6 +69,71 @@ async function checkService(baseUrl: string, svc: typeof SERVICES[0]): Promise<C
       checkedAt: new Date().toISOString(),
       error: e instanceof Error ? e.message : 'Unknown error',
     }
+  }
+}
+
+async function fetchCloudflareHistory(token: string, zoneId: string): Promise<DayHistory[]> {
+  const today = new Date()
+  const since = new Date(today)
+  since.setDate(since.getDate() - 89)
+
+  try {
+    const res = await fetch('https://api.cloudflare.com/client/v4/graphql', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        query: `query($zoneTag: string!, $since: Time!, $until: Time!) {
+          viewer { zones(filter: { zoneTag: $zoneTag }) { httpRequests1dGroups(limit: 90, filter: { date_geq: $since, date_leq: $until }) { dimensions { date } sum { pageViews requests } uniq { uniques } } } }
+        }`,
+        variables: {
+          zoneTag: zoneId,
+          since: since.toISOString().split('T')[0],
+          until: today.toISOString().split('T')[0],
+        },
+      }),
+    })
+    if (!res.ok) return []
+    const json = (await res.json()) as any
+    if (json.errors) return []
+
+    const groups: any[] = json.data?.viewer?.zones?.[0]?.httpRequests1dGroups ?? []
+    const dayMap = new Map<string, { requests: number; visitors: number }>()
+
+    for (const g of groups) {
+      const date = g.dimensions.date
+      dayMap.set(date, {
+        requests: g.sum?.requests ?? 0,
+        visitors: g.uniq?.uniques ?? 0,
+      })
+    }
+
+    const history: DayHistory[] = []
+    for (let i = 89; i >= 0; i--) {
+      const d = new Date(today)
+      d.setDate(d.getDate() - i)
+      const key = d.toISOString().split('T')[0]
+      const slot = dayMap.get(key)
+      if (slot && slot.requests > 0) {
+        // If there were requests and they succeeded (we got data), it's operational
+        history.push({
+          date: key,
+          status: 'operational',
+          requests: slot.requests,
+          visitors: slot.visitors,
+        })
+      } else {
+        // No requests recorded — mark as empty (no data)
+        history.push({
+          date: key,
+          status: 'empty',
+          requests: slot?.requests ?? 0,
+          visitors: slot?.visitors ?? 0,
+        })
+      }
+    }
+    return history
+  } catch {
+    return []
   }
 }
 
@@ -100,10 +176,15 @@ export const onRequest = async (context: { request: Request; env: Env }) => {
     error: 'Check failed',
   })
 
+  let history: DayHistory[] = []
+  if (context.env.CLOUDFLARE_API_TOKEN && context.env.CLOUDFLARE_ZONE_ID) {
+    history = await fetchCloudflareHistory(context.env.CLOUDFLARE_API_TOKEN, context.env.CLOUDFLARE_ZONE_ID)
+  }
+
   const { overall, message } = computeOverall(services, maintenance)
   const uptime = computeUptime(services)
   const checkedAt = new Date().toISOString()
   const nextCheck = new Date(Date.now() + 60_000).toISOString()
 
-  return Response.json({ overall, message, services, uptime, checkedAt, nextCheck }, { headers: HEADERS })
+  return Response.json({ overall, message, services, uptime, history, checkedAt, nextCheck }, { headers: HEADERS })
 }

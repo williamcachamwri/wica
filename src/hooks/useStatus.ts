@@ -11,11 +11,19 @@ export interface CheckResult {
   error?: string
 }
 
+export interface DayHistory {
+  date: string
+  status: 'operational' | 'degraded' | 'outage' | 'empty'
+  requests: number
+  visitors: number
+}
+
 export interface StatusResponse {
   overall: CheckResult['status'] | 'maintenance'
   message: string
   services: CheckResult[]
   uptime: { last24h: number; last7d: number; last30d: number }
+  history: DayHistory[]
   checkedAt: string
   nextCheck: string
 }

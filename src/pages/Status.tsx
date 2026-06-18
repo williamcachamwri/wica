@@ -3,83 +3,17 @@ import { Link } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { SEO } from '../components/SEO'
 import { Footer } from '../components/Footer'
-import { useStatus, type CheckResult } from '../hooks/useStatus'
+import { useStatus, type CheckResult, type DayHistory } from '../hooks/useStatus'
 import '../styles/status.css'
 
-/* ─── Uptime bar types ───────────────────────────────────────────── */
-type DayStatus = 'operational' | 'degraded' | 'outage' | 'empty'
-
-interface DayBar {
-  date: string
-  status: DayStatus
-  tooltip: string
-  incident?: { title: string; description: string }
-}
-
-const INCIDENTS = [
-  { title: 'Elevated latency', description: 'Response times spiked due to upstream API congestion.' },
-  { title: 'Deployment rollback', description: 'A recent deploy caused instability; rolled back within minutes.' },
-  { title: 'SSL certificate renewal', description: 'Auto-renewal failed, causing brief downtime during rotation.' },
-  { title: 'Database connection pool', description: 'Connection pool exhausted under load, now scaled up.' },
-  { title: 'DNS propagation delay', description: 'Record update took longer than expected to propagate.' },
-  { title: 'Rate limit hit', description: 'Burst traffic triggered API rate limiting; limits adjusted.' },
-  { title: 'CDN cache purge', description: 'Global cache invalidation caused a temporary backend spike.' },
-  { title: 'Third-party API outage', description: 'Downstream service returned 503s for ~8 minutes.' },
-  { title: 'Memory pressure', description: 'High memory usage caused OOM kills; instance resized.' },
-  { title: 'Dependency update broke compat', description: 'A transitive dependency update introduced a regression.' },
-]
-
-function pick<T>(arr: T[], i: number): T {
-  return arr[Math.abs(i * 7919) % arr.length]
-}
-
-function buildUptimeHistory(svcId: string, currentStatus: CheckResult['status']): DayBar[] {
-  const bars: DayBar[] = []
-  const today = new Date()
-  const seed = svcId.split('').reduce((a, c) => a + c.charCodeAt(0), 0)
-  const rand = (i: number) => {
-    const x = Math.sin(seed + i * 9301 + 49297) * 233280
-    return x - Math.floor(x)
-  }
-
-  for (let i = 89; i >= 0; i--) {
-    const d = new Date(today)
-    d.setDate(d.getDate() - i)
-    const label = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
-    const fullDate = d.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })
-
-    let status: DayStatus
-    if (i === 0) {
-      status = currentStatus === 'operational' ? 'operational' : currentStatus === 'degraded' ? 'degraded' : 'outage'
-    } else {
-      const r = rand(i)
-      status = r < 0.97 ? 'operational' : r < 0.99 ? 'degraded' : 'outage'
-    }
-
-    const bar: DayBar = {
-      date: label,
-      status,
-      tooltip: `${label}: ${status.charAt(0).toUpperCase() + status.slice(1)}`,
-    }
-    if (status !== 'operational') {
-      const incident = { ...pick(INCIDENTS, seed + i) }
-      if (status === 'degraded') {
-        incident.title = incident.title.replace(/outage|downtime|crash/i, 'degradation')
-      }
-      bar.incident = {
-        title: incident.title,
-        description: `${incident.description} — ${fullDate}`,
-      }
-    }
-    bars.push(bar)
-  }
-  return bars
-}
-
 /* ─── UptimeBar component ────────────────────────────────────────── */
-function UptimeBar({ bars, animate }: { bars: DayBar[]; animate: boolean }) {
+function UptimeBar({ bars, animate }: { bars: DayHistory[]; animate: boolean }) {
   const [hovered, setHovered] = useState<number | null>(null)
-  const [selected, setSelected] = useState<DayBar | null>(null)
+
+  const fmtLabel = (dateStr: string) => {
+    const d = new Date(dateStr + 'T00:00:00')
+    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+  }
 
   return (
     <div className="status__uptimebar-wrap">
@@ -87,43 +21,22 @@ function UptimeBar({ bars, animate }: { bars: DayBar[]; animate: boolean }) {
         {bars.map((bar, i) => (
           <div
             key={i}
-            className={`status__uptimebar-col status__uptimebar-col--${bar.status}${bar.incident ? ' status__uptimebar-col--clickable' : ''}${selected === bar ? ' status__uptimebar-col--selected' : ''}`}
+            className={`status__uptimebar-col status__uptimebar-col--${bar.status}`}
             style={{
               animationDelay: animate ? `${i * 6}ms` : '0ms',
               opacity: animate ? undefined : 1,
             }}
             onMouseEnter={() => setHovered(i)}
             onMouseLeave={() => setHovered(null)}
-            onClick={() => bar.incident ? setSelected(selected === bar ? null : bar) : undefined}
-            role={bar.incident ? 'button' : undefined}
-            tabIndex={bar.incident ? 0 : undefined}
-            onKeyDown={bar.incident ? (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setSelected(selected === bar ? null : bar) } } : undefined}
           >
             {hovered === i && (
-              <div className={`status__uptimebar-tooltip status__uptimebar-tooltip--${i < 6 ? 'left' : i > bars.length - 6 ? 'right' : 'center'}`}>{bar.tooltip}</div>
+              <div className={`status__uptimebar-tooltip status__uptimebar-tooltip--${i < 6 ? 'left' : i > bars.length - 6 ? 'right' : 'center'}`}>
+                {fmtLabel(bar.date)} — {bar.status === 'operational' ? `${bar.requests} requests` : bar.status === 'empty' ? 'No data' : bar.status}
+              </div>
             )}
           </div>
         ))}
       </div>
-      {selected?.incident && (
-        <div className="status__incident-detail">
-          <div className="status__incident-dot" />
-          <div className="status__incident-body">
-            <div className="status__incident-date">{selected.date}</div>
-            <div className="status__incident-title">{selected.incident.title}</div>
-            <div className="status__incident-desc">{selected.incident.description}</div>
-          </div>
-          <button
-            className="status__incident-close"
-            onClick={() => setSelected(null)}
-            aria-label="Close incident detail"
-          >
-            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
-              <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
-            </svg>
-          </button>
-        </div>
-      )}
       <div className="status__uptimebar-labels">
         <span>90 days ago</span>
         <span>Today</span>
@@ -182,15 +95,16 @@ function LatencyBar({ ms, animate }: { ms: number; animate: boolean }) {
 /* ─── Service row ────────────────────────────────────────────────── */
 function ServiceRow({
   svc,
+  history,
   index,
   animate,
 }: {
   svc: CheckResult
+  history: DayHistory[]
   index: number
   animate: boolean
 }) {
   const [expanded, setExpanded] = useState(true)
-  const bars = buildUptimeHistory(svc.id, svc.status)
 
   const statusColor =
     svc.status === 'operational' ? 'var(--score-good)' :
@@ -390,7 +304,7 @@ export default function Status() {
             <div className="status__section-label">Services</div>
             <div className="status__services">
               {data.services.map((svc, i) => (
-                <ServiceRow key={svc.id} svc={svc} index={i} animate={animate} />
+                <ServiceRow key={svc.id} svc={svc} history={data.history} index={i} animate={animate} />
               ))}
             </div>
 
