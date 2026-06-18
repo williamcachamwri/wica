@@ -170,7 +170,7 @@ function ServiceRow({
             exit={{ height: 0, opacity: 0 }}
             transition={{ type: 'spring', stiffness: 300, damping: 30 }}
           >
-            <UptimeBar bars={bars} animate={expanded} />
+            <UptimeBar bars={history} animate={expanded} />
           </motion.div>
         )}
       </AnimatePresence>
