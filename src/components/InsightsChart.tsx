@@ -218,6 +218,8 @@ export function InsightsChart({
 
   const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const pendingHoverIndex = useRef<number | null>(null)
+  const lastHoverIndexRef = useRef<number | null>(null)
+  const directionRef = useRef<'left' | 'right' | null>(null)
 
   const totals = useMemo(() => {
     const visitors = data.reduce((s, d) => s + d.visitors, 0)
@@ -297,7 +299,12 @@ export function InsightsChart({
     if (debounceTimer.current) clearTimeout(debounceTimer.current)
     debounceTimer.current = setTimeout(() => {
       if (pendingHoverIndex.current !== null) {
-        setHoverIndex(pendingHoverIndex.current)
+        const idx = pendingHoverIndex.current
+        if (lastHoverIndexRef.current !== null) {
+          directionRef.current = idx > lastHoverIndexRef.current ? 'right' : 'left'
+        }
+        lastHoverIndexRef.current = idx
+        setHoverIndex(idx)
       }
       debounceTimer.current = null
     }, 16)
@@ -311,6 +318,8 @@ export function InsightsChart({
       debounceTimer.current = null
     }
     pendingHoverIndex.current = null
+    lastHoverIndexRef.current = null
+    directionRef.current = null
     setIsHovering(false)
     setHoverIndex(null)
   }
@@ -592,13 +601,23 @@ export function InsightsChart({
           className={`insights-chart__pill ${hoveredPoint && hovered ? 'insights-chart__pill--visible' : ''}`}
           style={{ left: `${hoverLeftPct}%` }}
         >
-          {hovered ? formatDateLabel(hovered.date) : ''}
+          {hovered && (
+            <span key={hoverIndex} className={`insights-chart__pill-text ${directionRef.current === 'right' ? 'insights-chart__pill-text--right' : directionRef.current === 'left' ? 'insights-chart__pill-text--left' : ''}`}>
+              {formatDateLabel(hovered.date)}
+            </span>
+          )}
         </div>
         <div
           className={`insights-chart__tooltip ${hoverNearRight ? 'insights-chart__tooltip--left' : ''} ${hoveredPoint && hovered ? 'insights-chart__tooltip--visible' : ''}`}
           style={{ left: `${hoverLeftPct}%`, top: `${hoverTopPct}%` }}
         >
-          <div className="insights-chart__tooltip-date">{hovered ? formatDateLabel(hovered.date) : ''}</div>
+          <div className="insights-chart__tooltip-date">
+            {hovered && (
+              <span key={hoverIndex} className={`insights-chart__tooltip-date-text ${directionRef.current === 'right' ? 'insights-chart__tooltip-date-text--right' : directionRef.current === 'left' ? 'insights-chart__tooltip-date-text--left' : ''}`}>
+                {formatDateLabel(hovered.date)}
+              </span>
+            )}
+          </div>
           <div className="insights-chart__tooltip-row">
             <span className="insights-chart__tooltip-dot insights-chart__tooltip-dot--visitors" />
             <span className="insights-chart__tooltip-label">Visitors</span>

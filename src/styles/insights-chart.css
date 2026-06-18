@@ -452,6 +452,7 @@
   margin-bottom: 0.35rem;
   color: var(--surface);
   font-size: 11px;
+  overflow: hidden;
 }
 
 .insights-chart__tooltip-row {
@@ -636,6 +637,76 @@
   100% { background-position: -200% 0; }
 }
 
+/* ── Roll animation for date text ──────────────────────────────────── */
+
+.insights-chart__pill-text {
+  display: inline-block;
+}
+
+.insights-chart__pill-text--right {
+  animation: pill-roll-down 0.2s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+.insights-chart__pill-text--left {
+  animation: pill-roll-up 0.2s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+@keyframes pill-roll-down {
+  0% {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pill-roll-up {
+  0% {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.insights-chart__tooltip-date-text {
+  display: inline-block;
+}
+
+.insights-chart__tooltip-date-text--right {
+  animation: tooltip-roll-down 0.2s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+.insights-chart__tooltip-date-text--left {
+  animation: tooltip-roll-up 0.2s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+@keyframes tooltip-roll-down {
+  0% {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes tooltip-roll-up {
+  0% {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 /* ── Mobile ───────────────────────────────────────────────────────── */
 @media (max-width: 600px) {
   .insights-chart {
@@ -712,6 +783,7 @@
   .insights-chart__tooltip-date {
     font-size: 10px;
     margin-bottom: 0.25rem;
+    overflow: hidden;
   }
 
   .insights-chart__tooltip-dot {
