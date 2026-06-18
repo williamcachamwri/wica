@@ -19,9 +19,8 @@ import './styles/components.css'
 import './styles/inspect.css'
 import './styles/command-palette.css'
 
-const ColorPaletteFloating = lazy(() => import('./components/ColorPaletteFloating').then(m => ({ default: m.ColorPaletteFloating })))
 const CommandPalette = lazy(() => import('./components/CommandPalette').then(m => ({ default: m.CommandPalette })))
-const InspectFloating = lazy(() => import('./components/InspectFloating').then(m => ({ default: m.InspectFloating })))
+const FloatingControls = lazy(() => import('./components/FloatingControls').then(m => ({ default: m.FloatingControls })))
 const Inspector = lazy(() => import('./components/Inspector').then(m => ({ default: m.Inspector })))
 const NowPlayingSticky = lazy(() => import('./components/NowPlayingSticky').then(m => ({ default: m.NowPlayingSticky })))
 const WorldCupSticky = lazy(() => import('./components/WorldCupSticky').then(m => ({ default: m.WorldCupSticky })))
@@ -255,16 +254,13 @@ export default function App() {
         <Inspector active={inspectActive} />
       </Suspense>
       <Suspense fallback={null}>
-        <ColorPaletteFloating accent={accent} onAccentChange={handleAccentChange} />
-      </Suspense>
-      <Suspense fallback={null}>
-        <InspectFloating active={inspectActive} onToggle={() => setInspectActive((v) => !v)} />
-      </Suspense>
-      <Suspense fallback={null}>
-        <NowPlayingSticky />
+        <FloatingControls active={inspectActive} onToggle={() => setInspectActive((v) => !v)} accent={accent} onAccentChange={handleAccentChange} />
       </Suspense>
       <Suspense fallback={null}>
         <WorldCupSticky />
+      </Suspense>
+      <Suspense fallback={null}>
+        <NowPlayingSticky />
       </Suspense>
       <AnimatedRoutes />
       <ToastContainer />

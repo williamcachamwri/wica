@@ -74,6 +74,7 @@
   z-index: 70;
   display: flex;
   align-items: center;
+  height: 40px;
   background: var(--navbar-bg);
   border: 1px solid var(--navbar-border);
   border-radius: 999px;
@@ -85,28 +86,32 @@
   font-size: 13px;
   line-height: 1;
   overflow: hidden;
-  gap: 0;
-  transition: gap 0.5s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.nowplaying-sticky--collapsed {
-  gap: 0;
+.nowplaying-sticky--active:not(.nowplaying-sticky--collapsed) {
+  box-shadow:
+    0 4px 24px rgba(29, 185, 84, 0.08),
+    0 2px 8px rgba(0, 0, 0, 0.06);
 }
 
 .nowplaying-sticky__toggle {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 36px;
-  height: 36px;
+  width: 40px;
+  height: 40px;
   padding: 0;
   border: none;
   border-radius: 50%;
   background: transparent;
   color: var(--text-muted);
   cursor: pointer;
-  transition: color 0.15s ease;
   flex-shrink: 0;
+  transition: color 0.15s ease;
+}
+
+.nowplaying-sticky:not(.nowplaying-sticky--collapsed) .nowplaying-sticky__toggle {
+  border-right: 1px solid var(--border);
 }
 
 .nowplaying-sticky__toggle:hover {
@@ -139,22 +144,44 @@
   display: flex;
   align-items: center;
   gap: 0.55rem;
-  padding: 0.45rem 0.9rem 0.45rem 0;
+  padding: 0 0.9rem 0 0.65rem;
   text-decoration: none;
   cursor: pointer;
+  height: 40px;
 }
 
 .nowplaying-sticky__body--paused {
   cursor: default;
-  color: var(--text-subtle);
-  opacity: 0.5;
+}
+
+.nowplaying-sticky__spotify-icon {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
 }
 
 .nowplaying-sticky__icon {
-  width: 18px;
-  height: 18px;
+  width: 16px;
+  height: 16px;
   flex-shrink: 0;
   color: #1db954;
+}
+
+.nowplaying-sticky__body--paused .nowplaying-sticky__icon {
+  color: var(--text-subtle);
+}
+
+.nowplaying-sticky__pulse-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #1db954;
+  flex-shrink: 0;
+}
+
+.nowplaying-sticky__body--paused .nowplaying-sticky__pulse-dot {
+  display: none;
 }
 
 .nowplaying-sticky__info {
@@ -167,7 +194,7 @@
 .nowplaying-sticky__track {
   font-weight: 600;
   color: var(--text);
-  max-width: 150px;
+  max-width: 140px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -175,18 +202,19 @@
 }
 
 .nowplaying-sticky__artist {
-  max-width: 150px;
+  max-width: 140px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  font-size: 11.5px;
+  font-size: 11px;
   color: var(--text-subtle);
 }
 
 .nowplaying-sticky__art {
-  width: 32px;
-  height: 32px;
-  border-radius: 4px;
+  width: 36px;
+  height: 36px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
   object-fit: cover;
   flex-shrink: 0;
 }
@@ -196,6 +224,10 @@
   color: var(--text-subtle);
 }
 
+.nowplaying-sticky--collapsed .nowplaying-sticky__body--paused {
+  display: none;
+}
+
 @media (max-width: 640px) {
   .nowplaying-sticky {
     bottom: 1rem;
@@ -203,12 +235,12 @@
   }
 
   .nowplaying-sticky__toggle {
-    width: 32px;
-    height: 32px;
+    width: 36px;
+    height: 36px;
   }
 
   .nowplaying-sticky__body {
-    padding: 0.35rem 0.75rem 0.35rem 0;
+    padding: 0 0.75rem 0 0.5rem;
   }
 
   .nowplaying-sticky__track,

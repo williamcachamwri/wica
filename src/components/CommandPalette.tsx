@@ -8,6 +8,7 @@ interface CommandItem {
   label: string
   description?: string
   shortcut?: string
+  group: 'navigation' | 'actions'
   icon: React.ReactNode
   action: () => void
 }
@@ -122,16 +123,17 @@ function SearchIcon() {
   )
 }
 
-function CommandIcon() {
+function highlightMatch(text: string, query: string) {
+  if (!query.trim()) return <>{text}</>
+  const idx = text.toLowerCase().indexOf(query.toLowerCase())
+  if (idx === -1) return <>{text}</>
   return (
-    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M18 3a3 3 0 0 0-3 3v12a3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3H6a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3V6a3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3h12a3 3 0 0 0 3-3 3 3 0 0 0-3-3z" />
-    </svg>
+    <>
+      {text.slice(0, idx)}
+      <mark className="command-palette__match">{text.slice(idx, idx + query.length)}</mark>
+      {text.slice(idx + query.length)}
+    </>
   )
-}
-
-function KIcon() {
-  return <span className="command-palette__kbd">K</span>
 }
 
 interface CommandPaletteProps {
@@ -162,69 +164,15 @@ export function CommandPalette({ open, onOpenChange, theme, onToggleTheme, sound
   }, [close])
 
   const items: CommandItem[] = [
-    {
-      id: 'home',
-      label: 'Home',
-      description: 'Go to homepage',
-      icon: <HomeIcon />,
-      action: () => run(() => navigate('/')),
-    },
-    {
-      id: 'blog',
-      label: 'Blog',
-      description: 'Read notes and essays',
-      icon: <BlogIcon />,
-      action: () => run(() => navigate('/blog')),
-    },
-    {
-      id: 'guestbook',
-      label: 'Guestbook',
-      description: 'Leave a message',
-      icon: <GuestbookIcon />,
-      action: () => run(() => navigate('/guestbook')),
-    },
-    {
-      id: 'uses',
-      label: 'Uses',
-      description: 'Tools and gear',
-      icon: <UsesIcon />,
-      action: () => run(() => navigate('/uses')),
-    },
-    {
-      id: 'universe',
-      label: 'Universe',
-      description: 'Black hole canvas',
-      icon: <UniverseIcon />,
-      action: () => run(() => navigate('/universe')),
-    },
-    {
-      id: 'changelog',
-      label: 'Changelog',
-      description: 'Latest commit',
-      icon: <ChangelogIcon />,
-      action: () => run(() => navigate('/changelog/7e86da3')),
-    },
-    {
-      id: 'theme',
-      label: `Switch to ${theme === 'light' ? 'dark' : 'light'} theme`,
-      description: 'Toggle color scheme',
-      icon: <ThemeIcon />,
-      action: () => run(onToggleTheme),
-    },
-    {
-      id: 'sound',
-      label: soundMuted ? 'Unmute sound' : 'Mute sound',
-      description: 'Toggle UI sounds',
-      icon: <SoundIcon muted={soundMuted} />,
-      action: () => run(onToggleSound),
-    },
-    {
-      id: 'copy',
-      label: 'Copy link',
-      description: 'Copy current URL',
-      icon: <CopyIcon />,
-      action: () => run(() => navigator.clipboard.writeText(window.location.href)),
-    },
+    { id: 'home', label: 'Home', description: 'Go to homepage', group: 'navigation', icon: <HomeIcon />, action: () => run(() => navigate('/')) },
+    { id: 'blog', label: 'Blog', description: 'Read notes and essays', group: 'navigation', icon: <BlogIcon />, action: () => run(() => navigate('/blog')) },
+    { id: 'guestbook', label: 'Guestbook', description: 'Leave a message', group: 'navigation', icon: <GuestbookIcon />, action: () => run(() => navigate('/guestbook')) },
+    { id: 'uses', label: 'Uses', description: 'Tools and gear', group: 'navigation', icon: <UsesIcon />, action: () => run(() => navigate('/uses')) },
+    { id: 'universe', label: 'Universe', description: 'Black hole canvas', group: 'navigation', icon: <UniverseIcon />, action: () => run(() => navigate('/universe')) },
+    { id: 'changelog', label: 'Changelog', description: 'Latest commit', group: 'navigation', icon: <ChangelogIcon />, action: () => run(() => navigate('/changelog/7e86da3')) },
+    { id: 'theme', label: `Switch to ${theme === 'light' ? 'dark' : 'light'} theme`, description: 'Toggle color scheme', group: 'actions', icon: <ThemeIcon />, action: () => run(onToggleTheme) },
+    { id: 'sound', label: soundMuted ? 'Unmute sound' : 'Mute sound', description: 'Toggle UI sounds', group: 'actions', icon: <SoundIcon muted={soundMuted} />, action: () => run(onToggleSound) },
+    { id: 'copy', label: 'Copy link', description: 'Copy current URL', group: 'actions', icon: <CopyIcon />, action: () => run(() => navigator.clipboard.writeText(window.location.href)) },
   ]
 
   const filtered = query.trim() === ''
@@ -233,6 +181,22 @@ export function CommandPalette({ open, onOpenChange, theme, onToggleTheme, sound
         item.label.toLowerCase().includes(query.toLowerCase()) ||
         (item.description && item.description.toLowerCase().includes(query.toLowerCase()))
       )
+
+  const groups = [
+    { key: 'navigation', label: 'Navigation', items: filtered.filter(i => i.group === 'navigation') },
+    { key: 'actions', label: 'Actions', items: filtered.filter(i => i.group === 'actions') },
+  ].filter(g => g.items.length > 0)
+
+  const globalIndex = (() => {
+    let idx = 0
+    for (const group of groups) {
+      for (const item of group.items) {
+        if (idx === selectedIndex) return item
+        idx++
+      }
+    }
+    return null
+  })()
 
   useEffect(() => {
     setSelectedIndex(0)
@@ -248,22 +212,24 @@ export function CommandPalette({ open, onOpenChange, theme, onToggleTheme, sound
         return
       }
 
+      const totalItems = groups.reduce((s, g) => s + g.items.length, 0)
+
       if (e.key === 'ArrowDown') {
         e.preventDefault()
-        setSelectedIndex((prev) => (prev + 1) % filtered.length)
+        setSelectedIndex((prev) => (prev + 1) % totalItems)
       } else if (e.key === 'ArrowUp') {
         e.preventDefault()
-        setSelectedIndex((prev) => (prev - 1 + filtered.length) % filtered.length)
+        setSelectedIndex((prev) => (prev - 1 + totalItems) % totalItems)
       } else if (e.key === 'Enter') {
         e.preventDefault()
-        const item = filtered[selectedIndex]
+        const item = globalIndex
         if (item) item.action()
       }
     }
 
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [open, close, filtered, selectedIndex, items])
+  }, [open, close, groups, globalIndex])
 
   useEffect(() => {
     if (open && inputRef.current) {
@@ -271,7 +237,12 @@ export function CommandPalette({ open, onOpenChange, theme, onToggleTheme, sound
     }
   }, [open])
 
+  const mountedRef = useRef(false)
   useEffect(() => {
+    if (!mountedRef.current) {
+      mountedRef.current = true
+      return
+    }
     close()
   }, [location.pathname, close])
 
@@ -283,15 +254,15 @@ export function CommandPalette({ open, onOpenChange, theme, onToggleTheme, sound
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          transition={{ duration: 0.2 }}
+          transition={{ duration: 0.15 }}
           onClick={close}
         >
           <motion.div
             className="command-palette"
-            initial={{ opacity: 0, y: -20, scale: 0.96 }}
+            initial={{ opacity: 0, y: -16, scale: 0.97 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -12, scale: 0.98 }}
-            transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+            exit={{ opacity: 0, y: -8, scale: 0.98 }}
+            transition={{ type: 'spring', stiffness: 500, damping: 32, mass: 0.7 }}
             onClick={(e) => e.stopPropagation()}
           >
             <div className="command-palette__input-wrapper">
@@ -309,35 +280,59 @@ export function CommandPalette({ open, onOpenChange, theme, onToggleTheme, sound
             </div>
 
             <div className="command-palette__list" role="listbox">
-              {filtered.length === 0 ? (
-                <div className="command-palette__empty">No commands found.</div>
+              {groups.length === 0 ? (
+                <div className="command-palette__empty">
+                  <span className="command-palette__empty-icon">⌕</span>
+                  No commands found for &ldquo;{query}&rdquo;
+                </div>
               ) : (
-                filtered.map((item, index) => (
-                  <motion.button
-                    key={item.id}
-                    type="button"
-                    className={`command-palette__item ${index === selectedIndex ? 'command-palette__item--selected' : ''}`}
-                    role="option"
-                    aria-selected={index === selectedIndex}
-                    onClick={item.action}
-                    onMouseEnter={() => setSelectedIndex(index)}
-                    layout
-                    initial={{ opacity: 0, x: -8 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: index * 0.02 }}
-                  >
-                    <span className="command-palette__icon">{item.icon}</span>
-                    <span className="command-palette__label">
-                      {item.label}
-                      {item.description && (
-                        <span className="command-palette__description">{item.description}</span>
+                <AnimatePresence mode="popLayout">
+                  {groups.map((group) => (
+                    <div key={group.key} className="command-palette__group">
+                      {query.trim() === '' && (
+                        <div className="command-palette__group-label">{group.label}</div>
                       )}
-                    </span>
-                    {item.shortcut && (
-                      <span className="command-palette__shortcut">{item.shortcut}</span>
-                    )}
-                  </motion.button>
-                ))
+                      {group.items.map((item) => {
+                        const isSelected = item === globalIndex
+                        return (
+                          <motion.button
+                            key={item.id}
+                            type="button"
+                            className={`command-palette__item${isSelected ? ' command-palette__item--selected' : ''}`}
+                            role="option"
+                            aria-selected={isSelected}
+                            onClick={item.action}
+                            onMouseEnter={() => {
+                              let idx = 0
+                              for (const g of groups) {
+                                for (const gi of g.items) {
+                                  if (gi === item) { setSelectedIndex(idx); return }
+                                  idx++
+                                }
+                              }
+                            }}
+                            layout
+                            initial={{ opacity: 0, x: -8 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            exit={{ opacity: 0, x: -8, transition: { duration: 0.1 } }}
+                            transition={{ duration: 0.12, ease: [0.22, 1, 0.36, 1] }}
+                          >
+                            <span className="command-palette__icon">{item.icon}</span>
+                            <span className="command-palette__label">
+                              <span>{highlightMatch(item.label, query)}</span>
+                              {item.description && (
+                                <span className="command-palette__description">{item.description}</span>
+                              )}
+                            </span>
+                            {item.shortcut && (
+                              <span className="command-palette__shortcut">{item.shortcut}</span>
+                            )}
+                          </motion.button>
+                        )
+                      })}
+                    </div>
+                  ))}
+                </AnimatePresence>
               )}
             </div>
 

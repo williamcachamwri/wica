@@ -49,47 +49,15 @@ export function WorldCupSticky() {
 
   return (
     <motion.div
-      className={`worldcup-sticky${collapsed ? ' worldcup-sticky--collapsed' : ''}`}
+      className={`worldcup-sticky${collapsed ? ' worldcup-sticky--collapsed' : ''}${isLive ? ' worldcup-sticky--live' : ''}`}
       initial={{ opacity: 0, y: 16, scale: 0.9 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       transition={{ type: 'spring', stiffness: 260, damping: 22, mass: 0.8 }}
     >
-      <div className="worldcup-sticky__body-wrapper">
-        <button
-          type="button"
-          className="worldcup-sticky__body"
-          onClick={handleClick}
-        >
-          {isLive && <span className="worldcup-sticky__live" />}
-          <div className="worldcup-sticky__teams">
-            <div className="worldcup-sticky__team">
-              <img src={match.homeTeam.logo} alt="" className="worldcup-sticky__crest" />
-              <span className="worldcup-sticky__name">{match.homeTeam.name}</span>
-            </div>
-            {isUpcoming ? (
-              <span className="worldcup-sticky__vs">vs</span>
-            ) : (
-              <span className="worldcup-sticky__score">{match.homeTeam.score ?? '-'}&ndash;{match.awayTeam.score ?? '-'}</span>
-            )}
-            <div className="worldcup-sticky__team worldcup-sticky__team--away">
-              <img src={match.awayTeam.logo} alt="" className="worldcup-sticky__crest" />
-              <span className="worldcup-sticky__name">{match.awayTeam.name}</span>
-            </div>
-          </div>
-          <span className="worldcup-sticky__meta">
-            {isLive ? (
-              <><span className="worldcup-sticky__live-label">LIVE</span>{match.minute && <span className="worldcup-sticky__minute">{match.minute}</span>}</>
-            ) : (
-              new Date(match.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
-            )}
-          </span>
-        </button>
-      </div>
-
       <button
         type="button"
         className="worldcup-sticky__toggle"
-        onClick={() => setCollapsed(c => !c)}
+        onClick={() => setCollapsed((c) => !c)}
         aria-label={collapsed ? 'Show World Cup widget' : 'Hide World Cup widget'}
       >
         <motion.svg
@@ -102,6 +70,43 @@ export function WorldCupSticky() {
           <polyline points="9 18 15 12 9 6" />
         </motion.svg>
       </button>
+
+      <div className="worldcup-sticky__body-wrapper">
+        <button
+          type="button"
+          className="worldcup-sticky__body"
+          onClick={handleClick}
+        >
+          {isLive && (
+            <div className="worldcup-sticky__live-indicator">
+              <motion.span
+                className="worldcup-sticky__live-dot"
+                animate={{ opacity: [1, 0.3, 1] }}
+                transition={{ duration: 1.5, ease: 'easeInOut', repeat: Infinity }}
+              />
+              <span className="worldcup-sticky__live-label">LIVE</span>
+            </div>
+          )}
+          <div className="worldcup-sticky__teams">
+            <img src={match.homeTeam.logo} alt="" className="worldcup-sticky__crest" />
+            <span className="worldcup-sticky__name">{match.homeTeam.name}</span>
+            {isUpcoming ? (
+              <span className="worldcup-sticky__vs">vs</span>
+            ) : (
+              <span className="worldcup-sticky__score">{match.homeTeam.score ?? '-'}&ndash;{match.awayTeam.score ?? '-'}</span>
+            )}
+            <span className="worldcup-sticky__name worldcup-sticky__name--away">{match.awayTeam.name}</span>
+            <img src={match.awayTeam.logo} alt="" className="worldcup-sticky__crest" />
+          </div>
+          <span className="worldcup-sticky__meta">
+            {isLive ? (
+              match.minute ? <span>{match.minute}&prime;</span> : null
+            ) : (
+              new Date(match.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+            )}
+          </span>
+        </button>
+      </div>
     </motion.div>
   )
 }
