@@ -5,6 +5,8 @@ import { Footer } from '../components/Footer'
 import { SectionDivider } from '../components/SectionDivider'
 import { showToast } from '../components/Toast'
 
+import '../styles/guestbook.css'
+
 declare global {
   interface Window {
     turnstile?: {

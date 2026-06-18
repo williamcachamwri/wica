@@ -17,6 +17,8 @@ import { Footer } from '../components/Footer'
 import { fetchPost } from '../lib/posts'
 import { getMdxPost } from '../lib/mdxPosts'
 import { Mermaid } from '../mdx/Mermaid'
+import '../styles/blog.css'
+import '../styles/blog-interactions.css'
 
 const htmlSchema = {
   ...defaultSchema,

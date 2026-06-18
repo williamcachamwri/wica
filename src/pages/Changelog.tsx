@@ -4,6 +4,8 @@ import { AnimatePresence, motion } from 'framer-motion'
 import { SEO } from '../components/SEO'
 import { Footer } from '../components/Footer'
 
+import '../styles/changelog.css'
+
 interface CommitFile {
   filename: string
   previous_filename?: string | null

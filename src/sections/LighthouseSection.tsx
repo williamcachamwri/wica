@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { SectionDivider } from '../components/SectionDivider'
+import '../styles/lighthouse.css'
 
 interface AuditMetric {
   score: number | null
@@ -115,6 +116,7 @@ export function LighthouseSection() {
   const { ref: sectionRef, visible } = useInViewport<HTMLElement>()
 
   useEffect(() => {
+    if (!visible) return
     let cancelled = false
     async function fetchScores() {
       try {
@@ -127,7 +129,7 @@ export function LighthouseSection() {
     }
     fetchScores()
     return () => { cancelled = true }
-  }, [])
+  }, [visible])
 
   if (!data) {
     return (

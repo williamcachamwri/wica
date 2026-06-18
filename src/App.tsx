@@ -1,14 +1,8 @@
 import { lazy, Suspense, useEffect, useRef, useState } from 'react'
 import { BrowserRouter, Route, Routes, useLocation } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
-import { ColorPaletteFloating } from './components/ColorPaletteFloating'
-import { CommandPalette } from './components/CommandPalette'
 import { CustomCursor } from './components/CustomCursor'
 import { FloatingNavbar } from './components/FloatingNavbar'
-import { InspectFloating } from './components/InspectFloating'
-import { Inspector } from './components/Inspector'
-import { NowPlayingSticky } from './components/NowPlayingSticky'
-import { WorldCupSticky } from './components/WorldCupSticky'
 import { ToastContainer } from './components/Toast'
 import { initSound, isMuted, toggleMuted, playClick, playSoftClick } from './lib/sound'
 import BlogList from './pages/BlogList'
@@ -19,21 +13,18 @@ import './styles/navbar.css'
 import './styles/nowplaying.css'
 import './styles/footer.css'
 import './styles/projects.css'
-import './styles/blog.css'
-import './styles/guestbook.css'
-import './styles/changelog.css'
 import './styles/garden.css'
 import './styles/cursor.css'
 import './styles/components.css'
 import './styles/inspect.css'
-import './styles/lightbox.css'
-import './styles/blog-interactions.css'
-import './styles/contributions.css'
-import './styles/insights-chart.css'
-import './styles/lighthouse.css'
-import './styles/uses.css'
 import './styles/command-palette.css'
 
+const ColorPaletteFloating = lazy(() => import('./components/ColorPaletteFloating').then(m => ({ default: m.ColorPaletteFloating })))
+const CommandPalette = lazy(() => import('./components/CommandPalette').then(m => ({ default: m.CommandPalette })))
+const InspectFloating = lazy(() => import('./components/InspectFloating').then(m => ({ default: m.InspectFloating })))
+const Inspector = lazy(() => import('./components/Inspector').then(m => ({ default: m.Inspector })))
+const NowPlayingSticky = lazy(() => import('./components/NowPlayingSticky').then(m => ({ default: m.NowPlayingSticky })))
+const WorldCupSticky = lazy(() => import('./components/WorldCupSticky').then(m => ({ default: m.WorldCupSticky })))
 const BlogPost = lazy(() => import('./pages/BlogPost'))
 const Tags = lazy(() => import('./pages/Tags'))
 const Guestbook = lazy(() => import('./pages/Guestbook'))
@@ -58,21 +49,18 @@ function getInitialTheme(): Theme {
 const pageVariants = {
   initial: {
     opacity: 0,
-    y: 24,
-    scale: 0.98,
-    filter: 'blur(8px)',
+    y: 16,
+    scale: 0.99,
   },
   in: {
     opacity: 1,
     y: 0,
     scale: 1,
-    filter: 'blur(0px)',
   },
   out: {
     opacity: 0,
-    y: -20,
-    scale: 1.01,
-    filter: 'blur(6px)',
+    y: -12,
+    scale: 1.005,
   },
 }
 
@@ -149,7 +137,7 @@ export default function App() {
   }, [theme])
 
   useEffect(() => {
-    const t = setTimeout(() => setNavbarReady(true), 1200)
+    const t = setTimeout(() => setNavbarReady(true), 300)
     return () => clearTimeout(t)
   }, [])
 
@@ -263,21 +251,35 @@ export default function App() {
       </motion.div>
 
       <CustomCursor />
-      <Inspector active={inspectActive} />
-      <ColorPaletteFloating accent={accent} onAccentChange={handleAccentChange} />
-      <InspectFloating active={inspectActive} onToggle={() => setInspectActive((v) => !v)} />
-      <NowPlayingSticky />
-      <WorldCupSticky />
+      <Suspense fallback={null}>
+        <Inspector active={inspectActive} />
+      </Suspense>
+      <Suspense fallback={null}>
+        <ColorPaletteFloating accent={accent} onAccentChange={handleAccentChange} />
+      </Suspense>
+      <Suspense fallback={null}>
+        <InspectFloating active={inspectActive} onToggle={() => setInspectActive((v) => !v)} />
+      </Suspense>
+      <Suspense fallback={null}>
+        <NowPlayingSticky />
+      </Suspense>
+      <Suspense fallback={null}>
+        <WorldCupSticky />
+      </Suspense>
       <AnimatedRoutes />
       <ToastContainer />
-      <CommandPalette
-        open={commandPaletteOpen}
-        onOpenChange={setCommandPaletteOpen}
-        theme={theme}
-        onToggleTheme={toggleTheme}
-        soundMuted={soundMuted}
-        onToggleSound={handleToggleSound}
-      />
+      {commandPaletteOpen && (
+        <Suspense fallback={null}>
+          <CommandPalette
+            open={commandPaletteOpen}
+            onOpenChange={setCommandPaletteOpen}
+            theme={theme}
+            onToggleTheme={toggleTheme}
+            soundMuted={soundMuted}
+            onToggleSound={handleToggleSound}
+          />
+        </Suspense>
+      )}
     </BrowserRouter>
   )
 }

@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
+import '../styles/contributions.css'
 
 interface Day {
   date: string
@@ -103,24 +104,28 @@ export function GithubContributions() {
 
   useEffect(() => {
     let mounted = true
-
-    async function fetchContributions() {
-      try {
-        const res = await fetch('/api/github-contributions')
-        if (!res.ok) throw new Error()
-        const json = (await res.json()) as ContributionsData
-        if (!mounted) return
-        setData(json)
-        setError(false)
-      } catch {
-        if (mounted) setError(true)
-      } finally {
-        if (mounted) setLoading(false)
+    const initDelay = setTimeout(() => {
+      async function fetchContributions() {
+        try {
+          const res = await fetch('/api/github-contributions')
+          if (!res.ok) throw new Error()
+          const json = (await res.json()) as ContributionsData
+          if (!mounted) return
+          setData(json)
+          setError(false)
+        } catch {
+          if (mounted) setError(true)
+        } finally {
+          if (mounted) setLoading(false)
+        }
       }
-    }
+      fetchContributions()
+    }, 200)
 
-    fetchContributions()
-    return () => { mounted = false }
+    return () => {
+      mounted = false
+      clearTimeout(initDelay)
+    }
   }, [])
 
   const maxCount = useMemo(() => {

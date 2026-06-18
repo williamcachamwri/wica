@@ -4,6 +4,7 @@ import { SEO } from '../components/SEO'
 import { SectionDivider } from '../components/SectionDivider'
 import { Footer } from '../components/Footer'
 import { allPosts } from '../data/allPosts'
+import '../styles/blog.css'
 
 function formatDate(date: string) {
   return new Date(date).toLocaleDateString('en-US', {

@@ -19,74 +19,79 @@ export function CustomCursor() {
     const [ripples, setRipples] = useState<Ripple[]>([])
     const [crosshair, setCrosshair] = useState(false)
     const rafRef = useRef<number>()
+    const cleanupRef = useRef<() => void>()
 
   useEffect(() => {
-    // Skip on touch devices
     if (window.matchMedia('(pointer: coarse)').matches) return
 
-    const handleMove = (e: MouseEvent) => {
-      posRef.current = { x: e.clientX, y: e.clientY }
-      setHidden(false)
-    }
-
-    const handleLeave = () => setHidden(true)
-    const handleEnter = () => setHidden(false)
-
-    const handleOver = (e: MouseEvent) => {
-      const target = e.target as HTMLElement
-      const isCrosshair = target.closest('[data-cursor-crosshair]') !== null
-      const isInteractive =
-        target.closest('a, button, [role="button"], input, textarea, select, [data-cursor-hover]') !== null
-      setCrosshair(isCrosshair)
-      setHovering(isInteractive && !isCrosshair)
-    }
-
-    const handleDown = () => {
-      setClicking(true)
-      const id = ++rippleId
-      setRipples((prev) => [...prev, { id, x: posRef.current.x, y: posRef.current.y }])
-      setTimeout(() => {
-        setRipples((prev) => prev.filter((r) => r.id !== id))
-      }, 500)
-    }
-
-    const handleUp = () => setClicking(false)
-
-    const animate = () => {
-      const dot = dotRef.current
-      const ring = ringRef.current
-      if (!dot || !ring) {
-        rafRef.current = requestAnimationFrame(animate)
-        return
+    const initTimer = setTimeout(() => {
+      const handleMove = (e: MouseEvent) => {
+        posRef.current = { x: e.clientX, y: e.clientY }
+        setHidden(false)
       }
 
-      // Dot follows instantly
-      dot.style.transform = `translate(${posRef.current.x}px, ${posRef.current.y}px)`
+      const handleLeave = () => setHidden(true)
+      const handleEnter = () => setHidden(false)
 
-      // Ring follows with easing
-      ringPosRef.current.x += (posRef.current.x - ringPosRef.current.x) * 0.18
-      ringPosRef.current.y += (posRef.current.y - ringPosRef.current.y) * 0.18
-      ring.style.transform = `translate(${ringPosRef.current.x}px, ${ringPosRef.current.y}px)`
+      const handleOver = (e: MouseEvent) => {
+        const target = e.target as HTMLElement
+        const isCrosshair = target.closest('[data-cursor-crosshair]') !== null
+        const isInteractive =
+          target.closest('a, button, [role="button"], input, textarea, select, [data-cursor-hover]') !== null
+        setCrosshair(isCrosshair)
+        setHovering(isInteractive && !isCrosshair)
+      }
 
+      const handleDown = () => {
+        setClicking(true)
+        const id = ++rippleId
+        setRipples((prev) => [...prev, { id, x: posRef.current.x, y: posRef.current.y }])
+        setTimeout(() => {
+          setRipples((prev) => prev.filter((r) => r.id !== id))
+        }, 500)
+      }
+
+      const handleUp = () => setClicking(false)
+
+      const animate = () => {
+        const dot = dotRef.current
+        const ring = ringRef.current
+        if (!dot || !ring) {
+          rafRef.current = requestAnimationFrame(animate)
+          return
+        }
+
+        dot.style.transform = `translate(${posRef.current.x}px, ${posRef.current.y}px)`
+
+        ringPosRef.current.x += (posRef.current.x - ringPosRef.current.x) * 0.18
+        ringPosRef.current.y += (posRef.current.y - ringPosRef.current.y) * 0.18
+        ring.style.transform = `translate(${ringPosRef.current.x}px, ${ringPosRef.current.y}px)`
+
+        rafRef.current = requestAnimationFrame(animate)
+      }
+
+      window.addEventListener('mousemove', handleMove, { passive: true })
+      window.addEventListener('mouseleave', handleLeave)
+      window.addEventListener('mouseenter', handleEnter)
+      window.addEventListener('mouseover', handleOver, { passive: true })
+      window.addEventListener('mousedown', handleDown)
+      window.addEventListener('mouseup', handleUp)
       rafRef.current = requestAnimationFrame(animate)
-    }
 
-    window.addEventListener('mousemove', handleMove, { passive: true })
-    window.addEventListener('mouseleave', handleLeave)
-    window.addEventListener('mouseenter', handleEnter)
-    window.addEventListener('mouseover', handleOver, { passive: true })
-    window.addEventListener('mousedown', handleDown)
-    window.addEventListener('mouseup', handleUp)
-    rafRef.current = requestAnimationFrame(animate)
+      cleanupRef.current = () => {
+        window.removeEventListener('mousemove', handleMove)
+        window.removeEventListener('mouseleave', handleLeave)
+        window.removeEventListener('mouseenter', handleEnter)
+        window.removeEventListener('mouseover', handleOver)
+        window.removeEventListener('mousedown', handleDown)
+        window.removeEventListener('mouseup', handleUp)
+        if (rafRef.current) cancelAnimationFrame(rafRef.current)
+      }
+    }, 100)
 
     return () => {
-      window.removeEventListener('mousemove', handleMove)
-      window.removeEventListener('mouseleave', handleLeave)
-      window.removeEventListener('mouseenter', handleEnter)
-      window.removeEventListener('mouseover', handleOver)
-      window.removeEventListener('mousedown', handleDown)
-      window.removeEventListener('mouseup', handleUp)
-      if (rafRef.current) cancelAnimationFrame(rafRef.current)
+      clearTimeout(initTimer)
+      cleanupRef.current?.()
     }
   }, [])
 

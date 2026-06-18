@@ -1,14 +1,34 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { generateMockInsightsData, InsightsChart, InsightsDataPoint } from '../components/InsightsChart'
 import { SectionDivider } from '../components/SectionDivider'
+import '../styles/insights-chart.css'
 
 export function Insights() {
   const [apiData, setApiData] = useState<InsightsDataPoint[] | null>(null)
   const [loading, setLoading] = useState(true)
   const [apiMock, setApiMock] = useState(false)
   const [forceMock, setForceMock] = useState(false)
+  const [shouldFetch, setShouldFetch] = useState(false)
+  const sectionRef = useRef<HTMLElement>(null)
 
   useEffect(() => {
+    const el = sectionRef.current
+    if (!el) return
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setShouldFetch(true)
+          observer.disconnect()
+        }
+      },
+      { rootMargin: '200px' }
+    )
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [])
+
+  useEffect(() => {
+    if (!shouldFetch) return
     fetch('/api/insights')
       .then((res) => res.json())
       .then((json) => {
@@ -17,7 +37,7 @@ export function Insights() {
       })
       .catch(() => setApiData([]))
       .finally(() => setLoading(false))
-  }, [])
+  }, [shouldFetch])
 
   const data = useMemo(() => {
     if (forceMock) return generateMockInsightsData()
@@ -26,7 +46,7 @@ export function Insights() {
 
   if (loading) {
     return (
-      <section id="insights" className="mb-14">
+      <section id="insights" className="mb-14" ref={sectionRef}>
         <SectionDivider label="Analytics" />
         <div className="insights-chart insights-chart--skeleton" aria-hidden="true">
           <div className="insights-chart__header">
@@ -50,7 +70,7 @@ export function Insights() {
   if (!data || data.length === 0) return null
 
   return (
-    <section id="insights" className="mb-14">
+    <section id="insights" className="mb-14" ref={sectionRef}>
       <SectionDivider label="Analytics" />
       {apiMock && !forceMock && (
         <p className="text-xs text-[var(--text-subtle)] mb-3">

@@ -2,6 +2,7 @@ import { SEO } from '../components/SEO'
 import { SectionDivider } from '../components/SectionDivider'
 import { Footer } from '../components/Footer'
 import { USES_ICONS } from '../data/usesIcons'
+import '../styles/uses.css'
 
 interface UsesItem {
   name: string

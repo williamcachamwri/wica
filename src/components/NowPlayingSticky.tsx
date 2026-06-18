@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { motion } from 'framer-motion'
 
 interface NowPlayingData {
@@ -14,6 +14,7 @@ export function NowPlayingSticky() {
   const [data, setData] = useState<NowPlayingData | null>(null)
   const [error, setError] = useState(false)
   const [collapsed, setCollapsed] = useState(false)
+  const cleanupInterval = useRef<ReturnType<typeof setInterval>>()
 
   useEffect(() => {
     let mounted = true
@@ -32,11 +33,16 @@ export function NowPlayingSticky() {
       }
     }
 
-    fetchNowPlaying()
-    const interval = setInterval(fetchNowPlaying, 30000)
+    const initDelay = setTimeout(() => {
+      fetchNowPlaying()
+      const interval = setInterval(fetchNowPlaying, 30000)
+      cleanupInterval.current = interval
+    }, 2000)
+
     return () => {
       mounted = false
-      clearInterval(interval)
+      clearTimeout(initDelay)
+      if (cleanupInterval.current) clearInterval(cleanupInterval.current)
     }
   }, [])
 

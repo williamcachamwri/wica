@@ -3,6 +3,7 @@ import { Lightbox } from '../components/Lightbox'
 import { PhotoCard } from '../components/PhotoCard'
 import { SectionDivider } from '../components/SectionDivider'
 import { photos } from '../data/photos'
+import '../styles/lightbox.css'
 
 export function Memories() {
   const [activeIndex, setActiveIndex] = useState<number | null>(null)

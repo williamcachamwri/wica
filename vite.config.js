@@ -18,4 +18,24 @@ export default defineConfig({
       },
     },
   },
+  build: {
+    target: 'es2020',
+    minify: 'esbuild',
+    cssMinify: true,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'vendor-react': ['react', 'react-dom'],
+          'vendor-router': ['react-router-dom'],
+          'vendor-motion': ['framer-motion'],
+          'vendor-markdown': ['react-markdown', 'remark-gfm', 'remark-math', 'rehype-highlight', 'rehype-katex', 'rehype-raw', 'rehype-sanitize'],
+          'vendor-mdx': ['@mdx-js/react'],
+          'vendor-mermaid': ['mermaid'],
+        },
+      },
+    },
+    modulePreload: {
+      polyfill: true,
+    },
+  },
 })

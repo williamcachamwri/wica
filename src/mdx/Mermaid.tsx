@@ -1,16 +1,10 @@
-import { useEffect, useState } from 'react'
+import { memo, useEffect, useState } from 'react'
 
 interface MermaidProps {
   children: string
 }
 
-let mermaidPromise: Promise<typeof import('mermaid')> | null = null
 let initialized = false
-
-function loadMermaid() {
-  if (!mermaidPromise) mermaidPromise = import('mermaid')
-  return mermaidPromise
-}
 
 function getVar(name: string): string {
   if (typeof window === 'undefined') return '#000000'
@@ -33,7 +27,7 @@ function mix(color1: string, color2: string, ratio: number): string {
 }
 
 async function initMermaid() {
-  const mermaid = await loadMermaid()
+  const mermaid = await import('mermaid')
   if (initialized) return mermaid
 
   const accent = getVar('--accent'); const surface = getVar('--surface'); const bg = getVar('--bg')
@@ -67,7 +61,7 @@ function sanitizeSvg(raw: string): string {
     .replace(/href\s*=\s*["']\s*javascript:/gi, 'href="#"')
 }
 
-export function Mermaid({ children }: MermaidProps) {
+export const Mermaid = memo(function Mermaid({ children }: MermaidProps) {
   const [svg, setSvg] = useState<string>('')
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
@@ -99,4 +93,4 @@ export function Mermaid({ children }: MermaidProps) {
   }
 
   return <div className="mermaid-diagram" data-loading={loading} dangerouslySetInnerHTML={{ __html: svg }} />
-}
+})

@@ -8,8 +8,8 @@ export function Loader({ onDone }: LoaderProps) {
   const [phase, setPhase] = useState<'pulse' | 'split'>('pulse')
 
   useEffect(() => {
-    const t1 = setTimeout(() => setPhase('split'), 550)
-    const t2 = setTimeout(() => onDone(), 1150)
+    const t1 = setTimeout(() => setPhase('split'), 350)
+    const t2 = setTimeout(() => onDone(), 750)
     return () => {
       clearTimeout(t1)
       clearTimeout(t2)

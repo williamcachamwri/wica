@@ -20,7 +20,7 @@ export default function Home() {
   useEffect(() => {
     if (!loading) {
       sessionStorage.setItem(LOADER_SHOWN_KEY, 'true')
-      const t = setTimeout(() => setLoaded(true), 150)
+      const t = setTimeout(() => setLoaded(true), 50)
       return () => clearTimeout(t)
     }
   }, [loading])

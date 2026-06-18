@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { motion } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
 import type { Match } from '../types'
@@ -12,6 +12,7 @@ export function WorldCupSticky() {
   const navigate = useNavigate()
   const [data, setData] = useState<WorldCupData | null>(null)
   const [collapsed, setCollapsed] = useState(false)
+  const cleanupInterval = useRef<ReturnType<typeof setInterval>>()
 
   useEffect(() => {
     let mounted = true
@@ -23,9 +24,12 @@ export function WorldCupSticky() {
         if (mounted && json && !json.error) setData(json)
       } catch { }
     }
-    fetchData()
-    const interval = setInterval(fetchData, 30000)
-    return () => { mounted = false; clearInterval(interval) }
+    const initDelay = setTimeout(() => {
+      fetchData()
+      const interval = setInterval(fetchData, 30000)
+      cleanupInterval.current = interval
+    }, 2000)
+    return () => { mounted = false; clearTimeout(initDelay); if (cleanupInterval.current) clearInterval(cleanupInterval.current) }
   }, [])
 
   if (!data) return null
