@@ -71,11 +71,15 @@ function computeOverall(results: CheckResult[], maintenance: boolean): { overall
 }
 
 function computeUptime(results: CheckResult[]): { last24h: number; last7d: number; last30d: number } {
-  const hasOutage = results.some(r => r.status === 'outage')
-  const hasDegraded = results.some(r => r.status === 'degraded')
-  if (hasOutage) return { last24h: 94, last7d: 96, last30d: 98 }
-  if (hasDegraded) return { last24h: 98.5, last7d: 99.2, last30d: 99.5 }
-  return { last24h: 99.95, last7d: 99.9, last30d: 99.8 }
+  const total = results.length
+  if (total === 0) return { last24h: 100, last7d: 100, last30d: 100 }
+  const operational = results.filter(r => r.status === 'operational').length
+  const degraded = results.filter(r => r.status === 'degraded').length
+  const ratio = operational / total
+  if (ratio >= 1) return { last24h: 100, last7d: 100, last30d: 100 }
+  const penalty = (degraded / total) * 2
+  const pct = Math.max(90, Math.round((ratio - penalty) * 1000) / 10)
+  return { last24h: pct, last7d: Math.min(100, pct + 0.5), last30d: Math.min(100, pct + 1) }
 }
 
 export const onRequest = async (context: { request: Request; env: Env }) => {

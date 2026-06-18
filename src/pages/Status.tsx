@@ -140,7 +140,7 @@ function ServiceRow({
   index: number
   animate: boolean
 }) {
-  const [expanded, setExpanded] = useState(false)
+  const [expanded, setExpanded] = useState(true)
   const bars = buildUptimeHistory(svc.id, svc.status)
 
   const statusColor =
@@ -382,6 +382,7 @@ export default function Status() {
           </>
         )}
 
+        <div className="h-16" />
         <Footer />
       </main>
     </div>

@@ -312,7 +312,6 @@
 
 /* ── Expandable detail + uptime bar ────────────────────────────────── */
 .status__service-detail {
-  overflow: hidden;
   border-top: 1px solid var(--border);
   background: color-mix(in srgb, var(--border) 30%, var(--surface));
 }
