@@ -100,7 +100,7 @@ function UptimeBar({ bars, animate }: { bars: DayBar[]; animate: boolean }) {
             onKeyDown={bar.incident ? (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setSelected(selected === bar ? null : bar) } } : undefined}
           >
             {hovered === i && (
-              <div className="status__uptimebar-tooltip">{bar.tooltip}</div>
+              <div className={`status__uptimebar-tooltip status__uptimebar-tooltip--${i < 6 ? 'left' : i > bars.length - 6 ? 'right' : 'center'}`}>{bar.tooltip}</div>
             )}
           </div>
         ))}
