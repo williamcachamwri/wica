@@ -63,9 +63,10 @@ export default function Guestbook() {
 
   const renderTurnstile = useCallback(() => {
     if (!turnstileRef.current || !window.turnstile) return
+    const isDark = document.documentElement.classList.contains('dark')
     widgetId.current = window.turnstile.render(turnstileRef.current, {
       sitekey: SITE_KEY,
-      theme: 'dark',
+      theme: isDark ? 'dark' : 'light',
       size: 'flexible',
     })
   }, [])

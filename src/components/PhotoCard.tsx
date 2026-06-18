@@ -8,6 +8,12 @@ export function PhotoCard({ src, caption, rotate, index = 0, onClick }: PhotoCar
       className="polaroid"
       style={{ '--rotate': `${rotate}deg`, '--i': index } as React.CSSProperties}
       onClick={onClick}
+      onKeyDown={onClick ? (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault()
+          onClick()
+        }
+      } : undefined}
       role={onClick ? 'button' : undefined}
       tabIndex={onClick ? 0 : undefined}
       aria-label={onClick ? `Open ${caption}` : undefined}

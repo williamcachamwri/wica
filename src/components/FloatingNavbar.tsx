@@ -13,13 +13,21 @@ interface FloatingNavbarProps {
 
 export function FloatingNavbar({ theme, onToggleTheme, soundMuted = true, onToggleSound, onToggleCommandPalette }: FloatingNavbarProps) {
   const location = useLocation()
-  const isActive = (path: string) => location.pathname === path
+  const isActive = (path: string) => {
+    if (path === '/') return location.pathname === '/'
+    return location.pathname === path || location.pathname.startsWith(path + '/')
+  }
   const [expanded, setExpanded] = useState(true)
 
   useEffect(() => {
     const isMobile = window.innerWidth <= 640
     setExpanded(!isMobile)
   }, [])
+
+  useEffect(() => {
+    const isMobile = window.innerWidth <= 640
+    if (isMobile) setExpanded(false)
+  }, [location.pathname])
 
   return (
     <nav className={`floating-navbar${expanded ? ' floating-navbar--expanded' : ' floating-navbar--collapsed'}`}>

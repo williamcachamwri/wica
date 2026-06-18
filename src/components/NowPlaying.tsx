@@ -1,42 +1,7 @@
-import { useEffect, useState } from 'react'
-
-interface NowPlayingData {
-  isPlaying: boolean
-  title?: string
-  artist?: string
-  album?: string
-  albumArt?: string | null
-  url?: string
-}
+import { useNowPlaying } from '../hooks/useNowPlaying'
 
 export function NowPlaying() {
-  const [data, setData] = useState<NowPlayingData | null>(null)
-  const [error, setError] = useState(false)
-
-  useEffect(() => {
-    let mounted = true
-
-    async function fetchNowPlaying() {
-      try {
-        const res = await fetch('/api/now-playing')
-        if (!res.ok) return
-        const json = await res.json()
-        if (mounted) {
-          setData(json)
-          setError(false)
-        }
-      } catch {
-        if (mounted) setError(true)
-      }
-    }
-
-    fetchNowPlaying()
-    const interval = setInterval(fetchNowPlaying, 30000)
-    return () => {
-      mounted = false
-      clearInterval(interval)
-    }
-  }, [])
+  const { data, error } = useNowPlaying()
 
   if (error || !data || !data.isPlaying) {
     return (

@@ -42,15 +42,19 @@ export function WorkingHours() {
     return () => clearInterval(id)
   }, [])
 
-  const tz = Intl.DateTimeFormat().resolvedOptions().timeZone
-  const offset = -now.getTimezoneOffset()
-  const offsetStr = `GMT${offset >= 0 ? '+' : ''}${Math.floor(offset / 60)}`
-  const h = now.getHours()
-  const m = now.getMinutes()
-  const s = now.getSeconds()
-  const dow = now.getDay()
-  const day = now.getDate()
-  const month = now.getMonth() + 1
+  const AUTHOR_TZ = 'Asia/Ho_Chi_Minh'
+  const authorTime = new Intl.DateTimeFormat('en-US', {
+    timeZone: AUTHOR_TZ,
+    hour: 'numeric', minute: 'numeric', second: 'numeric',
+    hour12: false, weekday: 'short', day: 'numeric', month: 'numeric',
+  }).formatToParts(now)
+  const getPart = (type: string) => authorTime.find(p => p.type === type)?.value ?? '0'
+  const h = parseInt(getPart('hour'))
+  const m = parseInt(getPart('minute'))
+  const s = parseInt(getPart('second'))
+  const dow = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].indexOf(getPart('weekday'))
+  const day = parseInt(getPart('day'))
+  const month = parseInt(getPart('month'))
   const status = getStatus(h)
   const hh = pad(h)
   const mm = pad(m)
@@ -75,7 +79,7 @@ export function WorkingHours() {
           {status.label}
         </span>
         <span className="wh__sep" />
-        <span className="wh__tz">{offsetStr}</span>
+        <span className="wh__tz">GMT+7</span>
         <span className="wh__date">{WEEKDAYS[dow]}, {month}/{day}</span>
       </div>
     </div>

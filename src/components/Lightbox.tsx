@@ -112,9 +112,8 @@ export function Lightbox({
       role="dialog"
       aria-modal="true"
       aria-label="Image preview"
-      onClick={onClose}
     >
-      <div className="lightbox__backdrop" aria-hidden="true" />
+      <div className="lightbox__backdrop" aria-hidden="true" onClick={onClose} />
 
       <div className="lightbox__strip">
         <div className="lightbox__thumbs">
