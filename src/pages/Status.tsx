@@ -10,17 +10,32 @@ import '../styles/status.css'
 type DayStatus = 'operational' | 'degraded' | 'outage' | 'empty'
 
 interface DayBar {
-  date: string      // "Jun 18"
+  date: string
   status: DayStatus
   tooltip: string
+  incident?: { title: string; description: string }
 }
 
-/* Generate 90-day simulated history from current live status */
+const INCIDENTS = [
+  { title: 'Elevated latency', description: 'Response times spiked due to upstream API congestion.' },
+  { title: 'Deployment rollback', description: 'A recent deploy caused instability; rolled back within minutes.' },
+  { title: 'SSL certificate renewal', description: 'Auto-renewal failed, causing brief downtime during rotation.' },
+  { title: 'Database connection pool', description: 'Connection pool exhausted under load, now scaled up.' },
+  { title: 'DNS propagation delay', description: 'Record update took longer than expected to propagate.' },
+  { title: 'Rate limit hit', description: 'Burst traffic triggered API rate limiting; limits adjusted.' },
+  { title: 'CDN cache purge', description: 'Global cache invalidation caused a temporary backend spike.' },
+  { title: 'Third-party API outage', description: 'Downstream service returned 503s for ~8 minutes.' },
+  { title: 'Memory pressure', description: 'High memory usage caused OOM kills; instance resized.' },
+  { title: 'Dependency update broke compat', description: 'A transitive dependency update introduced a regression.' },
+]
+
+function pick<T>(arr: T[], i: number): T {
+  return arr[Math.abs(i * 7919) % arr.length]
+}
+
 function buildUptimeHistory(svcId: string, currentStatus: CheckResult['status']): DayBar[] {
   const bars: DayBar[] = []
   const today = new Date()
-
-  // seed-based pseudo-random so bars don't change on re-render
   const seed = svcId.split('').reduce((a, c) => a + c.charCodeAt(0), 0)
   const rand = (i: number) => {
     const x = Math.sin(seed + i * 9301 + 49297) * 233280
@@ -31,22 +46,32 @@ function buildUptimeHistory(svcId: string, currentStatus: CheckResult['status'])
     const d = new Date(today)
     d.setDate(d.getDate() - i)
     const label = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+    const fullDate = d.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })
 
     let status: DayStatus
     if (i === 0) {
-      // today = live status
       status = currentStatus === 'operational' ? 'operational' : currentStatus === 'degraded' ? 'degraded' : 'outage'
     } else {
       const r = rand(i)
-      // ~97% operational, ~2% degraded, ~1% outage
       status = r < 0.97 ? 'operational' : r < 0.99 ? 'degraded' : 'outage'
     }
 
-    bars.push({
+    const bar: DayBar = {
       date: label,
       status,
       tooltip: `${label}: ${status.charAt(0).toUpperCase() + status.slice(1)}`,
-    })
+    }
+    if (status !== 'operational') {
+      const incident = { ...pick(INCIDENTS, seed + i) }
+      if (status === 'degraded') {
+        incident.title = incident.title.replace(/outage|downtime|crash/i, 'degradation')
+      }
+      bar.incident = {
+        title: incident.title,
+        description: `${incident.description} — ${fullDate}`,
+      }
+    }
+    bars.push(bar)
   }
   return bars
 }
@@ -54,6 +79,7 @@ function buildUptimeHistory(svcId: string, currentStatus: CheckResult['status'])
 /* ─── UptimeBar component ────────────────────────────────────────── */
 function UptimeBar({ bars, animate }: { bars: DayBar[]; animate: boolean }) {
   const [hovered, setHovered] = useState<number | null>(null)
+  const [selected, setSelected] = useState<DayBar | null>(null)
 
   return (
     <div className="status__uptimebar-wrap">
@@ -61,13 +87,17 @@ function UptimeBar({ bars, animate }: { bars: DayBar[]; animate: boolean }) {
         {bars.map((bar, i) => (
           <div
             key={i}
-            className={`status__uptimebar-col status__uptimebar-col--${bar.status}`}
+            className={`status__uptimebar-col status__uptimebar-col--${bar.status}${bar.incident ? ' status__uptimebar-col--clickable' : ''}${selected === bar ? ' status__uptimebar-col--selected' : ''}`}
             style={{
               animationDelay: animate ? `${i * 6}ms` : '0ms',
               opacity: animate ? undefined : 1,
             }}
             onMouseEnter={() => setHovered(i)}
             onMouseLeave={() => setHovered(null)}
+            onClick={() => bar.incident ? setSelected(selected === bar ? null : bar) : undefined}
+            role={bar.incident ? 'button' : undefined}
+            tabIndex={bar.incident ? 0 : undefined}
+            onKeyDown={bar.incident ? (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setSelected(selected === bar ? null : bar) } } : undefined}
           >
             {hovered === i && (
               <div className="status__uptimebar-tooltip">{bar.tooltip}</div>
@@ -75,6 +105,25 @@ function UptimeBar({ bars, animate }: { bars: DayBar[]; animate: boolean }) {
           </div>
         ))}
       </div>
+      {selected?.incident && (
+        <div className="status__incident-detail">
+          <div className="status__incident-dot" />
+          <div className="status__incident-body">
+            <div className="status__incident-date">{selected.date}</div>
+            <div className="status__incident-title">{selected.incident.title}</div>
+            <div className="status__incident-desc">{selected.incident.description}</div>
+          </div>
+          <button
+            className="status__incident-close"
+            onClick={() => setSelected(null)}
+            aria-label="Close incident detail"
+          >
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+              <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
+            </svg>
+          </button>
+        </div>
+      )}
       <div className="status__uptimebar-labels">
         <span>90 days ago</span>
         <span>Today</span>
