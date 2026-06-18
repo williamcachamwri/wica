@@ -1,79 +1,158 @@
-/* ── Status Page ──────────────────────────────────────────────────── */
-.status {
-  padding: 3rem 1.5rem 4rem;
-}
-
+/* ── Page header ──────────────────────────────────────────────────── */
 .status__header {
-  margin-bottom: 2.5rem;
-}
-
-.status__title {
-  font-size: 1.75rem;
-  font-weight: 700;
-  letter-spacing: -0.03em;
-  color: var(--text-primary);
-  margin: 0 0 0.5rem;
-}
-
-.status__subtitle {
-  color: var(--text-muted);
-  font-size: 14px;
-  margin: 0;
-}
-
-/* ── Overall Banner ──────────────────────────────────────────────── */
-.status__banner {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  padding: 1rem 1.25rem;
-  border-radius: 12px;
-  border: 1px solid var(--border);
-  background: var(--surface);
   margin-bottom: 2rem;
 }
 
+.status__back {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 12px;
+  font-family: var(--font-mono);
+  color: var(--text-muted);
+  text-decoration: none;
+  margin-bottom: 1rem;
+  transition: color 0.2s ease;
+}
+
+.status__back:hover {
+  color: var(--accent);
+}
+
+.status__title {
+  font-size: clamp(1.5rem, 5vw, 2.25rem);
+  font-weight: 700;
+  letter-spacing: -0.035em;
+  color: var(--text-primary);
+  line-height: 1.1;
+  margin: 0 0 0.4rem;
+}
+
+.status__header-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 12px;
+  font-family: var(--font-mono);
+  color: var(--text-muted);
+}
+
+.status__header-sep {
+  opacity: 0.4;
+}
+
+/* inline refresh icon button */
+.status__refresh-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-subtle);
+  padding: 2px;
+  border-radius: 4px;
+  transition: color 0.2s ease, transform 0.2s ease;
+  line-height: 0;
+}
+
+.status__refresh-icon:hover {
+  color: var(--accent);
+}
+
+.status__refresh-icon--spin svg {
+  animation: status-spin 0.7s linear infinite;
+}
+
+/* ── Section label ────────────────────────────────────────────────── */
+.status__section-label {
+  font-size: 10px;
+  font-weight: 600;
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-subtle);
+  margin-bottom: 0.6rem;
+  margin-top: 2rem;
+}
+
+/* ── Overall Banner ───────────────────────────────────────────────── */
+.status__banner {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 1.1rem 1.3rem;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  margin-bottom: 2rem;
+  position: relative;
+  overflow: hidden;
+}
+
+/* color tint per status */
+.status__banner--operational {
+  border-color: color-mix(in srgb, var(--score-good) 22%, var(--border));
+  background: color-mix(in srgb, var(--score-good) 6%, var(--surface));
+}
+
+.status__banner--degraded {
+  border-color: color-mix(in srgb, var(--score-ok) 22%, var(--border));
+  background: color-mix(in srgb, var(--score-ok) 6%, var(--surface));
+}
+
+.status__banner--outage {
+  border-color: color-mix(in srgb, var(--score-bad) 22%, var(--border));
+  background: color-mix(in srgb, var(--score-bad) 6%, var(--surface));
+}
+
+.status__banner--maintenance {
+  border-color: color-mix(in srgb, var(--accent) 22%, var(--border));
+  background: color-mix(in srgb, var(--accent) 6%, var(--surface));
+}
+
 .status__banner-dot {
-  width: 12px;
-  height: 12px;
+  width: 11px;
+  height: 11px;
   border-radius: 50%;
   flex-shrink: 0;
 }
 
 .status__banner-dot--operational {
-  background: var(--score-good, #22c55e);
-  box-shadow: 0 0 8px rgba(34, 197, 94, 0.4);
+  background: var(--score-good);
+  box-shadow: 0 0 0 0 color-mix(in srgb, var(--score-good) 50%, transparent);
+  animation: status-pulse-ring 2.2s ease-in-out infinite;
 }
 
 .status__banner-dot--degraded {
-  background: var(--score-ok, #f59e0b);
-  box-shadow: 0 0 8px rgba(245, 158, 11, 0.4);
-  animation: status-blink 1s ease-in-out infinite;
+  background: var(--score-ok);
+  animation: status-blink 1.1s ease-in-out infinite;
 }
 
 .status__banner-dot--outage {
-  background: var(--score-bad, #ef4444);
-  box-shadow: 0 0 8px rgba(239, 68, 68, 0.4);
+  background: var(--score-bad);
   animation: status-blink 0.6s ease-in-out infinite;
 }
 
 .status__banner-dot--maintenance {
-  background: var(--text-subtle);
-  box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
+  background: var(--accent);
+  animation: status-pulse-ring 3s ease-in-out infinite;
 }
 
-.status__banner-text {
+.status__banner-body {
   flex: 1;
+  min-width: 0;
 }
 
-.status__banner-status {
+.status__banner-title {
   font-size: 15px;
-  font-weight: 600;
+  font-weight: 700;
   color: var(--text-primary);
+  letter-spacing: -0.01em;
 }
 
-.status__banner-message {
-  font-size: 13px;
+.status__banner-sub {
+  font-size: 12px;
   color: var(--text-muted);
   margin-top: 0.15rem;
 }
@@ -82,26 +161,51 @@
   font-size: 11px;
   color: var(--text-subtle);
   font-family: var(--font-mono);
-  text-align: right;
   flex-shrink: 0;
+  text-align: right;
 }
 
-/* ── Service List ────────────────────────────────────────────────── */
+/* ── Service list ─────────────────────────────────────────────────── */
 .status__services {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  margin-bottom: 2.5rem;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: 0;
 }
 
 .status__service {
+  border-bottom: 1px solid var(--border);
+}
+
+.status__service:last-child {
+  border-bottom: none;
+}
+
+/* clickable header row */
+.status__service-header {
+  width: 100%;
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 0.75rem;
-  padding: 0.85rem 1rem;
-  border-radius: 10px;
-  border: 1px solid var(--border);
+  padding: 0.85rem 1.1rem;
   background: var(--surface);
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.15s ease;
+}
+
+.status__service-header:hover {
+  background: color-mix(in srgb, var(--accent) 3%, var(--surface));
+}
+
+.status__service-left {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  flex: 1;
+  min-width: 0;
 }
 
 .status__service-dot {
@@ -111,102 +215,289 @@
   flex-shrink: 0;
 }
 
-.status__service-dot--operational { background: var(--score-good, #22c55e); }
-.status__service-dot--degraded { background: var(--score-ok, #f59e0b); }
-.status__service-dot--outage { background: var(--score-bad, #ef4444); }
+.status__service-dot--operational {
+  background: var(--score-good);
+  box-shadow: 0 0 0 0 color-mix(in srgb, var(--score-good) 50%, transparent);
+  animation: status-pulse-ring 2.2s ease-in-out infinite;
+}
 
-.status__service-info {
-  flex: 1;
-  min-width: 0;
+.status__service-dot--degraded {
+  background: var(--score-ok);
+  animation: status-blink 1.1s ease-in-out infinite;
+}
+
+.status__service-dot--outage {
+  background: var(--score-bad);
+  animation: status-blink 0.6s ease-in-out infinite;
 }
 
 .status__service-name {
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 600;
   color: var(--text-primary);
+  line-height: 1.2;
 }
 
 .status__service-desc {
-  font-size: 12px;
+  font-size: 11px;
   color: var(--text-subtle);
+  margin-top: 1px;
 }
 
-.status__service-meta {
-  text-align: right;
+.status__service-right {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
   flex-shrink: 0;
 }
 
 .status__service-status {
   font-size: 12px;
   font-weight: 500;
+  font-family: var(--font-mono);
+  white-space: nowrap;
+}
+
+.status__service-chevron {
+  color: var(--text-subtle);
+  flex-shrink: 0;
+  transition: color 0.2s ease;
+}
+
+.status__service-header:hover .status__service-chevron {
   color: var(--text-muted);
 }
 
-.status__service-latency {
-  font-size: 11px;
-  color: var(--text-subtle);
-  font-family: var(--font-mono);
+/* ── Latency bar (inside service row) ──────────────────────────────── */
+.status__latency-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
 }
 
-/* ── Uptime Cards ────────────────────────────────────────────────── */
+.status__latency-track {
+  width: 36px;
+  height: 3px;
+  border-radius: 2px;
+  background: var(--border);
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.status__latency-fill {
+  height: 100%;
+  border-radius: 2px;
+  transition: width 0.9s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.status__latency-fill--good {
+  background: var(--score-good);
+}
+
+.status__latency-fill--ok {
+  background: var(--score-ok);
+}
+
+.status__latency-fill--bad {
+  background: var(--score-bad);
+}
+
+.status__latency-ms {
+  font-size: 11px;
+  font-family: var(--font-mono);
+  white-space: nowrap;
+  min-width: 2.8rem;
+  text-align: right;
+}
+
+/* ── Expandable detail + uptime bar ────────────────────────────────── */
+.status__service-detail {
+  overflow: hidden;
+  border-top: 1px solid var(--border);
+  background: color-mix(in srgb, var(--border) 30%, var(--surface));
+}
+
+/* ── Uptime bar (Vercel-style 90 days) ─────────────────────────────── */
+.status__uptimebar-wrap {
+  padding: 0.85rem 1.1rem;
+}
+
+.status__uptimebar {
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 32px;
+  margin-bottom: 0.3rem;
+}
+
+.status__uptimebar-col {
+  flex: 1;
+  border-radius: 2px;
+  height: 100%;
+  min-width: 0;
+  position: relative;
+  cursor: default;
+  animation: bar-grow 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+  transform-origin: bottom;
+}
+
+@keyframes bar-grow {
+  from {
+    transform: scaleY(0);
+    opacity: 0;
+  }
+
+  to {
+    transform: scaleY(1);
+    opacity: 1;
+  }
+}
+
+.status__uptimebar-col--operational {
+  background: var(--accent);
+}
+
+.status__uptimebar-col--degraded {
+  background: var(--score-ok);
+}
+
+.status__uptimebar-col--outage {
+  background: var(--score-bad);
+}
+
+.status__uptimebar-col--empty {
+  background: var(--border);
+}
+
+.status__uptimebar-col:hover {
+  filter: brightness(1.2);
+}
+
+/* tooltip */
+.status__uptimebar-tooltip {
+  position: absolute;
+  bottom: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  font-size: 10px;
+  font-family: var(--font-mono);
+  background: var(--text-primary);
+  color: var(--surface);
+  padding: 3px 7px;
+  border-radius: 5px;
+  pointer-events: none;
+  z-index: 10;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.status__uptimebar-tooltip::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 4px solid transparent;
+  border-top-color: var(--text-primary);
+}
+
+.status__uptimebar-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 10px;
+  font-family: var(--font-mono);
+  color: var(--text-subtle);
+}
+
+/* ── Uptime summary cards ─────────────────────────────────────────── */
 .status__uptime {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 0.75rem;
-  margin-bottom: 2.5rem;
+  gap: 0.6rem;
+  margin-bottom: 0;
 }
 
 .status__uptime-card {
-  padding: 1rem;
-  border-radius: 10px;
+  padding: 1rem 1.1rem;
+  border-radius: 12px;
   border: 1px solid var(--border);
   background: var(--surface);
   text-align: center;
+  animation: card-in 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.status__uptime-card:nth-child(1) {
+  animation-delay: 0.12s;
+}
+
+.status__uptime-card:nth-child(2) {
+  animation-delay: 0.18s;
+}
+
+.status__uptime-card:nth-child(3) {
+  animation-delay: 0.24s;
+}
+
+@keyframes card-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.97);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
 .status__uptime-value {
-  font-size: 1.5rem;
+  font-size: 1.45rem;
   font-weight: 700;
-  letter-spacing: -0.02em;
-  color: var(--text-primary);
+  letter-spacing: -0.025em;
+  color: var(--score-good);
   font-family: var(--font-mono);
+  line-height: 1.1;
 }
 
 .status__uptime-label {
-  font-size: 11px;
-  color: var(--text-subtle);
-  margin-top: 0.2rem;
-}
-
-/* ── Incident History ────────────────────────────────────────────── */
-.status__history {
-  margin-bottom: 2.5rem;
-}
-
-.status__history-title {
-  font-size: 14px;
+  font-size: 10px;
   font-weight: 600;
-  color: var(--text-primary);
-  margin: 0 0 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-subtle);
+  margin-top: 0.3rem;
+}
+
+/* ── Incident History ─────────────────────────────────────────────── */
+.status__history {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+  margin-bottom: 0;
 }
 
 .status__history-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 2rem 1.5rem;
   font-size: 13px;
-  color: var(--text-subtle);
-  font-style: italic;
+  color: var(--text-muted);
 }
 
-/* ── Refresh ─────────────────────────────────────────────────────── */
+/* ── Refresh button (bottom) ──────────────────────────────────────── */
 .status__refresh-wrap {
   text-align: center;
+  margin-top: 2rem;
 }
 
-.status__refresh {
+.status__btn {
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
   padding: 8px 18px;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 500;
   font-family: var(--font-mono);
   color: var(--text-muted);
@@ -221,65 +512,71 @@
     transform 0.2s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-.status__refresh:hover {
+.status__btn:hover {
   color: var(--accent);
   border-color: var(--accent);
   background: var(--code-bg);
   transform: translateY(-1px);
 }
 
-.status__refresh:active {
+.status__btn:active {
   transform: translateY(0);
 }
 
-.status__refresh--loading {
+.status__btn--loading {
   pointer-events: none;
   opacity: 0.6;
 }
 
-.status__refresh svg {
-  transition: transform 0.4s ease;
+.status__btn--loading svg {
+  animation: status-spin 0.75s linear infinite;
 }
 
-.status__refresh--loading svg {
-  animation: status-spin 0.8s linear infinite;
-}
-
-@keyframes status-spin {
-  to { transform: rotate(360deg); }
-}
-
-/* ── Skeleton ────────────────────────────────────────────────────── */
-.status__skeleton-banner {
-  height: 64px;
-  border-radius: 12px;
-  background: var(--surface);
-  border: 1px solid var(--border);
+/* ── Skeleton loading ─────────────────────────────────────────────── */
+.status__skeleton-wrap {
   margin-bottom: 2rem;
 }
 
-.status__skeleton-item {
-  height: 52px;
-  border-radius: 10px;
+.status__skeleton-banner {
+  height: 68px;
+  border-radius: 14px;
   background: var(--surface);
   border: 1px solid var(--border);
+  margin-bottom: 1.5rem;
+  animation: status-shimmer 1.6s ease-in-out infinite;
+}
+
+.status__skeleton-list {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  gap: 1px;
+}
+
+.status__skeleton-item {
+  height: 56px;
+  background: var(--surface);
+  animation: status-shimmer 1.6s ease-in-out infinite;
 }
 
 @keyframes status-shimmer {
-  0% { opacity: 1; }
-  50% { opacity: 0.4; }
-  100% { opacity: 1; }
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.45;
+  }
 }
 
-.status__skeleton-banner,
-.status__skeleton-item {
-  animation: status-shimmer 1.5s ease-in-out infinite;
-}
-
-/* ── Error State ─────────────────────────────────────────────────── */
+/* ── Error state ──────────────────────────────────────────────────── */
 .status__error {
   text-align: center;
-  padding: 3rem 1rem;
+  padding: 4rem 1rem;
 }
 
 .status__error-icon {
@@ -288,17 +585,61 @@
 }
 
 .status__error-text {
-  color: var(--score-bad, #ef4444);
-  font-size: 14px;
-  margin-bottom: 1rem;
+  color: var(--score-bad);
+  font-size: 13px;
+  margin-bottom: 1.25rem;
 }
 
-/* ── Responsive ──────────────────────────────────────────────────── */
-@media (max-width: 640px) {
-  .status__title {
-    font-size: 1.35rem;
+/* ── Animations ───────────────────────────────────────────────────── */
+@keyframes status-pulse-ring {
+
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 color-mix(in srgb, currentColor 60%, transparent);
   }
 
+  50% {
+    box-shadow: 0 0 0 4px color-mix(in srgb, currentColor 0%, transparent);
+  }
+}
+
+/* dot uses background color — helper classes carry currentColor fallback */
+.status__banner-dot--operational {
+  --_c: var(--score-good);
+}
+
+.status__banner-dot--degraded {
+  --_c: var(--score-ok);
+}
+
+.status__banner-dot--outage {
+  --_c: var(--score-bad);
+}
+
+.status__banner-dot--maintenance {
+  --_c: var(--accent);
+}
+
+@keyframes status-blink {
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.2;
+  }
+}
+
+@keyframes status-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ── Responsive ───────────────────────────────────────────────────── */
+@media (max-width: 600px) {
   .status__banner {
     flex-wrap: wrap;
   }
@@ -306,18 +647,33 @@
   .status__banner-time {
     width: 100%;
     text-align: left;
+    margin-top: 0.3rem;
+  }
+
+  .status__service-right {
+    gap: 0.5rem;
+  }
+
+  .status__latency-track {
+    display: none;
+  }
+
+  .status__latency-ms {
+    display: none;
   }
 
   .status__uptime {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.4rem;
   }
 
-  .status__service {
-    flex-wrap: wrap;
+  .status__uptime-value {
+    font-size: 1.1rem;
   }
+}
 
-  .status__service-meta {
-    width: 100%;
-    text-align: left;
+@media (max-width: 400px) {
+  .status__uptime {
+    grid-template-columns: 1fr 1fr 1fr;
   }
 }
