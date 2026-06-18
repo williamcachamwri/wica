@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { InsightsChart, InsightsDataPoint, generateMockInsightsData } from '../components/InsightsChart'
 import { SEO } from '../components/SEO'
@@ -8,6 +8,81 @@ import '../styles/insight.css'
 
 function formatNumber(n: number) {
   return n.toLocaleString('en-US')
+}
+
+function useCountUp(target: number, duration = 1400, start = false) {
+  const [value, setValue] = useState(0)
+  const startTime = useRef<number | null>(null)
+  const rafRef = useRef<number>()
+
+  useEffect(() => {
+    if (!start) {
+      setValue(0)
+      return
+    }
+
+    const ease = (t: number) => {
+      const x = Math.min(1, Math.max(0, t))
+      return 1 - Math.pow(1 - x, 3)
+    }
+
+    const animate = (timestamp: number) => {
+      if (startTime.current === null) startTime.current = timestamp
+      const elapsed = timestamp - startTime.current
+      const progress = Math.min(1, elapsed / duration)
+      setValue(Math.round(target * ease(progress)))
+
+      if (progress < 1) {
+        rafRef.current = requestAnimationFrame(animate)
+      }
+    }
+
+    rafRef.current = requestAnimationFrame(animate)
+    return () => {
+      if (rafRef.current) cancelAnimationFrame(rafRef.current)
+    }
+  }, [target, duration, start])
+
+  return value
+}
+
+function useCountUpBatch(targets: number[], duration = 1200, start = false): number[] {
+  const [values, setValues] = useState<number[]>(() => targets.map(() => 0))
+  const targetsKey = targets.join(',')
+  const rafRef = useRef<number>()
+  const startTime = useRef<number | null>(null)
+
+  useEffect(() => {
+    if (!start) {
+      setValues(targets.map(() => 0))
+      return
+    }
+
+    startTime.current = null
+
+    const ease = (t: number) => {
+      const x = Math.min(1, Math.max(0, t))
+      return 1 - Math.pow(1 - x, 3)
+    }
+
+    const animate = (timestamp: number) => {
+      if (startTime.current === null) startTime.current = timestamp
+      const elapsed = timestamp - startTime.current
+      const progress = Math.min(1, elapsed / duration)
+      setValues(targets.map(t => Math.round(t * ease(progress))))
+
+      if (progress < 1) {
+        rafRef.current = requestAnimationFrame(animate)
+      }
+    }
+
+    rafRef.current = requestAnimationFrame(animate)
+    return () => {
+      if (rafRef.current) cancelAnimationFrame(rafRef.current)
+    }
+  }, [targetsKey, duration, start])
+
+  return values
 }
 
 function computeGrowth(data: InsightsDataPoint[]): number {
@@ -48,6 +123,7 @@ function getDayOfWeekBreakdown(data: InsightsDataPoint[]): DayStats[] {
 export default function Insight() {
   const [data, setData] = useState<InsightsDataPoint[] | null>(null)
   const [loading, setLoading] = useState(true)
+  const [countStarted, setCountStarted] = useState(false)
 
   useEffect(() => {
     fetch('/api/insights')
@@ -55,6 +131,11 @@ export default function Insight() {
       .then((json) => setData(json.data ?? []))
       .catch(() => setData([]))
       .finally(() => setLoading(false))
+  }, [])
+
+  useEffect(() => {
+    const t = setTimeout(() => setCountStarted(true), 400)
+    return () => clearTimeout(t)
   }, [])
 
   const displayData = useMemo(() => data && data.length > 0 ? data : generateMockInsightsData(), [data])
@@ -71,6 +152,14 @@ export default function Insight() {
     const bestDay = [...dayBreakdown].sort((a, b) => b.avg - a.avg)[0]
     return { totalVisitors, totalSessions, dailyAvgVisitors, dailyAvgSessions, growth, peak, dayBreakdown, bestDay }
   }, [displayData])
+
+  const totalVisitorsCount = useCountUp(stats?.totalVisitors ?? 0, 1400, countStarted)
+  const totalSessionsCount = useCountUp(stats?.totalSessions ?? 0, 1400, countStarted)
+  const dailyAvgVisitorsCount = useCountUp(stats?.dailyAvgVisitors ?? 0, 1300, countStarted)
+  const dailyAvgSessionsCount = useCountUp(stats?.dailyAvgSessions ?? 0, 1300, countStarted)
+  const peakVisitorsCount = useCountUp(stats?.peak.visitors ?? 0, 1200, countStarted)
+  const bestDayAvgCount = useCountUp(stats?.bestDay.avg ?? 0, 1200, countStarted)
+  const dayCounts = useCountUpBatch(stats?.dayBreakdown.map(d => d.avg) ?? [], 1000, countStarted)
 
   const formatDateLabel = (date: string) =>
     new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
@@ -99,19 +188,19 @@ export default function Insight() {
             <div className="insight-summary">
               <div className="insight-summary__card">
                 <span className="insight-summary__label">Total Visitors</span>
-                <span className="insight-summary__value">{formatNumber(stats.totalVisitors)}</span>
+                <span className="insight-summary__value">{formatNumber(totalVisitorsCount)}</span>
               </div>
               <div className="insight-summary__card">
                 <span className="insight-summary__label">Total Sessions</span>
-                <span className="insight-summary__value">{formatNumber(stats.totalSessions)}</span>
+                <span className="insight-summary__value">{formatNumber(totalSessionsCount)}</span>
               </div>
               <div className="insight-summary__card">
                 <span className="insight-summary__label">Daily Avg Visitors</span>
-                <span className="insight-summary__value">{formatNumber(stats.dailyAvgVisitors)}</span>
+                <span className="insight-summary__value">{formatNumber(dailyAvgVisitorsCount)}</span>
               </div>
               <div className="insight-summary__card">
                 <span className="insight-summary__label">Daily Avg Sessions</span>
-                <span className="insight-summary__value">{formatNumber(stats.dailyAvgSessions)}</span>
+                <span className="insight-summary__value">{formatNumber(dailyAvgSessionsCount)}</span>
               </div>
             </div>
           )}
@@ -136,12 +225,12 @@ export default function Insight() {
               <div className="insight-analysis__item">
                 <span className="insight-analysis__label">Peak Day</span>
                 <span className="insight-analysis__value">{formatDateLabel(stats.peak.date)}</span>
-                <span className="insight-analysis__note">{formatNumber(stats.peak.visitors)} visitors</span>
+                <span className="insight-analysis__note">{formatNumber(peakVisitorsCount)} visitors</span>
               </div>
               <div className="insight-analysis__item">
                 <span className="insight-analysis__label">Best Day of Week</span>
                 <span className="insight-analysis__value">{stats.bestDay.day}</span>
-                <span className="insight-analysis__note">{formatNumber(stats.bestDay.avg)} avg visitors</span>
+                <span className="insight-analysis__note">{formatNumber(bestDayAvgCount)} avg visitors</span>
               </div>
             </div>
           )}
@@ -150,7 +239,7 @@ export default function Insight() {
             <div className="insight-days">
               <h3 className="insight-days__title">Visitors by Day of Week</h3>
               <div className="insight-days__grid">
-                {stats.dayBreakdown.map((d) => {
+                {stats.dayBreakdown.map((d, i) => {
                   const pct = stats.totalVisitors > 0 ? ((d.avg / stats.bestDay.avg) * 100) : 0
                   return (
                     <div key={d.day} className="insight-days__bar-group">
@@ -161,7 +250,7 @@ export default function Insight() {
                           style={{ width: `${pct}%` }}
                         />
                       </div>
-                      <span className="insight-days__bar-value">{formatNumber(d.avg)}</span>
+                      <span className="insight-days__bar-value">{formatNumber(dayCounts[i] ?? 0)}</span>
                     </div>
                   )
                 })}
