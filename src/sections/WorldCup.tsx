@@ -7,7 +7,7 @@ import '../styles/worldcup.css'
 
 const tabVariants = {
   enter: { opacity: 0, y: 8, scale: 0.98 },
-  center: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.3, ease: [0.16, 1, 0.3, 1] } },
+  center: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.3, ease: [0.16, 1, 0.3, 1] as const } },
   exit: { opacity: 0, y: -6, scale: 0.97, transition: { duration: 0.15 } },
 }
 
@@ -15,19 +15,13 @@ type Tab = 'Matches' | 'Standings' | 'Power Rankings'
 const PER_PAGE = 5
 const REFRESH_INTERVAL = 30000
 
-function getStatusScore(m: Match): number {
-  if (m.status === 'LIVE') return 0
-  if (m.status === 'FT') return 1
-  return 2
-}
-
 export function WorldCup() {
   const navigate = useNavigate()
   const [data, setData] = useState<{ matches: Match[]; standings: Standing[]; nextMatch?: Match | null } | null>(null)
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState<Tab>('Matches')
   const [page, setPage] = useState(0)
-  const [countdown, setCountdown] = useState(REFRESH_INTERVAL / 1000)
+  const [, setCountdown] = useState(REFRESH_INTERVAL / 1000)
   const [groupFilter, setGroupFilter] = useState('')
 
   const fetchData = useCallback(() => {

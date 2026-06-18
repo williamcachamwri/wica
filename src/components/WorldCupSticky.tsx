@@ -12,7 +12,7 @@ export function WorldCupSticky() {
   const navigate = useNavigate()
   const [data, setData] = useState<WorldCupData | null>(null)
   const [collapsed, setCollapsed] = useState(false)
-  const cleanupInterval = useRef<ReturnType<typeof setInterval>>()
+  const cleanupInterval = useRef<ReturnType<typeof setInterval> | undefined>(undefined)
 
   useEffect(() => {
     let mounted = true

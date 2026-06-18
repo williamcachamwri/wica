@@ -78,7 +78,7 @@ function computeUptime(results: CheckResult[]): { last24h: number; last7d: numbe
   return { last24h: 99.95, last7d: 99.9, last30d: 99.8 }
 }
 
-export const onRequest: PagesFunction<Env> = async (context) => {
+export const onRequest = async (context: { request: Request; env: Env }) => {
   if (context.request.method === 'OPTIONS') return new Response(null, { headers: HEADERS })
 
   const origin = new URL(context.request.url).origin

@@ -32,7 +32,7 @@ async function fetchZoneAnalytics(token: string, zoneId: string) {
   return (json.data?.viewer?.zones?.[0]?.httpRequests1dGroups ?? []).map((g: any) => ({ date: g.dimensions.date, sessions: g.sum.pageViews ?? 0, visitors: g.uniq?.uniques ?? 0 })).sort((a: any, b: any) => new Date(a.date).getTime() - new Date(b.date).getTime())
 }
 
-export const onRequest: PagesFunction<Env> = async (context) => {
+export const onRequest = async (context: { request: Request; env: Env }) => {
   if (context.request.method === 'OPTIONS') return new Response(null, { headers: { ...CORS, ...SECURE } })
 
   const { CLOUDFLARE_API_TOKEN, CLOUDFLARE_ZONE_ID } = context.env

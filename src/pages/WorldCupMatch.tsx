@@ -80,6 +80,7 @@ export default function WorldCupMatch() {
     stats: { home: any[]; away: any[] } | null
     powerRanking: any
     standings: any
+    playerStats?: Record<string, any>
   } | null>(null)
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState<'Timeline' | 'Lineups' | 'Stats' | 'Table' | 'Power Ranking'>('Timeline')
