@@ -1,0 +1,85 @@
+export const meta = {
+  slug: "imported-your-ai-marketing-stack-is-a-gpt-wrapper-wearing-a-trench-coat",
+  title: "Your AI Marketing Stack Is a GPT Wrapper Wearing a Trench Coat",
+  date: "Mon, 22 Jun 2026 07:49:40 +0000",
+  summary: "I sat through a vendor demo last month where a \"next-generation AI marketing platform\" promised to 10x our content output. I asked one question: \"What's actually happening when I click Generate?\"\n\nThe answer, after some squirming, was a POST request to gpt-4, a prompt template with our brand name st",
+  tags: [],
+}
+
+I sat through a vendor demo last month where a "next-generation AI marketing platform" promised to 10x our content output. I asked one question: *"What's actually happening when I click Generate?"*
+
+
+The answer, after some squirming, was a POST request to `gpt-4`, a prompt template with our brand name string-interpolated in, and a `temperature` of 0.7.
+
+
+That's it. That's the platform. $40k/year for a `fetch()` call and a system prompt someone wrote in an afternoon.
+
+
+I'm not here to tell you AI is useless for marketing. I'm here to tell you that almost everyone is using it to automate the *wrong layer of the stack* — and in doing so, they're degrading the very channels that make marketing work in the first place.
+
+
+  
+  
+  The wrapper economy
+
+
+Pull back the curtain on most "AI marketing" SaaS and you find the same three ingredients:
+
+
+const result = await openai.chat.completions.create(&#123;
+  model: "gpt-4o",
+  messages: [
+    &#123; role: "system", content: BRAND_VOICE_PROMPT &#125;,
+    &#123; role: "user", content: `Write a LinkedIn post about $&#123;topic&#125;` &#125;
+  ],
+  temperature: 0.7,
+&#125;);
+
+
+A prompt. A model call. A nice UI on top. The "moat" is the UI and the onboarding, not the intelligence.
+
+
+There's nothing *wrong* with a wrapper — wrappers are a legitimate business when they solve distribution, integration, or workflow. But marketers are buying these tools believing they've acquired a competitive edge. They haven't. Your competitor bought the same wrapper, pointed at the same model, fed it the same "best practice" prompt. You are all generating regression-to-the-mean content from the same weights.
+
+
+**The output of a shared model is, by definition, not a differentiator.** It's a commodity. And we're flooding every channel with it.
+
+
+  
+  
+  We automated production. Production was never the bottleneck.
+
+
+Here's the uncomfortable part for anyone who's shipped a content pipeline.
+
+
+The marketing funnel was never bottlenecked on *how fast you can produce words*. A competent writer + a CMS could already produce more content than any audience wanted to read. The actual scarce resources are:
+
+
+**Attention** — the audience's, which is fixed and now being carpet-bombed
+
+**Trust** — which is destroyed faster by volume than it's built by quality
+
+**Relevance** — getting the right message to the right person at the right moment
+
+
+AI made the *cheap* thing (production) 100x cheaper and did approximately nothing for the *expensive* things. So now we have:
+
+
+- Inboxes full of "personalized" emails that are personalized only in the `&#123;&#123;first_name&#125;&#125;` token
+- A search index that Google is actively trying to de-rank because it's choking on generated filler
+- LinkedIn feeds that read like the same robot talking to itself in 10,000 voices
+
+
+This is a classic engineering mistake: **optimizing the part of the system that was already fast.** We found the cheap operation and parallelized it, while the bottleneck sat untouched. If you profiled a marketing org like you profile a service, "write more blog posts" would not show up as the hot path.
+
+
+  
+  
+  The channel-poisoning feedback loop
+
+
+This is the part that should genuinely worry you, because it's a systems problem, not a taste problem.
+
+
+AI-driven marketing depends on channels — organic search, email deliverability, social reach. Those
