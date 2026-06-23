@@ -18,6 +18,7 @@ import './styles/cursor.css'
 import './styles/components.css'
 import './styles/inspect.css'
 import './styles/command-palette.css'
+import './styles/bento.css'
 
 const CommandPalette = lazy(() => import('./components/CommandPalette').then(m => ({ default: m.CommandPalette })))
 const FloatingControls = lazy(() => import('./components/FloatingControls').then(m => ({ default: m.FloatingControls })))
@@ -72,7 +73,7 @@ const pageTransition = {
   mass: 0.8,
 }
 
-function AnimatedRoutes() {
+function AnimatedRoutes({ layoutMode }: { layoutMode: 'normal' | 'bento' }) {
   const location = useLocation()
 
   return (
@@ -88,7 +89,7 @@ function AnimatedRoutes() {
       >
         <Suspense fallback={null}>
           <Routes location={location}>
-            <Route path="/" element={<Home />} />
+            <Route path="/" element={<Home layoutMode={layoutMode} />} />
             <Route path="/blog" element={<BlogList />} />
             <Route path="/blog/tag/:tag" element={<Tags />} />
             <Route path="/blog/:slug" element={<BlogPost />} />
@@ -115,6 +116,9 @@ export default function App() {
   const [theme, setTheme] = useState<Theme>(getInitialTheme)
   const [soundMuted, setSoundMuted] = useState(true)
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false)
+  const [layoutMode, setLayoutMode] = useState<'normal' | 'bento'>(
+    () => (localStorage.getItem('ddt-layout') as 'normal' | 'bento') || 'normal'
+  )
   const transitionTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   useEffect(() => {
@@ -192,6 +196,15 @@ export default function App() {
     playSoftClick()
   }
 
+  const toggleLayout = () => {
+    playSoftClick()
+    setLayoutMode(prev => {
+      const next = prev === 'normal' ? 'bento' : 'normal'
+      localStorage.setItem('ddt-layout', next)
+      return next
+    })
+  }
+
   const toggleTheme = () => {
     playSoftClick()
     const next = theme === 'light' ? 'dark' : 'light'
@@ -250,6 +263,8 @@ export default function App() {
           onToggleSound={handleToggleSound}
           commandPaletteOpen={commandPaletteOpen}
           onToggleCommandPalette={() => setCommandPaletteOpen((v) => !v)}
+          layoutMode={layoutMode}
+          onToggleLayout={toggleLayout}
         />
       </motion.div>
 
@@ -266,7 +281,7 @@ export default function App() {
       <Suspense fallback={null}>
         <NowPlayingSticky />
       </Suspense>
-      <AnimatedRoutes />
+      <AnimatedRoutes layoutMode={layoutMode} />
       <ToastContainer />
       {commandPaletteOpen && (
         <Suspense fallback={null}>

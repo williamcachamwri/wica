@@ -1,18 +1,52 @@
+import { AnimatePresence, motion } from 'framer-motion'
+import { useEffect, useState } from 'react'
+import { BentoGrid } from '../components/BentoGrid'
+import { Footer } from '../components/Footer'
 import { Loader } from '../components/Loader'
 import { SEO } from '../components/SEO'
-import { Footer } from '../components/Footer'
 import { GithubActivity } from '../sections/GithubActivity'
-import { WorldCup } from '../sections/WorldCup'
 import { Hero } from '../sections/Hero'
 import { Insights } from '../sections/Insights'
 import { LighthouseSection } from '../sections/LighthouseSection'
 import { Memories } from '../sections/Memories'
 import { Projects } from '../sections/Projects'
-import { useEffect, useState } from 'react'
+import { WorldCup } from '../sections/WorldCup'
 
 const LOADER_SHOWN_KEY = 'ddt-loader-shown'
 
-export default function Home() {
+const layoutVariants = {
+  hidden: {
+    opacity: 0,
+    scale: 0.97,
+    filter: 'blur(4px)',
+  },
+  visible: {
+    opacity: 1,
+    scale: 1,
+    filter: 'blur(0px)',
+    transition: {
+      duration: 0.4,
+      ease: [0.22, 1, 0.36, 1],
+      staggerChildren: 0.04,
+      delayChildren: 0.05,
+    },
+  },
+  exit: {
+    opacity: 0,
+    scale: 1.01,
+    filter: 'blur(4px)',
+    transition: {
+      duration: 0.25,
+      ease: [0.22, 1, 0.36, 1],
+    },
+  },
+}
+
+interface HomeProps {
+  layoutMode: 'normal' | 'bento'
+}
+
+export default function Home({ layoutMode }: HomeProps) {
   const alreadyShown = sessionStorage.getItem(LOADER_SHOWN_KEY) === 'true'
   const [loading, setLoading] = useState(!alreadyShown)
   const [loaded, setLoaded] = useState(alreadyShown)
@@ -24,6 +58,10 @@ export default function Home() {
       return () => clearTimeout(t)
     }
   }, [loading])
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }, [layoutMode])
 
   return (
     <>
@@ -37,16 +75,41 @@ export default function Home() {
           Skip to content
         </a>
 
-        <main id="main" className="max-w-[680px] mx-auto px-6 pt-16 md:pt-24 pb-20">
-          <Hero typewriterStart={!loading} nameStartDelay={1.5} />
-          <GithubActivity />
-          <WorldCup />
-          <Projects />
-          <Insights />
-          <LighthouseSection />
-          <Memories />
-          <Footer />
-        </main>
+        <AnimatePresence mode="wait" initial={false}>
+          {layoutMode === 'normal' ? (
+            <motion.main
+              key="normal"
+              id="main"
+              className="max-w-[680px] mx-auto px-6 pt-16 md:pt-24 pb-20"
+              initial="hidden"
+              animate="visible"
+              exit="exit"
+              variants={layoutVariants}
+            >
+              <Hero typewriterStart={!loading} nameStartDelay={1.5} />
+              <GithubActivity />
+              <WorldCup />
+              <Projects />
+              <Insights />
+              <LighthouseSection />
+              <Memories />
+              <Footer />
+            </motion.main>
+          ) : (
+            <motion.main
+              key="bento"
+              id="main"
+              className="layout-bento"
+              initial="hidden"
+              animate="visible"
+              exit="exit"
+              variants={layoutVariants}
+            >
+              <BentoGrid />
+              <Footer />
+            </motion.main>
+          )}
+        </AnimatePresence>
       </div>
     </>
   )

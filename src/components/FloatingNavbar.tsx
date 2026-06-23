@@ -1,6 +1,6 @@
 import { Link, useLocation } from 'react-router-dom'
 import { useEffect, useState } from 'react'
-import { motion } from 'framer-motion'
+import { AnimatePresence, motion } from 'framer-motion'
 
 interface FloatingNavbarProps {
   theme: 'light' | 'dark'
@@ -9,9 +9,31 @@ interface FloatingNavbarProps {
   onToggleSound?: () => void
   commandPaletteOpen?: boolean
   onToggleCommandPalette?: () => void
+  layoutMode: 'normal' | 'bento'
+  onToggleLayout: () => void
 }
 
-export function FloatingNavbar({ theme, onToggleTheme, soundMuted = true, onToggleSound, onToggleCommandPalette }: FloatingNavbarProps) {
+function BentoGridIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+      <rect x="0" y="0" width="6" height="6" rx="1.5" fill="currentColor"/>
+      <rect x="8" y="0" width="6" height="6" rx="1.5" fill="currentColor"/>
+      <rect x="0" y="8" width="14" height="6" rx="1.5" fill="currentColor"/>
+    </svg>
+  )
+}
+
+function ListViewIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+      <rect x="0" y="1" width="14" height="2" rx="1" fill="currentColor"/>
+      <rect x="0" y="6" width="14" height="2" rx="1" fill="currentColor"/>
+      <rect x="0" y="11" width="14" height="2" rx="1" fill="currentColor"/>
+    </svg>
+  )
+}
+
+export function FloatingNavbar({ theme, onToggleTheme, soundMuted = true, onToggleSound, onToggleCommandPalette, layoutMode, onToggleLayout }: FloatingNavbarProps) {
   const location = useLocation()
   const isActive = (path: string) => {
     if (path === '/') return location.pathname === '/'
@@ -114,6 +136,28 @@ export function FloatingNavbar({ theme, onToggleTheme, soundMuted = true, onTogg
         aria-label={theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode'}
       >
         <span className="theme-toggle__icon">{theme === 'light' ? '☾' : '☼'}</span>
+      </button>
+
+      <button
+        type="button"
+        className={`layout-toggle ${layoutMode === 'bento' ? 'layout-toggle--active' : ''}`}
+        onClick={onToggleLayout}
+        title={layoutMode === 'normal' ? 'Bento grid view' : 'Normal view'}
+        aria-label={layoutMode === 'normal' ? 'Switch to bento grid' : 'Switch to normal view'}
+        aria-pressed={layoutMode === 'bento'}
+      >
+        <AnimatePresence mode="wait" initial={false}>
+          <motion.span
+            key={layoutMode}
+            initial={{ opacity: 0, rotate: -20, scale: 0.7 }}
+            animate={{ opacity: 1, rotate: 0, scale: 1 }}
+            exit={{ opacity: 0, rotate: 20, scale: 0.7 }}
+            transition={{ type: 'spring', stiffness: 380, damping: 22 }}
+            style={{ display: 'flex' }}
+          >
+            {layoutMode === 'normal' ? <BentoGridIcon /> : <ListViewIcon />}
+          </motion.span>
+        </AnimatePresence>
       </button>
     </nav>
   )

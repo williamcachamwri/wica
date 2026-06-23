@@ -1,0 +1,302 @@
+/* ── Bento grid layout ──────────────────────────────────────────── */
+
+.layout-bento {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 5rem 1.5rem 4rem;
+}
+
+.bento-grid {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  grid-template-rows: auto;
+  gap: 12px;
+}
+
+/* ── Bento cell base ───────────────────────────────────────────── */
+.bento-cell {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  overflow: hidden;
+  position: relative;
+  transition:
+    border-color 0.3s ease,
+    box-shadow 0.3s ease,
+    transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.bento-cell:hover {
+  border-color: var(--border-strong);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.06);
+  transform: translateY(-2px);
+}
+
+.dark .bento-cell:hover {
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+/* ── Spotlight gradient hover effect ───────────────────────────── */
+.bento-cell::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(
+    200px circle at var(--spotlight-x, 50%) var(--spotlight-y, 50%),
+    color-mix(in srgb, var(--accent) 6%, transparent),
+    transparent 60%
+  );
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.bento-cell:hover::before {
+  opacity: 1;
+}
+
+.bento-cell > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* ── Grid placement ────────────────────────────────────────────── */
+
+/* Hero card — wide, chiếm 8/12 columns, 2 rows */
+.bento-cell--hero {
+  grid-column: span 8;
+  grid-row: span 2;
+  padding: 2rem 2rem 1.75rem;
+  min-height: 280px;
+  background: linear-gradient(
+    135deg,
+    var(--surface) 0%,
+    color-mix(in srgb, var(--accent) 3%, var(--surface)) 100%
+  );
+}
+
+/* Now Playing — 4 col, row 1 */
+.bento-cell--nowplaying {
+  grid-column: span 4;
+  grid-row: span 1;
+  padding: 1.25rem;
+}
+
+/* Working hours — 4 col, row 2 */
+.bento-cell--workinghours {
+  grid-column: span 4;
+  grid-row: span 1;
+  padding: 1.25rem;
+}
+
+/* GitHub Activity — full width */
+.bento-cell--github {
+  grid-column: span 12;
+  padding: 1.5rem 1.75rem;
+}
+
+/* Projects — 3 × 4 cols */
+.bento-cell--project {
+  grid-column: span 4;
+  padding: 1.5rem;
+  min-height: 200px;
+}
+
+/* Insights chart — 8 cols */
+.bento-cell--insights {
+  grid-column: span 8;
+  padding: 1.5rem 1.75rem;
+  min-height: 260px;
+}
+
+/* Lighthouse scores — 4 cols */
+.bento-cell--lighthouse {
+  grid-column: span 4;
+  padding: 1.5rem;
+}
+
+/* Memories / photos — full width */
+.bento-cell--memories {
+  grid-column: span 12;
+  padding: 1.5rem;
+}
+
+/* ── Bento cell label ──────────────────────────────────────────── */
+.bento-cell__label {
+  display: inline-flex;
+  align-items: center;
+  margin-bottom: 0.875rem;
+  padding-bottom: 0.4rem;
+  position: relative;
+}
+
+.bento-cell__label::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 20px;
+  height: 2px;
+  background: color-mix(in srgb, var(--accent) 50%, transparent);
+  border-radius: 1px;
+  opacity: 0.7;
+}
+
+.bento-cell__label span {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--text-subtle);
+}
+
+/* ── Reset section margins inside bento cells ──────────────────── */
+.bento-cell section,
+.bento-cell .mb-14,
+.bento-cell .mb-12 {
+  margin-bottom: 0 !important;
+}
+
+.bento-cell .section-divider {
+  display: none;
+}
+
+.bento-cell .lighthouse-section {
+  margin-bottom: 0;
+}
+
+.bento-cell .insights-chart {
+  margin: 0;
+}
+
+/* ── Hero compact ──────────────────────────────────────────────── */
+.bento-hero__bio {
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--text-secondary);
+  max-width: 540px;
+}
+
+.bento-hero__bio p {
+  margin-bottom: 0.35rem;
+}
+
+.bento-hero__links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-top: 0.75rem;
+}
+
+.bento-hero__links a {
+  font-size: 14px;
+}
+
+/* ── Project card inside bento cell ────────────────────────────── */
+.bento-cell--project .project-card {
+  background: none;
+  border: none;
+  border-radius: 0;
+  padding: 0;
+  box-shadow: none;
+}
+
+.bento-cell--project .project-card:hover {
+  transform: none;
+  border-color: transparent;
+  box-shadow: none;
+}
+
+.bento-cell--project .icon-box {
+  width: 60px;
+  height: 60px;
+}
+
+/* ── NowPlaying inside bento cell ──────────────────────────────── */
+.bento-cell--nowplaying .nowplaying {
+  margin-top: 0;
+}
+
+/* ── WorkingHours inside bento cell ────────────────────────────── */
+.bento-cell--workinghours .wh {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.bento-cell--workinghours .wh__row {
+  padding: 0;
+  background: none;
+  border: none;
+}
+
+/* ── Lighthouse inside bento cell ──────────────────────────────── */
+.bento-cell--lighthouse .lighthouse-grid {
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.5rem;
+}
+
+.bento-cell--lighthouse .lighthouse-card {
+  padding: 0.85rem;
+}
+
+.bento-cell--lighthouse .lighthouse-card__score {
+  font-size: 1.25rem;
+}
+
+.bento-cell--lighthouse .lighthouse-metrics {
+  display: none;
+}
+
+.bento-cell--lighthouse .lighthouse-meta {
+  display: none;
+}
+
+/* ── Memories inside bento cell ────────────────────────────────── */
+.bento-cell--memories .memories__subtitle {
+  display: none;
+}
+
+.bento-cell--memories .photo-desk {
+  padding: 0.5rem 0 0;
+}
+
+/* ── Insights inside bento cell ────────────────────────────────── */
+.bento-cell--insights .insights-chart__chart {
+  height: 220px;
+}
+
+@media (max-width: 900px) {
+  .bento-cell--hero          { grid-column: span 12; }
+  .bento-cell--nowplaying    { grid-column: span 6; }
+  .bento-cell--workinghours  { grid-column: span 6; }
+  .bento-cell--project       { grid-column: span 6; }
+  .bento-cell--insights      { grid-column: span 12; }
+  .bento-cell--lighthouse    { grid-column: span 12; }
+  .bento-cell--lighthouse .lighthouse-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  .layout-bento { padding: 4.5rem 1rem 3rem; }
+  .bento-grid   { gap: 8px; }
+  .bento-cell--hero          { grid-column: span 12; min-height: 220px; }
+  .bento-cell--nowplaying    { grid-column: span 12; }
+  .bento-cell--workinghours  { grid-column: span 12; }
+  .bento-cell--project       { grid-column: span 12; }
+  .bento-cell--insights      { grid-column: span 12; }
+  .bento-cell--lighthouse    { grid-column: span 12; }
+  .bento-cell--memories      { grid-column: span 12; }
+  .bento-cell--lighthouse .lighthouse-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bento-cell,
+  .bento-cell::before {
+    transition: none !important;
+  }
+}
