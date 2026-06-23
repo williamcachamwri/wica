@@ -1,39 +1,52 @@
 /* ── Bento grid layout ──────────────────────────────────────────── */
 
 .layout-bento {
-  max-width: 1100px;
+  max-width: 1120px;
   margin: 0 auto;
-  padding: 5rem 1.5rem 4rem;
+  padding: 5.5rem 1.5rem 5rem;
 }
 
 .bento-grid {
   display: grid;
   grid-template-columns: repeat(12, 1fr);
-  grid-template-rows: auto;
-  gap: 12px;
+  grid-auto-rows: auto;
+  gap: 10px;
 }
 
-/* ── Bento cell base ───────────────────────────────────────────── */
+/* ── Cell base ──────────────────────────────────────────────────── */
 .bento-cell {
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 20px;
+  border-radius: 18px;
   overflow: hidden;
   position: relative;
   transition:
-    border-color 0.3s ease,
-    box-shadow 0.3s ease,
-    transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+    border-color 0.25s ease,
+    box-shadow 0.25s ease,
+    transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+  box-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.04),
+    0 2px 8px rgba(0, 0, 0, 0.02);
+}
+
+.dark .bento-cell {
+  box-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.2),
+    0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
 .bento-cell:hover {
   border-color: var(--border-strong);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.06);
+  box-shadow:
+    0 4px 16px rgba(0, 0, 0, 0.06),
+    0 1px 4px rgba(0, 0, 0, 0.04);
   transform: translateY(-2px);
 }
 
 .dark .bento-cell:hover {
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  box-shadow:
+    0 8px 24px rgba(0, 0, 0, 0.35),
+    0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
 /* ── Spotlight gradient hover effect ───────────────────────────── */
@@ -43,12 +56,12 @@
   inset: 0;
   border-radius: inherit;
   background: radial-gradient(
-    200px circle at var(--spotlight-x, 50%) var(--spotlight-y, 50%),
-    color-mix(in srgb, var(--accent) 6%, transparent),
-    transparent 60%
+    180px circle at var(--spotlight-x, 50%) var(--spotlight-y, 50%),
+    color-mix(in srgb, var(--accent) 7%, transparent),
+    transparent 65%
   );
   opacity: 0;
-  transition: opacity 0.3s ease;
+  transition: opacity 0.25s ease;
   pointer-events: none;
   z-index: 0;
 }
@@ -64,71 +77,122 @@
 
 /* ── Grid placement ────────────────────────────────────────────── */
 
-/* Hero card — wide, chiếm 8/12 columns, 2 rows */
+/* Hero card — wide, 2 rows */
 .bento-cell--hero {
   grid-column: span 8;
   grid-row: span 2;
   padding: 2rem 2rem 1.75rem;
-  min-height: 280px;
-  background: linear-gradient(
-    135deg,
-    var(--surface) 0%,
-    color-mix(in srgb, var(--accent) 3%, var(--surface)) 100%
-  );
+  min-height: 300px;
+  position: relative;
+  overflow: hidden;
+  background:
+    radial-gradient(
+      ellipse 80% 60% at 90% 10%,
+      color-mix(in srgb, var(--accent) 8%, transparent),
+      transparent 60%
+    ),
+    var(--surface);
 }
 
-/* Now Playing — 4 col, row 1 */
+/* Dot grid decoration ở góc phải Hero */
+.bento-cell--hero::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 200px;
+  height: 200px;
+  background-image: radial-gradient(
+    circle,
+    color-mix(in srgb, var(--accent) 20%, transparent) 1px,
+    transparent 1px
+  );
+  background-size: 16px 16px;
+  opacity: 0.35;
+  pointer-events: none;
+  mask-image: radial-gradient(ellipse at top right, black 30%, transparent 70%);
+  -webkit-mask-image: radial-gradient(ellipse at top right, black 30%, transparent 70%);
+}
+
+.bento-cell--hero > * {
+  position: relative;
+  z-index: 2;
+}
+
+.bento-cell--hero::before {
+  z-index: 1;
+}
+
+/* Now Playing */
 .bento-cell--nowplaying {
   grid-column: span 4;
-  grid-row: span 1;
   padding: 1.25rem;
+  align-self: start;
 }
 
-/* Working hours — 4 col, row 2 */
+/* Working hours */
 .bento-cell--workinghours {
   grid-column: span 4;
-  grid-row: span 1;
   padding: 1.25rem;
+  align-self: start;
+  background:
+    radial-gradient(
+      circle at 90% 90%,
+      color-mix(in srgb, var(--accent) 6%, transparent),
+      transparent 55%
+    ),
+    var(--surface);
 }
 
 /* GitHub Activity — full width */
 .bento-cell--github {
   grid-column: span 12;
-  padding: 1.5rem 1.75rem;
+  padding: 1.25rem 1.5rem;
+  align-self: start;
+}
+
+/* WorldCup — full width */
+.bento-cell--worldcup {
+  grid-column: span 12;
+  padding: 0;
 }
 
 /* Projects — 3 × 4 cols */
 .bento-cell--project {
   grid-column: span 4;
-  padding: 1.5rem;
-  min-height: 200px;
+  padding: 1.25rem;
+  align-self: start;
+  min-height: unset;
 }
 
 /* Insights chart — 8 cols */
 .bento-cell--insights {
   grid-column: span 8;
-  padding: 1.5rem 1.75rem;
-  min-height: 260px;
+  padding: 0;
+  overflow: hidden;
 }
 
 /* Lighthouse scores — 4 cols */
 .bento-cell--lighthouse {
   grid-column: span 4;
-  padding: 1.5rem;
+  padding: 1.25rem;
+  align-self: start;
 }
 
 /* Memories / photos — full width */
 .bento-cell--memories {
   grid-column: span 12;
-  padding: 1.5rem;
+  padding: 1.25rem 1.5rem;
+  overflow: hidden;
 }
 
 /* ── Bento cell label ──────────────────────────────────────────── */
 .bento-cell__label {
   display: inline-flex;
   align-items: center;
+  gap: 0.4rem;
   margin-bottom: 0.875rem;
-  padding-bottom: 0.4rem;
+  padding: 0.25rem 0.6rem 0.25rem 0;
   position: relative;
 }
 
@@ -136,26 +200,28 @@
   content: '';
   position: absolute;
   left: 0;
-  bottom: 0;
-  width: 20px;
-  height: 2px;
-  background: color-mix(in srgb, var(--accent) 50%, transparent);
+  bottom: -2px;
+  width: 16px;
+  height: 1.5px;
+  background: var(--accent);
   border-radius: 1px;
-  opacity: 0.7;
+  opacity: 0.6;
 }
 
 .bento-cell__label span {
   font-family: "JetBrains Mono", monospace;
-  font-size: 10px;
+  font-size: 9px;
   text-transform: uppercase;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.14em;
   color: var(--text-subtle);
+  font-weight: 600;
 }
 
 /* ── Reset section margins inside bento cells ──────────────────── */
 .bento-cell section,
 .bento-cell .mb-14,
-.bento-cell .mb-12 {
+.bento-cell .mb-12,
+.bento-cell .mb-10 {
   margin-bottom: 0 !important;
 }
 
@@ -194,109 +260,223 @@
   font-size: 14px;
 }
 
-/* ── Project card inside bento cell ────────────────────────────── */
-.bento-cell--project .project-card {
-  background: none;
-  border: none;
-  border-radius: 0;
-  padding: 0;
-  box-shadow: none;
+/* ── NowPlaying widget redesign ────────────────────────────────── */
+.bento-nowplaying-widget {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
 }
 
-.bento-cell--project .project-card:hover {
-  transform: none;
-  border-color: transparent;
-  box-shadow: none;
-}
-
-.bento-cell--project .icon-box {
-  width: 60px;
-  height: 60px;
-}
-
-/* ── NowPlaying inside bento cell ──────────────────────────────── */
 .bento-cell--nowplaying .nowplaying {
   margin-top: 0;
+  width: 100%;
+  padding: 0.6rem 0.85rem;
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--accent) 5%, var(--surface-elevated));
+  border-color: color-mix(in srgb, var(--accent) 15%, var(--border));
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  box-sizing: border-box;
 }
 
-/* ── WorkingHours inside bento cell ────────────────────────────── */
+.bento-cell--nowplaying .nowplaying--active {
+  background: color-mix(in srgb, #1db954 6%, var(--surface-elevated));
+  border-color: color-mix(in srgb, #1db954 20%, var(--border));
+}
+
+/* Spotify bar animation khi đang playing */
+.bento-cell--nowplaying .nowplaying--active::after {
+  content: '';
+  display: block;
+  width: 30px;
+  height: 14px;
+  margin-left: auto;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 14'%3E%3Crect x='0' y='4' width='4' height='10' rx='2' fill='%231db954'%3E%3Canimate attributeName='height' values='10;4;10' dur='0.8s' repeatCount='indefinite'/%3E%3Canimate attributeName='y' values='4;8;4' dur='0.8s' repeatCount='indefinite'/%3E%3C/rect%3E%3Crect x='8' y='0' width='4' height='14' rx='2' fill='%231db954'%3E%3Canimate attributeName='height' values='14;6;14' dur='0.8s' begin='0.2s' repeatCount='indefinite'/%3E%3Canimate attributeName='y' values='0;4;0' dur='0.8s' begin='0.2s' repeatCount='indefinite'/%3E%3C/rect%3E%3Crect x='16' y='2' width='4' height='12' rx='2' fill='%231db954'%3E%3Canimate attributeName='height' values='12;5;12' dur='0.8s' begin='0.4s' repeatCount='indefinite'/%3E%3Canimate attributeName='y' values='2;6;2' dur='0.8s' begin='0.4s' repeatCount='indefinite'/%3E%3C/rect%3E%3Crect x='24' y='3' width='4' height='11' rx='2' fill='%231db954'%3E%3Canimate attributeName='height' values='11;4;11' dur='0.8s' begin='0.1s' repeatCount='indefinite'/%3E%3Canimate attributeName='y' values='3;7;3' dur='0.8s' begin='0.1s' repeatCount='indefinite'/%3E%3C/rect%3E%3C/svg%3E") no-repeat center;
+  flex-shrink: 0;
+}
+
+/* ── Working hours trong bento ─────────────────────────────────── */
 .bento-cell--workinghours .wh {
-  margin-top: 0;
-  margin-bottom: 0;
+  margin: 0;
 }
 
 .bento-cell--workinghours .wh__row {
-  padding: 0;
-  background: none;
-  border: none;
+  padding: 0.5rem 0.75rem;
+  background: var(--surface-elevated);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
-/* ── Lighthouse inside bento cell ──────────────────────────────── */
+/* ── GitHub trong bento ────────────────────────────────────────── */
+.bento-github-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0;
+}
+
+.bento-cell--github .github-contributions {
+  gap: 0.2rem;
+}
+
+.bento-cell--github .contrib-scroll {
+  padding-bottom: 0.2rem;
+}
+
+.bento-cell--github .contrib-footer {
+  margin-top: 0.4rem;
+}
+
+/* ── WorldCup trong bento ──────────────────────────────────────── */
+.bento-cell--worldcup section,
+.bento-cell--worldcup .mb-14,
+.bento-cell--worldcup .mb-10 {
+  margin-bottom: 0 !important;
+}
+
+.bento-cell--worldcup .section-divider {
+  display: none;
+}
+
+.bento-cell--worldcup > * > *:first-child {
+  padding: 1.25rem 1.5rem 0;
+}
+
+/* ── Project card trong bento ──────────────────────────────────── */
+.bento-cell--project .project-card {
+  background: var(--surface-elevated);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 1rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  height: 100%;
+  transition:
+    transform 0.3s cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 0.3s ease,
+    box-shadow 0.3s ease;
+}
+
+.bento-cell--project .project-card:hover {
+  transform: translateY(-2px);
+  border-color: color-mix(in srgb, var(--accent) 30%, var(--border));
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
+}
+
+.bento-cell--project .icon-box {
+  width: 48px;
+  height: 48px;
+  margin-bottom: 0.75rem;
+}
+
+/* ── Insights trong bento ──────────────────────────────────────── */
+.bento-cell--insights .insights-chart {
+  margin: 0;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+}
+
+.bento-cell--insights .insights-chart__chart {
+  height: 180px;
+}
+
+/* ── Lighthouse trong bento ────────────────────────────────────── */
+.bento-cell--lighthouse .lighthouse-section {
+  margin-bottom: 0;
+}
+
 .bento-cell--lighthouse .lighthouse-grid {
   grid-template-columns: repeat(2, 1fr);
   gap: 0.5rem;
 }
 
 .bento-cell--lighthouse .lighthouse-card {
-  padding: 0.85rem;
+  padding: 0.9rem;
 }
 
 .bento-cell--lighthouse .lighthouse-card__score {
-  font-size: 1.25rem;
+  font-size: 1.4rem;
+  margin-bottom: 0.5rem;
+}
+
+.bento-cell--lighthouse .lighthouse-card__bar-track {
+  height: 5px;
 }
 
 .bento-cell--lighthouse .lighthouse-metrics {
-  display: none;
+  display: none !important;
 }
 
 .bento-cell--lighthouse .lighthouse-meta {
-  display: none;
+  display: none !important;
 }
 
-/* ── Memories inside bento cell ────────────────────────────────── */
+/* ── Memories trong bento ──────────────────────────────────────── */
 .bento-cell--memories .memories__subtitle {
   display: none;
 }
 
 .bento-cell--memories .photo-desk {
   padding: 0.5rem 0 0;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  justify-content: flex-start;
+  gap: 0.5rem;
+  scrollbar-width: none;
 }
 
-/* ── Insights inside bento cell ────────────────────────────────── */
-.bento-cell--insights .insights-chart__chart {
-  height: 220px;
+.bento-cell--memories .photo-desk::-webkit-scrollbar {
+  display: none;
 }
 
+.bento-cell--memories .polaroid {
+  margin-left: 0;
+  flex-shrink: 0;
+}
+
+/* ── Responsive — tablet ───────────────────────────────────────── */
 @media (max-width: 900px) {
   .bento-cell--hero          { grid-column: span 12; }
   .bento-cell--nowplaying    { grid-column: span 6; }
   .bento-cell--workinghours  { grid-column: span 6; }
+  .bento-cell--worldcup      { grid-column: span 12; }
   .bento-cell--project       { grid-column: span 6; }
   .bento-cell--insights      { grid-column: span 12; }
   .bento-cell--lighthouse    { grid-column: span 12; }
   .bento-cell--lighthouse .lighthouse-grid {
     grid-template-columns: repeat(4, 1fr);
   }
+  .bento-cell--memories      { grid-column: span 12; }
 }
 
+/* ── Responsive — mobile ───────────────────────────────────────── */
 @media (max-width: 600px) {
-  .layout-bento { padding: 4.5rem 1rem 3rem; }
+  .layout-bento { padding: 4.5rem 0.875rem 3rem; }
   .bento-grid   { gap: 8px; }
-  .bento-cell--hero          { grid-column: span 12; min-height: 220px; }
+  .bento-cell--hero          { grid-column: span 12; min-height: 240px; }
   .bento-cell--nowplaying    { grid-column: span 12; }
   .bento-cell--workinghours  { grid-column: span 12; }
+  .bento-cell--worldcup      { grid-column: span 12; }
   .bento-cell--project       { grid-column: span 12; }
   .bento-cell--insights      { grid-column: span 12; }
   .bento-cell--lighthouse    { grid-column: span 12; }
-  .bento-cell--memories      { grid-column: span 12; }
   .bento-cell--lighthouse .lighthouse-grid {
     grid-template-columns: repeat(2, 1fr);
   }
+  .bento-cell--memories      { grid-column: span 12; }
 }
 
+/* ── Reduced motion ────────────────────────────────────────────── */
 @media (prefers-reduced-motion: reduce) {
   .bento-cell,
   .bento-cell::before {
     transition: none !important;
+  }
+
+  .bento-cell--nowplaying .nowplaying--active::after {
+    background-image: none;
   }
 }

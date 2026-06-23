@@ -13,6 +13,7 @@ import { LighthouseSection } from '../sections/LighthouseSection'
 import { Memories } from '../sections/Memories'
 import { NowPlaying } from '../components/NowPlaying'
 import { WorkingHours } from '../sections/WorkingHours'
+import { WorldCup } from '../sections/WorldCup'
 import '../styles/bento.css'
 
 function BentoCellLabel({ children }: { children: React.ReactNode }) {
@@ -117,6 +118,7 @@ export function BentoGrid() {
   const nowPlayingRef = useCellSpotlight()
   const workingHoursRef = useCellSpotlight()
   const githubRef = useCellSpotlight()
+  const worldcupRef = useCellSpotlight()
   const insightsRef = useCellSpotlight()
   const lighthouseRef = useCellSpotlight()
   const memoriesRef = useCellSpotlight()
@@ -146,7 +148,9 @@ export function BentoGrid() {
         animate="visible"
       >
         <BentoCellLabel>Now Playing</BentoCellLabel>
-        <NowPlaying />
+        <div className="bento-nowplaying-widget">
+          <NowPlaying />
+        </div>
       </motion.div>
 
       {/* Working Hours */}
@@ -171,8 +175,23 @@ export function BentoGrid() {
         initial="hidden"
         animate="visible"
       >
-        <BentoCellLabel>GitHub Activity</BentoCellLabel>
+        <div className="bento-github-header">
+          <BentoCellLabel>GitHub Activity</BentoCellLabel>
+        </div>
         <GithubContributions />
+      </motion.div>
+
+      {/* World Cup */}
+      <motion.div
+        ref={worldcupRef}
+        className="bento-cell bento-cell--worldcup"
+        variants={cellVariants}
+        custom={4}
+        initial="hidden"
+        animate="visible"
+      >
+        <BentoCellLabel>World Cup</BentoCellLabel>
+        <WorldCup />
       </motion.div>
 
       {/* 3 Project Cards */}
@@ -182,7 +201,7 @@ export function BentoGrid() {
           ref={projectRefs[i]}
           className="bento-cell bento-cell--project"
           variants={cellVariants}
-          custom={4 + i}
+          custom={5 + i}
           initial="hidden"
           animate="visible"
         >
@@ -195,7 +214,7 @@ export function BentoGrid() {
         ref={insightsRef}
         className="bento-cell bento-cell--insights"
         variants={cellVariants}
-        custom={7}
+        custom={8}
         initial="hidden"
         animate="visible"
       >
@@ -208,7 +227,7 @@ export function BentoGrid() {
         ref={lighthouseRef}
         className="bento-cell bento-cell--lighthouse"
         variants={cellVariants}
-        custom={8}
+        custom={9}
         initial="hidden"
         animate="visible"
       >
@@ -221,7 +240,7 @@ export function BentoGrid() {
         ref={memoriesRef}
         className="bento-cell bento-cell--memories"
         variants={cellVariants}
-        custom={9}
+        custom={10}
         initial="hidden"
         animate="visible"
       >
