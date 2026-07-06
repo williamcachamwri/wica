@@ -1,0 +1,71 @@
+export const meta = {
+  slug: "imported-perl-weekly-780---trf",
+  title: "Perl 🐪 Weekly #780 - TRF",
+  date: "Mon, 06 Jul 2026 07:27:12 +0000",
+  summary: "This edition of Perl Weekly covers the announcement of the Raku Foundation, the upcoming Perl v5.44 release, updates to Perl-LSP, and a collection of articles about automation, UTF-8 performance, AI, SOAP web services, and the weekly community challenges.",
+  tags: ["perl", "raku", "programming", "newsletter"],
+}
+
+*Originally published at https://dev.to/szabgab/perl-weekly-780-trf-37cm*
+
+Hi everyone,
+
+Last month saw the official unveiling of the Raku Foundation (TRF), which was highlighted in an online update by Damian Conway. This is an exciting step forward for the core developers of Raku.
+
+With TRF now up and running, it raises questions about the future of The Perl and Raku Foundation (TPRF). Returning to the traditional name of The Perl Foundation (TPF) seems like a logical next step. This division should allow both the Perl and Raku ecosystems to grow independently without overlapping concerns. It is wonderful to see Damian actively supporting Raku, a project that even Larry Wall was connected to at one stage.
+
+In other news, Perl developers have something to look forward to with the imminent arrival of Perl v5.44.
+
+I hope you find the rest of this week's updates informative.
+
+-- Editor: Mohammad Sajid Anwar.
+
+## Announcements
+
+## perl-lsp version 0.6.0 by Veesh Goldman
+
+The latest release, version 0.6.0, can now be downloaded from crates.io and is fully compatible with both Visual Studio Code and The Zed Editor. This major update introduces helpful capabilities such as intelligent type narrowing for variables inside code blocks, enhanced renewal of inherited methods, and a specialized heatmap command-line interface designed to evaluate the usage and complexity of functions.
+
+## Articles
+
+## Automate Perl module testing with GitHub Actions by Dragos Trif
+
+This practical tutorial outlines how to establish a continuous integration and continuous deployment pipeline using GitHub Actions for your Perl software. It walks through the process of setting up automated tests that trigger on every code push, validating your modules against a variety of operating systems and Perl releases. This approach helps maintain high code quality across different platforms with minimal manual overhead.
+
+## How One Pull Request Took App::HTTPThis to Version 1.0 by Dave Cross
+
+What started as a minor adjustment to clean up a startup notification message eventually led to a major internal restructuring of App::HTTPThis. Shifting the network interface configuration away from all available interfaces to localhost (127.0.0.1), alongside introducing dedicated support for the Windows Subsystem for Linux (WSL), helped elevate this project into a secure and dependable cross-platform version 1.0.0 release.
+
+## Reading UTF-8 at GB/s by Christian Hansen
+
+Christian discusses a performance constraint within the standard file reading operations of Perl when processing UTF-8 byte sequences. He presents an alternative approach utilizing Unicode::UTF8::read_utf8, which combines reading and validation into a single workflow. This optimization yields processing speeds that outpace native reading operations by 7 to 16 times.
+
+## The AI Revolution is Validating 40 Years of Perl Philosophy by Randal Schwartz
+
+Randal explores how the rise of large language models mirrors the architectural principles Larry Wall built into Perl, particularly regarding context and structural semiotics. The ongoing shift toward semantic and conceptual programming models suggests that modern artificial intelligence relies on concepts that Perl programmers have leveraged for decades, moving away from rigid mathematical restrictions.
+
+## Web
+
+## SOAP and Perl by Mohammad Sajid Anwar
+
+This piece examines historical and contemporary approaches to handling Simple Object Access Protocol (SOAP) web services within the Perl ecosystem. It highlights the relevance of the SOAP::Lite module for sustaining legacy corporate infrastructure and provides tactical advice on optimizing XML payloads, managing WSDL specifications, and engineering resilient API integrations with modern workflows.
+
+## CPAN
+
+## JSON::JSONFold by Yair Lenga
+
+This new package available on CPAN assists in formatting JSON to balance compactness and human readability. By extending existing serialization tools, JSON::JSONFold compresses straightforward, smaller structures into single lines and formats tabular layouts for cleaner presentation.
+
+## The Weekly Challenge
+
+The Weekly Challenge, managed by Mohammad Sajid Anwar, offers a great way to experiment with new programming approaches. Participants also stand a chance to win a $50 cash prize awarded to a randomly chosen contributor each month, sponsored graciously by Marc Perry.
+
+## The Weekly Challenge - 381 by Mohammad Sajid Anwar
+
+A new set of problems is ready for this week, featuring the tasks "Same Row Column" and "Smaller Greater Element". If you have not participated before, it is an excellent opportunity to dive in and test your problem-solving skills.
+
+## RECAP - The Weekly Challenge - 380 by Mohammad Sajid Anwar
+
+Take a look back at how Team PWC solved the challenges from the previous week, which focused on the "Sum of Frequencies" and "Reverse Degree" assignments.
+
+--- imported via sync-blogs ---
