@@ -34,5 +34,17 @@
     "title": "Perl 🐪 Weekly #780 - TRF",
     "url": "https://dev.to/szabgab/perl-weekly-780-trf-37cm",
     "importedAt": "2026-07-06T07:36:51.308Z"
+  },
+  "devto-feed-migrating-a-react-app-to-typescript-and-nextjs-0": {
+    "slug": "imported-migrating-a-react-app-to-typescript-and-nextjs",
+    "title": "Migrating a React App to TypeScript and Next.js",
+    "url": "https://dev.to/gaurav_gola_dev/migrating-a-react-app-to-typescript-and-nextjs-3109",
+    "importedAt": "2026-07-20T07:02:47.397Z"
+  },
+  "devto-feed-optimizing-rag-at-scale-chunking-retrieval-and-the-bayesian-search-that-cut-late-1": {
+    "slug": "imported-optimizing-rag-at-scale-chunking-retrieval-and-the-bayesian-search-that-cut-late",
+    "title": "Optimizing RAG at Scale: Chunking, Retrieval, and the Bayesian Search That Cut Latency 40%",
+    "url": "https://dev.to/imus_d7584cbc8ee9b0336256/optimizing-rag-at-scale-chunking-retrieval-and-the-bayesian-search-that-cut-latency-40-2k98",
+    "importedAt": "2026-07-20T07:02:54.986Z"
   }
 }

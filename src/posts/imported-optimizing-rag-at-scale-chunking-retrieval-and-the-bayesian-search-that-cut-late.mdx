@@ -1,0 +1,88 @@
+export const meta = {
+  slug: "imported-optimizing-rag-at-scale-chunking-retrieval-and-the-bayesian-search-that-cut-late",
+  title: "Optimizing RAG at Scale: Chunking, Retrieval, and the Bayesian Search That Cut Latency 40%",
+  date: "Mon, 20 Jul 2026 07:00:55 +0000",
+  summary: "This article discusses optimizing an enterprise RAG (Retrieval-Augmented Generation) pipeline by implementing dynamic chunking strategies and a hybrid retrieval layer.",
+  tags: ["rag", "llm", "search", "python"],
+}
+
+## Optimizing RAG at Scale: Chunking, Retrieval, and the Bayesian Search That Cut Latency 40%
+
+How we moved from "semantic search + hope" to a measured, tunable retrieval pipeline with 95% recall@10
+
+## The RAG Reality Check
+
+Everyone ships RAG the same way: chunk by 512 tokens, embed with text-embedding-3-small, top-k=5, stuff into context. It works for demos.
+
+Then you hit production:
+
+- Legal contracts: 512 tokens splits clauses mid-sentence
+- API docs: 1000-token chunks drown signal in noise
+- Customer tickets: Conversational context needs overlap, not fixed windows
+- Latency: 500ms embedding + 200ms vector search + 300ms LLM = 1s+ per query
+
+We rebuilt our retrieval layer from first principles. Here's what actually moves metrics.
+
+## Chunking: One Size Fits None
+
+```python
+# rag/chunking.py
+from abc import ABC, abstractmethod
+from dataclasses import dataclass
+
+@dataclass
+class Chunk:
+    text: str
+    metadata: dict
+    token_count: int
+    chunk_id: str
+
+class ChunkingStrategy(ABC):
+    @abstractmethod
+    def chunk(self, document: str, metadata: dict) -> list[Chunk]: ...
+
+class FixedTokenChunker(ChunkingStrategy):
+    """Baseline. Good for homogeneous content."""
+    def __init__(self, chunk_size=512, overlap=50):
+        self.chunk_size = chunk_size
+        self.overlap = overlap
+
+class RecursiveChunker(ChunkingStrategy):
+    """Respects structure: markdown headers, code blocks, paragraphs."""
+    def __init__(self, separators=["\n## ", "\n### ", "\n\n", "\n", " "], chunk_size=512):
+        self.separators = separators
+        self.chunk_size = chunk_size
+
+class SemanticChunker(ChunkingStrategy):
+    """Uses embedding similarity to find natural boundaries."""
+    def __init__(self, model="text-embedding-3-small", threshold=0.7):
+        self.model = model
+        self.threshold = threshold
+
+class AgenticChunker(ChunkingStrategy):
+    """LLM decides boundaries. Expensive but highest quality for complex docs."""
+    def __init__(self, model="gpt-4o-mini"):
+        self.model = model
+```
+
+Our production config by document type:
+
+- Legal contracts: Recursive (clause-aware) | Chunk Size: 1024 | Overlap: 100 | Recall@10: 94%
+- API reference: Recursive (function-aware) | Chunk Size: 768 | Overlap: 50 | Recall@10: 96%
+- Support tickets: Semantic + conversation turns | Chunk Size: 512 | Overlap: 75 | Recall@10: 91%
+- Internal wiki: Agentic (LLM) | Chunk Size: 1500 | Overlap: 200 | Recall@10: 97%
+
+## Hybrid Retrieval: BM25 + Vector + Rerank
+
+Pure vector search misses exact matches (error codes, function names). Pure BM25 misses semantic matches. Hybrid wins.
+
+```python
+# rag/retrieval.py
+class HybridRetriever:
+    def __init__(self, vector_store):
+        pass
+```
+
+*Originally published at https://dev.to/imus_d7584cbc8ee9b0336256/optimizing-rag-at-scale-chunking-retrieval-and-the-bayesian-search-that-cut-latency-40-2k98*
+
+--- imported via sync-blogs ---
