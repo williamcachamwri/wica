@@ -46,5 +46,17 @@
     "title": "Optimizing RAG at Scale: Chunking, Retrieval, and the Bayesian Search That Cut Latency 40%",
     "url": "https://dev.to/imus_d7584cbc8ee9b0336256/optimizing-rag-at-scale-chunking-retrieval-and-the-bayesian-search-that-cut-latency-40-2k98",
     "importedAt": "2026-07-20T07:02:54.986Z"
+  },
+  "devto-feed-from-commit-to-amazon-eks-building-a-gitops-pipeline-with-argo-cd-0": {
+    "slug": "imported-from-commit-to-amazon-eks-building-a-gitops-pipeline-with-argo-cd",
+    "title": "From Commit to Amazon EKS: Building a GitOps Pipeline with Argo CD",
+    "url": "https://dev.to/kenzytran/from-commit-to-amazon-eks-building-a-gitops-pipeline-with-argo-cd-3b9e",
+    "importedAt": "2026-07-27T07:06:15.638Z"
+  },
+  "devto-feed-ship-a-custom-wordpress-endpoint-without-writing-a-plugin-1": {
+    "slug": "imported-ship-a-custom-wordpress-endpoint-without-writing-a-plugin",
+    "title": "Ship a Custom WordPress Endpoint Without Writing a Plugin",
+    "url": "https://dev.to/jeansmaug/ship-a-custom-wordpress-endpoint-without-writing-a-plugin-24i1",
+    "importedAt": "2026-07-27T07:06:24.396Z"
   }
 }

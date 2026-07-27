@@ -1,0 +1,103 @@
+export const meta = {
+  slug: "imported-ship-a-custom-wordpress-endpoint-without-writing-a-plugin",
+  title: "Ship a Custom WordPress Endpoint Without Writing a Plugin",
+  date: "Mon, 27 Jul 2026 07:02:40 +0000",
+  summary: "This article discusses the challenges of creating custom WordPress REST API endpoints and introduces Loopress Full as a simpler, one-file solution that avoids plugin overhead.",
+  tags: ["wordpress", "rest-api", "php", "web-development"],
+}
+
+*Originally published at https://dev.to/jeansmaug/ship-a-custom-wordpress-endpoint-without-writing-a-plugin-24i1*
+
+When your frontend JavaScript application needs a specific dataset from WordPress—like just ten curated items for a homepage slider instead of the entire heavy payload of standard post objects—building a custom route should be a quick task. It typically involves writing a quick database query, mapping the results, and returning the data. 
+
+However, the real challenge lies in deciding where this code should actually live.
+
+## Where custom endpoints live today
+
+- Using functions.php: While this is the quickest method, it binds your logic completely to the current theme. Switching themes means losing your endpoint, and over time, the file turns into an unmaintainable mess.
+- Building a site-specific plugin: This is considered the clean approach, but it introduces boilerplate overhead. Your simple logic now requires plugin headers, action hooks, and a registration array:
+
+```php
+add_action('rest_api_init', function () {
+    register_rest_route('acme/v1', '/featured-products', [
+        'methods'             => 'GET',
+        'callback'            => 'acme_featured_products',
+        'permission_callback' => '__return_true',
+    ]);
+});
+```
+
+Additionally, you have to manage deployments across staging and production environments, along with version control for the plugin itself.
+- Using a code snippets plugin: This allows for rapid deployment, but your code is saved directly in the database. This workflow bypasses Git, version control, and standard code reviews.
+
+Ultimately, writing the endpoint logic is straightforward, but deploying it cleanly is the problem.
+
+## One file, one route
+
+With Loopress Full, you can deploy a custom endpoint by creating a single PHP file within your repository:
+
+```php
+<?php
+
+declare(strict_types=1);
+
+class FeaturedProducts
+{
+    public function get(): array
+    {
+        $query = new WP_Query([
+            'post_type'      => 'product',
+            'meta_key'       => 'featured',
+            'meta_value'     => '1',
+            'posts_per_page' => 10,
+        ]);
+
+        return array_map(fn(WP_Post $post): array => [
+            'id'    => $post->ID,
+            'title' => $post->post_title,
+            'url'   => get_permalink($post),
+        ], $query->posts);
+    }
+}
+```
+
+Save this file as api/featured-products.php and run the following deployment command:
+
+```shell
+lps api push
+```
+
+The platform handles all the wiring implicitly. The route is defined by the file name, and the handling class matches the PascalCase version of that name. Public methods named after HTTP verbs (such as get, post, put, patch, delete) are automatically mapped to their respective request handlers, eliminating the need for hooks or boilerplate registration.
+
+## Now call it
+
+```shell
+curl [https://your-site.com/wp-json/loopress-api/v1/featured-products](https://your-site.com/wp-json/loopress-api/v1/featured-products)
+```
+
+```json
+{"code":"rest_forbidden","message":"Sorry, you are not allowed to do that.","data":{"status":401}}
+```
+
+By default, a new route requires administrator authentication—matching the same security used by the Loopress CLI. This guarantees that your endpoints are never accidentally exposed to the public.
+
+If you are building an endpoint meant for backend communication, internal dashboards, or automated scripts, this default behavior provides instant security out of the box using standard application passwords over Basic authentication.
+
+However, if the route needs to be accessed publicly by a user's web browser, you can explicitly grant open access within the class code, allowing the change to be tracked via code review:
+
+```php
+public function permission(): callable
+{
+    return fn(): bool => true;
+}
+```
+
+```shell
+curl [https://your-site.com/wp-json/loopress-api/v1/featured-products](https://your-site.com/wp-json/loopress-api/v1/featured-products)
+```
+
+```json
+[{"id":231,"title":"Weekender Backpack","url":"[https://your-site.com/product/weekender-backpack](https://your-site.com/product/weekender-backpack)"}]
+```
+
+--- imported via sync-blogs ---

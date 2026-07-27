@@ -1,0 +1,170 @@
+export const meta = {
+  slug: "imported-from-commit-to-amazon-eks-building-a-gitops-pipeline-with-argo-cd",
+  title: "From Commit to Amazon EKS: Building a GitOps Pipeline with Argo CD",
+  date: "Mon, 27 Jul 2026 07:02:55 +0000",
+  summary: "This blog post outlines a step-by-step GitOps delivery pipeline for deploying the multi-tier vProfile Java application on Amazon EKS using Argo CD, Helm, and GitHub Actions.",
+  tags: ["kubernetes", "aws", "gitops", "argocd"],
+}
+
+Deploying an application to Kubernetes is easy to demonstrate with one command:
+
+```shell
+kubectl apply -f .
+```
+
+The harder question is what happens after the first deployment.
+
+How do you know which commit is running? How do you enforce code-quality checks? How does a new container image reach the cluster without giving the CI pipeline broad Kubernetes access? And how do you clean everything up without leaving AWS resources behind?
+
+I explored those questions by deploying vProfile, a multi-tier Java application, to Amazon EKS using a GitOps workflow.
+
+The result was this delivery path:
+
+```plaintext
+Pull request
+    -> Maven build and SonarQube Quality Gate
+    -> Merge to main
+    -> Build and push image to Amazon ECR
+    -> Update the image tag in Git
+    -> Argo CD synchronizes Amazon EKS
+```
+
+## The application
+
+vProfile contains four runtime components:
+
+- Tomcat: Runs the Java web application
+- MySQL: Stores application data
+- Memcached: Provides caching
+- RabbitMQ: Handles messaging
+
+This made the project more useful than deploying a single stateless container. It introduced persistent storage, startup dependencies, internal service discovery, secrets, and external traffic routing.
+
+## The tools and their responsibilities
+
+I deliberately gave each tool a narrow responsibility:
+
+- GitHub Actions builds, tests, and packages the application.
+- SonarQube provides code analysis and a Quality Gate.
+- Amazon ECR stores the container images.
+- Terraform provisions the AWS infrastructure.
+- Helm packages the Kubernetes resources.
+- Argo CD reconciles the desired state from Git with Amazon EKS.
+- AWS Load Balancer Controller creates the public ALB.
+- Amazon EBS CSI Driver provides persistent storage for MySQL.
+
+The important boundary is between CI and CD. The build pipeline creates an artifact and records the desired version in Git. Argo CD, not GitHub Actions, changes the cluster.
+
+## Pull requests as the quality gate
+
+When a pull request targets `main`, GitHub Actions runs the Maven build, tests, SonarQube analysis, and Quality Gate.
+
+Only after the pull request is reviewed and merged does the pipeline build the application image and push it to Amazon ECR.
+
+This gives the workflow two distinct stages:
+
+```plaintext
+Pull request  -> validate the change
+Merge         -> produce a deployable artifact
+```
+
+Secrets such as AWS credentials, SonarQube tokens, and webhooks belong in GitHub Secrets. Non-sensitive settings such as the AWS Region and ECR repository name can remain in GitHub Variables.
+
+For production, I would authenticate GitHub Actions to AWS with OIDC and short-lived credentials instead of storing long-lived AWS access keys.
+
+## Why I used commit SHA image tags
+
+The pipeline tags every application image with the Git commit SHA:
+
+```yaml
+app:
+  image: <account-id>[.dkr.ecr.us-east-1.amazonaws.com/vprofileappimg](https://.dkr.ecr.us-east-1.amazonaws.com/vprofileappimg)
+  tag: 7d064a3cc586d197b2968f5bb085e8d2d617942d
+```
+
+This small decision provides a direct link between:
+
+- the source revision;
+- the image in Amazon ECR;
+- the workload running in Amazon EKS.
+
+If a deployment fails, I can identify the exact image and roll back to a known commit. A `latest` tag may still be useful for convenience, but it should not be the deployment's only version identifier.
+
+For stronger immutability, a production workflow can promote images by digest rather than by tag.
+
+## Provisioning Amazon EKS with Terraform
+
+Terraform creates the main infrastructure:
+
+- VPC and subnets;
+- Amazon EKS cluster;
+- managed node group;
+- IAM roles;
+- OIDC provider for IAM Roles for Service Accounts;
+- Amazon EBS CSI Driver.
+
+The workshop applies Terraform manually so each step remains visible. A production workflow should instead run:
+
+```plaintext
+Pull request -> fmt -> validate -> security checks -> plan
+Merge + approval -> apply the reviewed plan
+```
+
+GitHub Actions should authenticate through OIDC, production applies should require approval, and Terraform state should use an encrypted and versioned remote backend with locking.
+
+## Packaging the workloads with Helm
+
+I converted the original Kubernetes manifests into a Helm chart. Values that change between deployments—image tags, replicas, ports, hostname, and storage size—live in `values.yaml`.
+
+Before committing a chart change, I render it locally:
+
+```shell
+helm lint helm/vprofile
+helm template vprofile helm/vprofile
+```
+
+This catches missing values and invalid templates before Argo CD tries to synchronize them.
+
+The application also depends on MySQL and Memcached during startup. Init containers wait for their Kubernetes DNS records before Tomcat starts:
+
+```plaintext
+init container waits for service DNS
+                |
+                v
+       application container starts
+```
+
+This is a pragmatic way to reduce startup-order failures. It does not replace readiness probes, retries, or proper dependency handling inside the application.
+
+## Argo CD closes the loop
+
+Argo CD watches the Helm chart in Git. Its automated synchronization policy uses:
+
+- `prune: true` to remove resources deleted from Git;
+- `selfHeal: true` to correct manual changes in the cluster;
+- `CreateNamespace=true` to create the application namespace.
+
+After CI updates `app.tag`, Argo CD detects the commit, renders the chart, and starts a rolling update.
+
+```plaintext
+Code
+  -> Quality Gate
+  -> Image in Amazon ECR
+  -> Desired image tag in Git
+  -> Argo CD
+  -> Amazon EKS
+```
+
+Git acts as the handoff between CI and CD and provides an audit trail for each deployment.
+
+In this learning project, CI commits the new image tag to the Helm repository because the process is explicit and easy to observe. In production, I would avoid giving CI permission to bypass branch protection. A pull-request-based update or Argo CD Image Updater would keep the build credentials scoped more narrowly.
+
+## Validating the complete flow
+
+I tested the workflow by making a small change on a feature branch and following it through every stage:
+
+1. The pull request triggered code checks and analysis.
+
+*Originally published at https://dev.to/kenzytran/from-commit-to-amazon-eks-building-a-gitops-pipeline-with-argo-cd-3b9e*
+
+--- imported via sync-blogs ---
