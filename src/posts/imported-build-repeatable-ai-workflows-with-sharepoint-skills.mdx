@@ -1,0 +1,54 @@
+export const meta = {
+  slug: "imported-build-repeatable-ai-workflows-with-sharepoint-skills",
+  title: "Build Repeatable AI Workflows with SharePoint Skills",
+  date: "Mon, 03 Aug 2026 06:56:52 +0000",
+  summary: "This article introduces SharePoint Skills, which are reusable, natural-language-driven AI workflows designed to automate repetitive document management tasks within SharePoint.",
+  tags: ["sharepoint", "ai", "workflows", "microsoft"],
+}
+
+*Originally published at [https://dev.to/balagmadhu/build-repeatable-ai-workflows-with-sharepoint-skills-54d7](https://dev.to/balagmadhu/build-repeatable-ai-workflows-with-sharepoint-skills-54d7)*
+
+Many SharePoint tasks are repetitive: checking whether a project folder contains the right files, reviewing documents against a checklist, or finding knowledge articles that are overdue for an update.
+
+SharePoint Skills are designed for exactly this kind of work.
+A Skill is a reusable, multi-step AI workflow that runs inside SharePoint. Rather than writing code or building a conventional automation flow, you describe the outcome you want in natural language, then review and refine the Skill SharePoint generates.
+
+You can also manage Skills directly from the SharePoint site’s Agent Assets library. Navigate to:
+
+SharePoint site → Site contents → Agent Assets → Skills
+
+From the Skills folder, you can manually upload a Skill file or organize existing Skills alongside your team’s other agent resources. This is useful when you want to reuse a Skill created elsewhere, maintain a controlled library of approved Skills, or move tested Skills between sites. Ensure users have the appropriate SharePoint permissions, since Skills operate within the site’s existing access model.
+
+## A simple example
+
+In this example, the Skill reviews each vendor onboarding folder for a signed NDA, tax form, and onboarding checklist. It then returns a clear summary of complete folders and folders that require attention. This replaces a repetitive manual review with a consistent, reusable AI-assisted process.
+
+## Why this improves the experience
+
+Skills make SharePoint more approachable because users do not need to remember complicated processes or learn a scripting language. They can simply ask for the outcome in the language they already use.
+For example:
+
+"Check the Plans library for project folders missing an approved brief or final budget, and list the gaps."
+
+Once saved, a Skill is reusable by people with the appropriate site access. Users can invoke it through a matching natural-language request, without necessarily having to remember the Skill’s exact name.
+
+## Keep the first Skills focused
+
+The best first use cases are specific, repetitive, and easy to verify:
+
+- Folder completeness check — Find missing mandatory files.
+- Document quality review — Check documents against an internal checklist.
+- Content freshness audit — Identify pages or documents that need review.
+- Naming and metadata review — Highlight content that does not follow team standards.
+
+Start small, test with real documents, and improve the wording based on how your team actually asks questions.
+
+## What Skills are not
+
+Skills are not intended to replace every automation platform. They work within SharePoint and inherit the permissions of the person running them. They cannot call external APIs, trigger webhooks, or run custom code. For cross-system workflows or transactional business automation, Power Automate or Copilot Studio may be the better fit.
+
+The magic is not just AI—it is turning a well-understood team process into something everyone can use consistently.
+
+For the official product documentation: [https://learn.microsoft.com/en-us/sharepoint/copilot-in-sharepoint-skills](https://learn.microsoft.com/en-us/sharepoint/copilot-in-sharepoint-skills)
+
+--- imported via sync-blogs ---

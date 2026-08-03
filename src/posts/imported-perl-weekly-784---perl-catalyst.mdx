@@ -1,0 +1,56 @@
+export const meta = {
+  slug: "imported-perl-weekly-784---perl-catalyst",
+  title: "Perl 🐪 Weekly #784 - Perl Catalyst",
+  date: "Mon, 03 Aug 2026 07:00:35 +0000",
+  summary: "This edition of Perl Weekly covers the announcement of CatalystNext, recent maintenance releases for Perl v5.40.5 and v5.42.3 with key security patches, and various community articles on OOP features, regex optimization, and testing.",
+  tags: ["perl", "catalyst", "newsletter", "security"],
+}
+
+*Originally published at https://dev.to/szabgab/perl-weekly-784-perl-catalyst-2o3l*
+
+Hi there,
+
+I remember when the Catalyst MVC web application framework was released back in 2005. That was the very first time I learned about the MVC pattern. Although I didn't get to use it until joining my current workplace, we now run a well-crafted application built on Catalyst. John Napiorkowski, creator of Catalyst, recently shared plans to revisit the framework under the working name CatalystNext. Check out the details in his post—I plan to take this opportunity to learn Catalyst from scratch.
+
+In case you missed it, two maintenance releases were recently published: Perl v5.40.5 and Perl v5.42.3. Both releases focus primarily on critical security patches for CVE-2026-8376, CVE-2026-57432, and CVE-2026-13221. A big thank you to the core team members for their hard work.
+
+I am a big fan of the experimental class feature in recent Perl versions. After watching a documentary titled "The Java Story," I was reminded of a choice I was given years ago between Perl and Java—naturally, I picked Perl. Watching it inspired me to explore how Perl's experimental class features handle Encapsulation, Reflection, and Immutable Classes, which I've shared in a couple of recent posts.
+
+I also recommend checking out Deven Corzine's talk, "Regex Optimization From Hours to Second"—talks like this make Perl conferences well worth attending. Another great session was "All About Test2" by Chad Graham. Thanks to the TPRC team for sharing these videos.
+
+Finally, pperl now targets Perl v5.44 for compatibility. Check out the full announcement in their release blog post.
+
+Enjoy the rest of the newsletter!
+
+--
+Your editor: Mohammad Sajid Anwar
+
+## Announcements
+
+- [Perl v5.40.5](https://metacpan.org/release/SHAY/perl-5.40.5/view/pod/perldelta.pod) by Steve Hay
+  The maintenance release of Perl v5.40.5 featuring important security fixes.
+
+- [Perl v5.42.3](https://metacpan.org/release/SHAY/perl-5.42.3/view/pod/perldelta.pod) by Steve Hay
+  The maintenance release of Perl v5.42.3 featuring important security fixes.
+
+- [ANNOUNCE: Perl.Wiki V 1.51, CPAN::MetaCurator V 1.27, etc](https://blogs.perl.org/users/ron_savage/2026/07/announce-perlwiki-v-151-cpanmetacurator-v-127-etc.html) by Ron Savage
+  The highlight of the latest release of Perl.Wiki is CPAN::MetaCurator v1.27.
+
+## Articles
+
+- [The Future Isn’t Evenly Distributed](https://perlhacks.com/2026/08/the-future-isnt-evenly-distributed/) by Dave Cross
+  Analyzing a recent support request for a 25-year-old Perl CGI script, Dave Cross explains why business software often lags behind cutting-edge technology. Technical advancement in real-world software depends heavily on economic factors—businesses usually need existing solutions to keep working today rather than constantly adopting the newest tools.
+
+- [Immutable Class](https://theweeklychallenge.org/blog/immutable-class) by Mohammad Sajid Anwar
+  An analysis comparing immutability handling in modern Perl, focusing on Moose's explicit runtime optimizations versus the experimental class features in core Perl for enforcing immutability from an external perspective.
+
+- [Reflection/MOP](https://theweeklychallenge.org/blog/reflection-or-mop/) by Mohammad Sajid Anwar
+  A walkthrough tracing the evolution of code reflection and metaobject protocols from Lisp and CLOS to modern Perl. Covers early symbol table handling via `%main::`, Moose's `Class::MOP`, and built-in features like the `isa` operator, `__CLASS__`, and capability testing with `$obj->can()`.
+
+- [CatalystNext: What Should We Keep, Change, and Rethink?](https://dev.to/jjn1056/catalystnext-what-should-we-keep-change-and-rethink-39kf) by John Napiorkowski
+  John Napiorkowski initiates the discussion around CatalystNext, a new vision for the classic Catalyst web framework based on PAGI technology. The post explores whether to keep action-subroutine attributes over a route DSL, ways to refine chained dispatch syntax, separating code bundles from URLs, and improving state/service boundaries without breaking historic compatibility.
+
+- [Moving Targets - PetaPerl 0.6.8](https://blogs.perl.org/users/petamem/2026/07/moving-targets---petaperl-068.html) by Richard C. Jelinek
+  PetaMem released version 0.6.8 of pperl, raising its minimum compatibility target to Perl v5.44.
+
+--- imported via sync-blogs ---
