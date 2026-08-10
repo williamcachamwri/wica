@@ -1,0 +1,81 @@
+export const meta = {
+  slug: "imported-4-files-into-one-human-reviewed-interview-brief",
+  title: "4 Files Into One Human-Reviewed Interview Brief",
+  date: "Mon, 10 Aug 2026 06:12:29 +0000",
+  summary: "This post explains how to build an automated interview briefing bot that consolidates candidate CVs, application forms, calendar events, and role scorecards into a single evidence-linked packet for human interviewers.",
+  tags: ["automation", "ai", "recruiting", "python"],
+}
+
+## 4 Files, One Interview Brief: The Bot That Preps the Human
+
+Your hiring manager opens the CV in one tab, hunts through Gmail for the application thread in another, digs up the role scorecard in a shared drive, and joins the call three minutes late still not sure what to ask. That is 15 minutes of tab-switching before a 30-minute interview. This post walks through the exact bot I build for clients that turns those four scattered inputs into a single evidence-linked briefing packet — without letting the model touch a hiring decision.
+
+## The one rule that keeps this safe: the bot preps humans, it does not judge them
+
+This bot prepares the interviewer. It does not score, rank, reject, advance, or message the candidate. That boundary is the entire reason the workflow is worth building first. Every automation vendor demo I have seen starts at the riskiest step — resume scoring — which is exactly where bias, EEOC exposure, and bad candidate experience live. Flip the order. Automate the boring information-gathering that your hiring manager is doing badly at 8:57 AM, and leave the judgment where it belongs.
+
+Practically, that means the bot has three hard "no" rules baked into the system prompt and the workflow logic itself:
+
+- No numeric fit score, no "recommend hire / no hire" language, no ranked comparison across candidates.
+- No candidate-facing output. The bot writes to the interviewer only.
+- No stage changes in the ATS. If you use Greenhouse, Ashby, or a spreadsheet, the bot reads. A human writes.
+
+If you skip this framing, the same code becomes a compliance problem the moment a rejected candidate asks how the decision was made.
+
+## The 4 inputs, and the boring identifier problem that breaks most builds
+
+The four inputs are: calendar event, candidate CV, application form response, and role scorecard. The one people skip is the scorecard, and without it the model produces a fluent summary that has nothing to do with what you are hiring for.
+
+Keep the scorecard to five fields so a hiring manager will actually maintain it:
+
+- Role title: Senior Support Specialist, SaaS
+- Must-have: Fluent written English, 2+ yrs ticketing (Zendesk/Intercom), B2B SaaS exposure
+- Nice-to-have: SQL basics, technical writing samples
+- Concerns to verify: US timezone overlap, availability start date, examples of angry-customer handling
+- Interview areas: Written comms sample, live triage exercise, escalation judgment
+
+The second boring problem: one clean identifier per candidate. Email is the only reliable one. Names collide, LinkedIn URLs get edited, phone numbers are missing half the time. If your calendar event only has a name, matching becomes a guessing game the moment you interview two people named David Chen in the same quarter.
+
+The fix is a title convention, not code:
+
+```
+Interview — Jane Doe — jane.doe@gmail.com — Support Specialist
+```
+
+Or put the email in the event description field. Not glamorous. But every reliable automation I have shipped starts with a boring, consistent input format.
+
+## The trigger, the extractor, and the "do not guess" rule
+
+The trigger is a scheduled job that runs every 10 minutes and looks for calendar events with an Interview label starting in the next 30-60 minutes. When it finds one, it pulls: candidate email, candidate name, interviewer name, role title, event start time, meeting link.
+
+If any critical field is missing, the bot does not guess. It sends the interviewer a short exception notice and stops.
+
+```python
+# pseudo-code, n8n / Make / Python all map to this shape
+def handle_event(event):
+    ctx = extract_calendar_fields(event)
+    missing = [k for k in ("candidate_email", "role_title", "interviewer") if not ctx.get(k)]
+    if missing:
+        notify_interviewer(
+            to=ctx.get("interviewer_email"),
+            subject=f"Briefing skipped: {event['summary']}",
+            body=f"Missing fields: {', '.join(missing)}. "
+                 f"Fix the event and I will regenerate on next run.\n{event['htmlLink']}"
+        )
+        return
+    build_briefing(ctx)
+```
+
+Silent guessing is how automations create embarrassing failures — the wrong candidate summary sent to the wrong interviewer, or a briefing about "David Chen" that mixes two people's CVs. An exception notice takes 20 seconds for a human to fix. A hallucinated brief takes a week of trust to rebuild.
+
+### Fields the trigger must always confirm before proceeding
+
+- candidate_email — the join key for every downstream lookup
+- role_title — required to load the correct scorecard
+- interviewer — required to send the brief to the right person
+- event_start — required to schedule delivery 30 min before
+
+---
+*Originally published at https://dev.to/lamingsrb/4-files-into-one-human-reviewed-interview-brief-41k2*
+
+--- imported via sync-blogs ---

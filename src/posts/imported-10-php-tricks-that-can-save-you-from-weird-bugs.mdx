@@ -1,0 +1,149 @@
+export const meta = {
+  slug: "imported-10-php-tricks-that-can-save-you-from-weird-bugs",
+  title: "10 PHP Tricks That Can Save You From Weird Bugs",
+  date: "Mon, 10 Aug 2026 06:12:35 +0000",
+  summary: "A practical guide detailing essential PHP quirks and tricks to help developers write cleaner code and avoid common pitfalls.",
+  tags: ["php", "webdev", "programming", "backend"],
+}
+
+## 10 PHP Tricks That Can Save You From Weird Bugs
+
+When starting out with PHP, everything seems straightforward: write code, reload the browser, and watch it work. However, as you gain experience, you begin encountering subtle behaviors that are not immediately obvious. Understanding these nuances can prevent confusing bugs and help you write cleaner code.
+
+Here are several essential PHP tricks and quirks every developer should keep in mind.
+
+## 1. Comparing Values: == vs ===
+
+One of the fundamental concepts in PHP is understanding how comparison operators behave. PHP offers two primary comparison operators:
+
+```php
+==
+===
+```
+
+The loose operator (`==`) compares values after type conversion, while the strict operator (`===`) compares both value and data type.
+
+```php
+var_dump(5 == "5");
+```
+
+Output:
+
+```plaintext
+bool(true)
+```
+
+Because PHP converts the string to an integer, it evaluates the comparison as true. Conversely, using strict comparison yields a different result:
+
+```php
+var_dump(5 === "5");
+```
+
+Output:
+
+```plaintext
+bool(false)
+```
+
+This occurs because `5` is an integer, whereas `"5"` is a string.
+
+### Recommendation
+
+Defaulting to strict comparison (`===` and `!==`) prevents accidental type coercion and makes your application logic reliable.
+
+```php
+if ($userId === 10) {
+    echo "Correct user";
+}
+```
+
+## 2. Falsey Values and Falsy Checks
+
+PHP evaluates several distinct values as false in boolean contexts, including:
+
+- `false`
+- `0`
+- `""` (empty string)
+- `"0"`
+- `null`
+- `[]` (empty array)
+
+Consider this condition:
+
+```php
+$value = 0;
+
+if (!$value) {
+    echo "This is considered false";
+}
+```
+
+This behavior becomes problematic when `0` is a valid identifier or result in your domain logic:
+
+```php
+$id = 0;
+
+if (!$id) {
+    echo "ID does not exist";
+}
+```
+
+If `0` is a legitimate value, checking truthiness leads to bugs. Instead, explicitly check for the absence of a value:
+
+```php
+if ($id === null) {
+    echo "ID is missing";
+}
+```
+
+## 3. Simplifying Fallbacks with Null Coalescing (??)
+
+The null coalescing operator (`??`) streamlines variable initialization when working with arrays or unassigned variables.
+
+Accessing non-existent array keys directly can trigger warnings:
+
+```php
+$username = $_GET['username'];
+```
+
+Using `??` safely supplies a default value if the key is missing or `null`:
+
+```php
+$username = $_GET['username'] ?? 'Guest';
+```
+
+If `$_GET['username']` is not set, executing the code produces:
+
+```php
+echo $username;
+```
+
+Output:
+
+```plaintext
+Guest
+```
+
+You can also chain multiple fallbacks:
+
+```php
+$name = $user['name'] ?? $user['username'] ?? 'Guest';
+```
+
+## 4. Null Coalescing (??) vs Short Ternary (?:)
+
+While `??` and `?:` look similar, they handle truthy and falsy values differently.
+
+- **Null Coalescing (`??`)** checks whether a variable exists and is not `null`.
+- **Shorthand Ternary (`?:`)** evaluates whether the left-hand side is truthy.
+
+```php
+$name = $user['name'] ?? 'Guest';
+```
+
+Knowing the distinction helps ensure you use the right tool depending on whether you are checking for existence or boolean truthiness.
+
+*Originally published at https://dev.to/codearea_shop_1f1def9b532/10-php-tricks-that-can-save-you-from-weird-bugs-4f28*
+
+---
+imported via sync-blogs ---
