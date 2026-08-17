@@ -1,0 +1,136 @@
+export const meta = {
+  slug: "imported-my-security-hook-silently-stopped-guarding-the-bug-was-one-line-of-encoding",
+  title: "My security hook silently stopped guarding. The bug was one line of encoding.",
+  date: "Mon, 17 Aug 2026 06:15:30 +0000",
+  summary: "A security hook for an AI agent failed silently on non-ASCII file paths on Windows due to default locale encoding (`cp932`), causing it to fail-open. The bug was resolved by reading raw bytes from `sys.stdin.buffer` and explicitly decoding as UTF-8.",
+  tags: ["python", "security", "encoding", "bugs"],
+}
+
+*Originally published at https://dev.to/aiq_labs/my-security-hook-silently-stopped-guarding-the-bug-was-one-line-of-encoding-1le8*
+
+*This is a submission for DEV's Summer Bug Smash: Clear the Lineup powered by Sentry.*
+
+## Project Overview
+
+I run a set of local policy guards around an AI coding agent. They are ordinary `PreToolUse` hooks: before the agent is allowed to perform an action, the proposed tool call is handed to a small Python script as JSON on **stdin**. The contract is two exit codes.
+
+```shell
+exit 0  → allow
+exit 2  → block, and send the reason back to the agent as feedback
+```
+
+There are several. One refuses access to credential paths. One intercepts destructive shell commands. One enforces a directory boundary. And one — `malformed-read-guard.py` — blocks the agent from reading files that contain corrupted tool-call syntax, because reading that syntax makes the model start emitting it too, and the session locks up.
+
+They had been working for weeks. One of them had also, for some of that time, been doing nothing at all.
+
+## Bug Fix or Performance Improvement
+
+### The symptom
+
+Same file. Same bytes. Two locations.
+
+- Placed at an ASCII path → guard fires, `exit 2`, read blocked.
+- Placed under a directory whose name contains Japanese characters → `exit 0`, read allowed.
+
+No exception. No stack trace. No log line. Nothing anywhere said a decision had been skipped. The hook ran, the hook returned "allow", and the agent read a file it was supposed to be protected from.
+
+### The mechanism
+
+Three steps, and the ugly part is that each one is individually defensible.
+
+**1. The payload is UTF-8. The reader is not.**
+
+Hook input is always UTF-8. But on Windows, Python opens `sys.stdin` using the *locale* encoding — on this machine, `cp932`. So this line
+
+```python
+data = json.load(sys.stdin)
+```
+
+decodes UTF-8 bytes as cp932.
+
+**2. Mojibake does not raise.**
+
+That is the whole problem. cp932 is permissive enough that UTF-8 bytes map onto *some* sequence of characters. You do not get a `UnicodeDecodeError` you can catch and log. You get a string that is merely wrong, and it flows onward as valid data:
+
+```
+'C:\...\self-catering\_�部\再開メモ.md'   ← what the guard actually received
+```
+
+**3. The corrupted path meets a correct safety valve.**
+
+```python
+p = Path(file_path)
+if not p.is_file():
+    sys.exit(0)          # nothing to inspect — don't block the agent's work
+```
+
+That valve is right. A guard that halts everything because a file vanished is a worse guard. But a corrupted path *looks exactly like* a file that isn't there, so the valve fires on every non-ASCII path in the system.
+
+Three correct decisions compose into: **a guard that silently stops guarding for an entire class of inputs.** And the class isn't exotic. It is "any project whose folders aren't named in English."
+
+The reason it survived so long is the exit code. `0` means *allowed*, and it also means *ran fine*. There is no third value for "I could not tell." Every observable signal said the guard was healthy.
+
+### Reproducing it
+
+Two scripts differing only in how stdin is read, fed the same UTF-8 payload, pointed at a real file under an ASCII path and a real file under a Japanese path. Live output, Python 3.14.2, unedited:
+
+```
+host stdout encoding = cp932
+
+===== BEFORE  (text layer) / ASCII path =====
+python            = 3.14.2
+sys.stdin.encoding= cp932
+path intact       = True
+exit              = 2   inspected and blocked
+
+===== BEFORE  (text layer) / Japanese path =====
+python            = 3.14.2
+sys.stdin.encoding= cp932
+path intact       = False
+exit              = 0   FAIL-OPEN (file looks absent, never inspected)
+
+===== AFTER   (explicit utf-8) / ASCII path =====
+path intact       = True
+exit              = 2   inspected and blocked
+
+===== AFTER   (explicit utf-8) / Japanese path =====
+path intact       = True
+exit              = 2   inspected and blocked
+```
+
+As a matrix:
+
+| | ASCII path | Japanese path |
+|---|---|---|
+| **before** | blocked ✅ | **allowed** 🔴 |
+| **after** | blocked ✅ | blocked ✅ |
+
+**Look at the top-left cell.** That is the trap. An ASCII-only test suite goes green on a guard that has stopped working. There was no failing test to write, because the test I would have written passed.
+
+## Code
+
+The fix is one line, and the matching logic is untouched.
+
+**Before**
+
+```python
+def main():
+    try:
+        data = json.load(sys.stdin)      # text layer → locale encoding → cp932
+    except Exception:
+        sys.exit(0)
+```
+
+**After** — take bytes, decode explicitly, never let the platform choose:
+
+```python
+def main():
+    # Windows の Python は sys.stdin を cp932 で開く。フック入力は UTF-8 なので
+    # テキスト層のまま読むと日本語パスが化け、対象ファイルを開けずに fail-open する
+    # （2026-07-30 実測: 同一内容のファイルが ASCII パスでは exit 2、日本語パス配下では
+    #  exit 0 で素通しだった）。必ずバイト列で受けて明示デコードする。
+    raw = sys.stdin.buffer.read().decode("utf-8")
+    data = json.loads(raw)
+```
+
+--- imported via sync-blogs ---

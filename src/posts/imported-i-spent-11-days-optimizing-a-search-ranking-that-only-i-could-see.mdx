@@ -1,0 +1,136 @@
+export const meta = {
+  slug: "imported-i-spent-11-days-optimizing-a-search-ranking-that-only-i-could-see",
+  title: "I spent 11 days optimizing a search ranking that only I could see",
+  date: "Mon, 17 Aug 2026 06:16:22 +0000",
+  summary: "This is a submission for DEV's Summer Bug Smash: Smash Stories powered by Sentry.\n\n\n  \n  \n  The symptom: good numbers, no users\n\n\nI publish small automation tools on a marketplace. By August I had 23 of them live. Store search looked fine — measured repeatedly, from a real browser, against the real ",
+  tags: ["devchallenge", "bugsmash"],
+}
+
+*This is a submission for [DEV's Summer Bug Smash: Smash Stories](https://dev.to/bugsmash) powered by [Sentry](https://sentry.io/).*
+
+
+  
+  
+  The symptom: good numbers, no users
+
+
+I publish small automation tools on a marketplace. By August I had 23 of them live. Store search looked fine — measured repeatedly, from a real browser, against the real production endpoint:
+
+
+Search term
+My rank *(store UI, Aug 2)*
+
+
+`sitemap checker`
+**#3**
+
+
+`google play audit`
+**#1**
+
+
+Real numbers after 89 days: **1 active user across all 23 tools. $0 revenue.**
+
+
+A #1 ranking and one user is not a rounding error. It is a contradiction, and I spent a week and a half resolving it in the wrong direction.
+
+
+  
+  
+  Eleven days of correct answers to the wrong question
+
+
+If ranking is fine and users are zero, the fault must be downstream — that was the reasoning. So I went looking for it, carefully:
+
+
+**Demand analysis.** Pulled 3,655 listings, then went deeper to 12,834 to check for sampling bias in the first pass. (There was one. I found it and corrected it.)
+
+**Naming analysis.** Split the corpus by whether the title contained a well-known platform name. Median users: 5 vs 2.
+
+**Age-cohort analysis.** Measured the base rate for new listings: only **11%** (n=9) get their first user within 0–3 days of publishing, against 74% at 14–30 days. Mine were young. The zeros were, statistically, unremarkable.
+
+**Acted on all of it.** Renamed 5 tools. Added output schemas across the board — the platform's own quality score went from 74 to 78–79.
+
+
+Every one of those produced a defensible number. Not one of them changed anything.
+
+
+That pattern is the actual signal, and I missed it for too long: **when every hypothesis confirms and nothing moves, stop testing hypotheses and start testing the instrument.**
+
+
+  
+  
+  "It reproduced" is not "it's correct"
+
+
+I had re-measured the ranking several times over those days. Same answer each time. I read that as confirmation.
+
+
+It isn't. Re-running a measurement under identical conditions reproduces the same *bias* just as faithfully as it reproduces the same *truth*. Repetition rules out transient noise and nothing else.
+
+
+There was one condition I never varied, because it never occurred to me that it was a condition:
+
+
+**I was logged in.**
+
+
+  
+  
+  The one-line diff
+
+
+Store search is an ordinary public endpoint:
+
+
+GET https://api.apify.com/v2/store?search=sitemap+checker&amp;limit=100
+
+
+Every measurement I had ever taken went out from a browser session — and later a token — belonging to the author of those 23 tools. So I sent it once more with no credentials at all:
+
+
+Search term *(API, Aug 13)*
+
+With my credentials
+Anonymous
+
+
+`sitemap checker`
+
+**#1** of 80
+**not present**
+
+
+`pdf table extractor`
+
+**#2** of 87
+**not present**
+
+
+`dead link checker`
+
+**#1** of 89
+**not present**
+
+
+My ranking existed. It existed only inside my own session.
+
+
+  
+  
+  Root cause, in the vendor's own documentation
+
+
+The endpoint accepts a query parameter I had never had a reason to pass: `includeUnrunnableActors`. Its documentation defines what "unrunnable" means:
+
+
+*"Actors from developers who haven't passed KYC, or full-permission Actors without a large user base"*
+
+
+That is the exclusion list, and it is two conditions OR'd together. Which one was I?
+
+
+The second branch is checkable anonymously — every listing exposes its own permission level. All 23 of mine came back `LIMITED_PERMISSIONS` with `isPublic: true`, so the full-permission branch did not apply. That left identity verification, and the platform console said so in words: **"Identity verification required."**
+
+
+Nothing in my code was broken. The tools were live, runnable, and genuinely well-ranked — inside an index that is not served to logged-out visitors. Which is to say: to everyone.
