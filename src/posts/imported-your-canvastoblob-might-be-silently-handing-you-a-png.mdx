@@ -1,0 +1,77 @@
+export const meta = {
+  slug: "imported-your-canvastoblob-might-be-silently-handing-you-a-png",
+  title: "Your canvas.toBlob might be silently handing you a PNG",
+  date: "Mon, 24 Aug 2026 06:37:17 +0000",
+  summary: "When a browser does not support the requested MIME type in `canvas.toBlob`, the HTML spec requires it to silently fall back to PNG, which can lead to misnamed files. This article explains why this fallback happens and demonstrates how to reliably detect format support by testing actual canvas encoding output.",
+  tags: ["javascript", "webdev", "html5", "canvas"],
+}
+
+*Originally published at https://dev.to/pm_cheng_3f36acecfb9c59f5/your-canvastoblob-might-be-silently-handing-you-a-png-27bo*
+
+A user reported that the `.webp` images exported from my web application failed to open on their desktop environment. Opening one of the problematic files in a binary viewer revealed its signature byte sequence: `89 50 4E 47`—the standard header for a PNG file, despite bearing a `.webp` extension. The underlying encoding logic was operating as intended; however, the browser had quietly substituted the requested output format without notification.
+
+## The spec says it's allowed to do this
+
+Consider a typical canvas export function:
+
+```javascript
+canvas.toBlob(blob => {
+  download(blob, 'output.webp');
+}, 'image/webp');
+```
+
+The asynchronous callback executes successfully, returning a non-null Blob of expected size. Despite these indicators, the generated asset is not WebP. This behavior adheres directly to the HTML specification: when a user agent encounters an unsupported target format during canvas export, it is mandated to default to PNG encoding. The API raises no exceptions and provides no secondary arguments indicating format substitution.
+
+The actual resulting format can only be verified by inspecting `blob.type`:
+
+```javascript
+canvas.toBlob(blob => {
+  console.log(blob.type);   // iOS below 16.4: "image/png"
+}, 'image/webp');
+```
+
+While `toDataURL` exhibits identical fallback behavior, its output string explicitly contains `data:image/png;base64,`, making the substitution immediately noticeable during inspection.
+
+## There is no capability query for this
+
+Attempting to resolve format support by targeting specific platforms or user agents presents significant maintenance challenges. On iOS, every browser engine relies on WebKit, making user-agent checks unreliable. Furthermore, embedded webviews, varied system updates, and desktop view toggles frequently distort user-agent strings.
+
+User-agent evaluation merely identifies the browser client rather than its active encoding capabilities. Factors such as operating system builds, engine versions, and feature flags dictate actual runtime support.
+
+While media APIs offer direct capability checking methods:
+
+```javascript
+MediaRecorder.isTypeSupported('video/webm;codecs=vp9');   // -> boolean
+await navigator.mediaCapabilities.encodingInfo({ ... });  // -> supported, smooth, powerEfficient
+```
+
+Canvas image encoding APIs provide no native equivalent. Neither `toBlob` nor `toDataURL` includes capability verification methods prior to execution. Determining format support requires direct execution and validation.
+
+## Just encode something and check what comes back
+
+To accurately verify supported formats, encode a minimal canvas instance dynamically and check the returned MIME type:
+
+```javascript
+const encodeCache = new Map();
+
+async function canEncode(mime) {
+  if (encodeCache.has(mime)) return encodeCache.get(mime);
+
+  const canvas = document.createElement('canvas');
+  canvas.width = canvas.height = 2;
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = 'rgba(0, 128, 255, 0.5)';   // semi-transparent, also probes alpha
+  ctx.fillRect(0, 0, 1, 1);
+
+  const blob = await new Promise(resolve => canvas.toBlob(resolve, mime));
+  const ok = !!blob && blob.type === mime;    // <- the whole point is this line
+
+  encodeCache.set(mime, ok);
+  return ok;
+}
+```
+
+Validating `blob.type` directly confirms whether the requested format was honored or replaced by the default PNG fallback.
+
+---
+imported via sync-blogs

@@ -1,0 +1,174 @@
+export const meta = {
+  slug: "imported-the-evolution-of-web-forms-part-3",
+  title: "The Evolution of Web Forms — Part 3",
+  date: "Mon, 24 Aug 2026 06:39:38 +0000",
+  summary: "This post explores the evolution of web forms by diving into React Hook Form, comparing controlled versus uncontrolled inputs, and demonstrating native uncontrolled form patterns.",
+  tags: ["react", "webdev", "javascript", "typescript"],
+}
+
+## The Evolution of Web Forms — Part 3: React Hook Form, Validation Libraries, and Zod
+
+In Part 2, we learned that React solved the problem of manually updating the DOM.
+
+Instead of writing:
+
+```javascript
+emailError.textContent =
+  "Email already exists";
+
+emailInput.setAttribute(
+  "aria-invalid",
+  "true"
+);
+```
+
+React allowed us to describe the interface from state:
+
+```tsx
+
+
+{errors.email && (
+  
+
+{errors.email}
+)}
+```
+
+However, React did not automatically manage:
+
+- Form values
+- Validation errors
+- Touched fields
+- Dirty fields
+- Submission state
+- Reset behavior
+- Dynamic fields
+- Backend errors
+- Performance
+
+Developers still had to build those features manually.
+
+That created the need for form-management libraries.
+
+This part covers:
+
+- React Hook Form’s philosophy and architecture
+- React Hook Form’s core APIs
+- Validation libraries
+- React Hook Form with Zod and TypeScript
+
+By the end, we will build a production-style registration form using:
+
+```plaintext
+React
++
+TypeScript
++
+React Hook Form
++
+Zod
++
+An API layer
+```
+
+## Stage 9: React Hook Form Deep Dive
+
+React Hook Form is not simply a shorter way to write controlled React forms.
+
+It uses a different architectural philosophy.
+
+A traditional controlled input stores its value in React state:
+
+```tsx
+const [email, setEmail] =
+  useState("");
+
+ {
+    setEmail(event.target.value);
+  }}
+/>
+```
+
+Every keystroke produces a state update:
+
+```plaintext
+User types
+    ↓
+onChange runs
+    ↓
+setEmail runs
+    ↓
+Component renders again
+    ↓
+Input receives the new value
+```
+
+React Hook Form prefers native, uncontrolled inputs when possible.
+
+```tsx
+
+```
+
+The browser stores the current value inside the input element.
+
+React Hook Form registers the input, listens to its events, tracks relevant form state, and reads its value when required. React Hook Form’s official documentation describes `register()` as the mechanism that connects an input to validation, value tracking, and submission.
+
+## Controlled versus uncontrolled inputs
+
+## Controlled input
+
+```tsx
+const [email, setEmail] =
+  useState("");
+
+ {
+    setEmail(event.target.value);
+  }}
+/>
+```
+
+React owns the value.
+
+```plaintext
+React state
+    ↓
+input value
+```
+
+The input cannot independently keep a different value because React continuously supplies it.
+
+## Uncontrolled input
+
+```tsx
+
+```
+
+The browser owns the current value.
+
+```plaintext
+DOM input element
+    ↓
+current value
+```
+
+React may provide the initial value, but it does not need to update React state after every keystroke.
+
+The current value can be read through:
+
+- A ref
+- `FormData`
+- Native form submission
+- A form-management library
+
+## A native uncontrolled input using `useRef`
+
+Before understanding React Hook Form, let us manually build one uncontrolled input.
+
+```tsx
+import {
+  FormEvent,
+```
+
+*Originally published at https://dev.to/karthikreddy/the-evolution-of-forms-part-3-laf*
+
+--- imported via sync-blogs ---

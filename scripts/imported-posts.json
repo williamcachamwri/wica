@@ -94,5 +94,17 @@
     "title": "My security hook silently stopped guarding. The bug was one line of encoding.",
     "url": "https://dev.to/aiq_labs/my-security-hook-silently-stopped-guarding-the-bug-was-one-line-of-encoding-1le8",
     "importedAt": "2026-08-17T06:39:00.136Z"
+  },
+  "devto-feed-the-evolution-of-web-forms-part-3-0": {
+    "slug": "imported-the-evolution-of-web-forms-part-3",
+    "title": "The Evolution of Web Forms — Part 3",
+    "url": "https://dev.to/karthikreddy/the-evolution-of-forms-part-3-laf",
+    "importedAt": "2026-08-24T06:41:08.928Z"
+  },
+  "devto-feed-your-canvastoblob-might-be-silently-handing-you-a-png-1": {
+    "slug": "imported-your-canvastoblob-might-be-silently-handing-you-a-png",
+    "title": "Your canvas.toBlob might be silently handing you a PNG",
+    "url": "https://dev.to/pm_cheng_3f36acecfb9c59f5/your-canvastoblob-might-be-silently-handing-you-a-png-27bo",
+    "importedAt": "2026-08-24T06:41:17.364Z"
   }
 }
