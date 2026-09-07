@@ -106,5 +106,17 @@
     "title": "Your canvas.toBlob might be silently handing you a PNG",
     "url": "https://dev.to/pm_cheng_3f36acecfb9c59f5/your-canvastoblob-might-be-silently-handing-you-a-png-27bo",
     "importedAt": "2026-08-24T06:41:17.364Z"
+  },
+  "devto-feed-claude-code-permissions-how-allow-ask-and-deny-actually-compose-0": {
+    "slug": "imported-claude-code-permissions-how-allow-ask-and-deny-actually-compose",
+    "title": "Claude Code permissions: how allow, ask, and deny actually compose",
+    "url": "https://dev.to/ottoflightrules/claude-code-permissions-how-allow-ask-and-deny-actually-compose-3kme",
+    "importedAt": "2026-09-07T11:14:37.497Z"
+  },
+  "devto-feed-part-of-speech-tagging-how-nlp-understands-grammar-1": {
+    "slug": "imported-part-of-speech-tagging-how-nlp-understands-grammar",
+    "title": "Part of Speech Tagging: How NLP Understands Grammar",
+    "url": "https://dev.to/javiagu13/part-of-speech-tagging-how-nlp-understands-grammar-2if5",
+    "importedAt": "2026-09-07T11:14:50.768Z"
   }
 }

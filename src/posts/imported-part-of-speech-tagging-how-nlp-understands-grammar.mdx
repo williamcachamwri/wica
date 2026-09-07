@@ -1,0 +1,95 @@
+export const meta = {
+  slug: "imported-part-of-speech-tagging-how-nlp-understands-grammar",
+  title: "Part of Speech Tagging: How NLP Understands Grammar",
+  date: "Mon, 07 Sep 2026 11:00:00 +0000",
+  summary: "Part of Speech (POS) tagging is a fundamental NLP process that assigns grammatical categories to words based on context. This post explores what POS tagging is, why it matters for downstream applications, and how taggers evolved from rule-based systems to neural networks.",
+  tags: ["nlp", "machinelearning", "python", "ai"],
+}
+
+*Originally published at https://dev.to/javiagu13/part-of-speech-tagging-how-nlp-understands-grammar-2if5*
+
+![Header Image](https://media2.dev.to/dynamic/image/width=800%2Cheight=%2Cfit=scale-down%2Cgravity=auto%2Cformat=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Farticles%2Fu8qwdq6lpausth5w3b9x.png)
+
+Most of us recall elementary grammar lessons about parts of speech, even if the details have faded.
+
+Nouns represent entities, verbs denote actions, adjectives offer descriptions, and adverbs modify. Back then, teachers had you underline subjects or highlight verbs before moving on.
+
+However, this basic grammatical foundation is vital for Natural Language Processing (NLP) models trying to interpret text. To extract accurate meaning, a model must determine the grammatical function of each token. Whether a word like "bank" functions as a noun or a verb depends entirely on its surrounding context.
+
+Part of speech tagging is the mechanism NLP frameworks rely on to figure this out. It serves as an essential building block in text analysis, powering numerous intelligent applications behind the scenes.
+
+## What Is Part of Speech?
+
+A part of speech classifies a word based on its syntactic role within a given context.
+
+Every token in a sentence fits into one or more categories. The core classes utilized in NLP include:
+
+- Noun (NN): Represents a person, place, object, or concept (e.g., "dog", "London", "happiness")
+- Verb (VB): Indicates an action or state of being (e.g., "run", "is", "understand")
+- Adjective (JJ): Modifies or describes a noun (e.g., "fast", "blue", "complicated")
+- Adverb (RB): Modifies a verb, adjective, or another adverb (e.g., "quickly", "very", "not")
+- Pronoun (PRP): Substitutes for a noun (e.g., "he", "she", "it", "they")
+- Preposition (IN): Denotes relationships between tokens (e.g., "in", "on", "at", "between")
+- Conjunction (CC): Links words, phrases, or clauses (e.g., "and", "but", "or")
+- Determiner (DT): Introduces a noun phrase (e.g., "the", "a", "this", "some")
+
+In practical NLP tasks, systems use standardized short labels such as Penn Treebank tags (like NN, VBZ, or JJ) rather than full category names. While different software tools may adopt slightly varying tag sets, the underlying grammatical distinctions remain consistent.
+
+![Common part of speech tags used in NLP with their Penn Treebank codes and examples](https://media2.dev.to/dynamic/image/width=800%2Cheight=%2Cfit=scale-down%2Cgravity=auto%2Cformat=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Farticles%2F4qal9irvdktwvv45j3mx.png)
+
+Common part of speech tags used in NLP with their Penn Treebank codes and examples
+
+## What Is Part of Speech Tagging?
+
+Part of speech tagging (POS tagging) refers to the automatic assignment of grammatical tags to every individual token in a body of text.
+
+For example, given the classic sentence:
+
+"The quick brown fox jumps over the lazy dog."
+
+A POS tagger converts it into tagged output:
+
+```
+The/DT quick/JJ brown/JJ fox/NN jumps/VBZ over/IN the/DT lazy/JJ dog/NN
+```
+
+By labeling each word, the tagger transforms raw, unstructured input into structured grammatical metadata that subsequent algorithms can process.
+
+While the concept seems straightforward, resolving lexical ambiguity presents a major challenge. Many words shift their part of speech based on how they are used.
+
+Consider the word "run": context determines whether it serves as a noun or a verb. A tagger's effectiveness relies on analyzing neighboring tokens to resolve these ambiguous cases accurately.
+
+## Why Does POS Tagging Matter?
+
+Though knowing a word's category might seem minor on its own, POS annotations drive many critical downstream language operations:
+
+- Named Entity Recognition (NER): Leverages proper noun tags (NNP) to locate entities like individuals, organizations, and geographic locations quickly.
+- Dependency Parsing: Requires POS tags to establish syntactic links between words, determining subjects, verbs, and direct objects.
+- Word Sense Disambiguation: Uses part-of-speech context to refine definitions. For instance, classifying "bank" as a verb immediately rules out financial institution meanings.
+- Information Extraction: Relies on structural POS patterns (such as noun-verb sequences) to extract structured facts and relationships from text.
+- Search and Indexing: Helps search engines emphasize core content tokens (nouns, verbs, adjectives) while filtering out low-information functional words.
+
+## How POS Tagging Works
+
+Modern tagging frameworks rely heavily on machine learning, though understanding earlier paradigms clarifies how the technology evolved.
+
+## The Rule-Based Approach
+
+Initial tagging systems used hand-crafted linguistic rules. An example rule might state that a word ending in "-ing" following a modal verb should be marked as a verb. While effective for formal documents, rule-based systems struggled with informal phrasing, evolving vocabularies, and edge cases.
+
+## Statistical Approaches
+
+Statistical models replaced manual rule creation with probabilistic calculations derived from labeled datasets. By examining annotated text, models calculated transition and emission probabilities, such as the likelihood of a noun following a determiner.
+
+Hidden Markov Models (HMMs) became the primary standard for sequential tagging, identifying the most probable sequence of tags for a given sequence of tokens.
+
+## Neural Approaches
+
+Currently, production-grade POS taggers rely primarily on neural networks and Transformer architectures. These systems generate deep contextual embeddings capable of handling complex linguistic ambiguities.
+
+By evaluating full-sentence context rather than isolated local windows, modern neural taggers accurately resolve words whose grammatical roles change based on sentence structure.
+
+![How a POS tagger works](https://media2.dev.to/dynamic/image/width=800%2Cheight=%2Cfit=scale-down%2Cgravity=auto%2Cformat=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Farticles%2F3hra1n5yq4gcm3212fgv.png)
+
+---
+imported via sync-blogs ---
