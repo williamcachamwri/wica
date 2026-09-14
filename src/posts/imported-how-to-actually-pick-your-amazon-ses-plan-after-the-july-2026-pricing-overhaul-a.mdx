@@ -1,0 +1,71 @@
+export const meta = {
+  slug: "imported-how-to-actually-pick-your-amazon-ses-plan-after-the-july-2026-pricing-overhaul-a",
+  title: "How to actually pick your Amazon SES plan after the July 2026 pricing overhaul (and whether the dedicated IP is worth it)",
+  date: "Mon, 14 Sep 2026 11:16:40 +0000",
+  summary: "This guide breaks down Amazon SES's July 2026 pricing restructuring into Essentials, Pro, and Enterprise tiers. It provides steps to check your current plan, compare volume-based costs, and evaluate whether upgrading to a dedicated IP is worth it.",
+  tags: ["aws", "ses", "email", "pricing"],
+}
+
+## How to actually pick your Amazon SES plan after the July 2026 pricing overhaul (and whether the dedicated IP is worth it)
+
+On July 21, 2026, Amazon restructured SES billing into three tiered plans — the biggest change to SES pricing in years (AWS, SES pricing page). A reader left a comment on our earlier SES provider comparison asking specifically about the Essentials/Pro split and whether a dedicated IP actually earns its keep. Fair question, and the pricing page alone doesn't answer it. Here's how to check which plan you're actually on, run the real numbers for your volume, and decide if the upgrade is worth paying for.
+
+## Step 1: check which plan you're actually on
+
+If you've been sending through SES for a while, you're probably still on legacy à la carte pricing, not one of the new plans. New accounts default to Essentials, as do accounts that have been dormant since June 1, 2025. Accounts that sent or processed mail on or after that date stay on à la carte pricing unless they opt into a plan themselves (AWS, "Introducing Amazon Simple Email Service (SES) pricing plans").
+
+Don't guess — check it:
+
+```shell
+aws sesv2 get-account --region <region> --query PricingAttributes
+```
+
+That returns `CurrentPlan` as `NONE`, `ESSENTIALS`, `PRO`, or `ENTERPRISE` (dev.classmethod.jp, "I checked the new Amazon SES pricing plans using the Price List API and SES API"). **Plan status is set per region**, so if you send from more than one AWS region, check each separately — an easy thing to miss until your `us-east-1` bill looks nothing like your `eu-west-1` one. Switching plans is one more command:
+
+```shell
+aws sesv2 put-account-pricing-attributes --plan <PLAN_NAME> --region <region>
+```
+
+## Step 2: what the three plans actually are
+
+- Tiers breakdown:
+  - Essentials: Base fee is none. Costs $0.16/1K for 0–10M, $0.14/1K for 10–100M, and $0.11/1K for >100M. Includes no managed dedicated IPs.
+  - Pro: Base fee is $105/mo. Costs $0.22/1K for 0–10M, $0.17/1K for 10–100M, and $0.12/1K for >100M. Includes 1 domain, 1 IP, and 5 seedlist tests.
+  - Enterprise: Base fee is $500/mo. Costs $0.23/1K for 0–10M, $0.18/1K for 10–100M, and $0.13/1K for >100M. Includes 5 domains, 12 IPs, and 25 seedlist tests.
+
+(AWS, SES pricing page. Base fees are per account, per region — run mail out of three regions on Pro and that's $315/month before a single email goes out.)
+
+Essentials gets you monitoring and basic deliverability insights. Pro adds managed dedicated IPs with reputation isolation, pre-bounce address validation, and inbox-placement visibility across providers. Enterprise stacks on multi-region failover and an annual deliverability assessment. AWS also claims the plans run "up to 22% less than purchasing the same features individually" — that's AWS's own marketing math, not something we independently verified, so check it against your actual legacy bill before treating it as a reason to switch.
+
+One more thing about the free tier: AWS killed the SES-specific free tier (3,000 messages/month for 12 months) for new customers as of July 21, 2026. If you're already in your 12-month window, you keep it; if you're signing up now, that safety net is gone.
+
+## Step 3: run the real math for your volume
+
+These are just the per-message and base-fee numbers, calculated directly from the rates above:
+
+- At 100,000 emails/month: Essentials $16 · Pro $127 ($105 + $22) · Enterprise $523 ($500 + $23)
+- At 1,000,000 emails/month: Essentials $160 · Pro $325 ($105 + $220) · Enterprise $730 ($500 + $230)
+- At 15,000,000 emails/month (crosses into the 10–100M tier): Essentials $2,300 · Pro $3,155 · Enterprise $3,700
+
+Your actual invoice will run higher than these numbers if you're validating addresses ($0.01 each) or sending attachments ($0.12/GB) — both apply on top, across every plan (AWS, SES pricing page). Treat the figures above as the floor, not the final number.
+
+## Step 4: is the dedicated-IP upgrade actually worth it?
+
+The whole pitch for Pro and Enterprise is reputation isolation. On Essentials, you share IP space with other SES customers; if one of them decides to blast their newsletter list like it's 2004, your deliverability can take collateral damage. A dedicated IP means your sending history is yours and only yours.
+
+The catch: a brand-new dedicated IP starts with zero reputation, which is worse than shared reputation, not better. SES auto-warms it by default — sending volume ramps up steadily over 45 days regardless of how much mail you actually want to send — and different providers take their own sweet time deciding to trust you, anywhere from about two weeks to six (AWS, "Warming up dedicated IP addresses"). Once it's warmed, AWS recommends keeping roughly 1,000 emails/day flowing to each provider just to hold the reputation you worked for; let it go quiet and you're back to convincing Gmail you're not a spammer. Send a sudden spike right after warm-up and providers may throttle or block you outright — the exact opposite of what you paid for. For comparison, SendGrid runs a similar automated warm-up on a 41-day schedule (Twilio/SendGrid docs), so this isn't an SES quirk — it's how IP reputation works everywhere.
+
+Here's the actual call: if you're sending transactional mail — receipts, password resets, alerts — under a couple million messages a month, shared-IP reputation on Essentials is rarely the thing keeping your emails out of inboxes. Paying $105–$500/month to isolate a reputation that wasn't in trouble is a solution hunting for a problem. The upgrade earns its cost once you're running real volume, sending anything that looks like marketing, or you've already seen bounce/complaint rates creep up on shared IPs — at that point, isolation and a 45-day warm-up you control beat inheriting whatever the shared pool did last week.
+
+## Step 5: the VDM add-on nobody prices clearly
+
+SES also sells Virtual Deliverability Manager as an à la carte add-on, with per-message pricing that drops as your volume crosses certain thresholds (AWS, "Amazon SES now offers tiered pricing for Virtual Deliverability Manager"). What AWS doesn't publish anywhere in that announcement is the actual per-tier rate. Rather than repeat a number some other blog made up, check the pricing calculator in your own SES console — it's the only place that number reliably shows up.
+
+## Bottom line
+
+For most small SaaS teams sending transactional or low-volume mail, Essentials is where you start and probably where you stay: no base fee, no warm-up to babysit, and the cheapest per-message rate on the table. Once volume climbs into the millions or a shared IP starts actually hurting deliverability, that's the point to revisit — and by then you'll have the data to justify it instead of guessing. If the math above says Essentials fits you, point your account at Amazon SES and get back to shipping.
+
+Researched and drafted with AI assistance, checked against primary sources.
+
+--- imported via sync-blogs ---
+*Originally published at https://dev.to/julianros/how-to-actually-pick-your-amazon-ses-plan-after-the-july-2026-pricing-overhaul-and-whether-the-44g4*
