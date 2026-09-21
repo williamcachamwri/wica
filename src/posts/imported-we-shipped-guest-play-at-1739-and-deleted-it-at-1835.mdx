@@ -1,0 +1,82 @@
+export const meta = {
+  slug: "imported-we-shipped-guest-play-at-1739-and-deleted-it-at-1835",
+  title: "We shipped guest play at 17:39 and deleted it at 18:35",
+  date: "Mon, 21 Sep 2026 11:32:59 +0000",
+  summary: "An honest retrospective on shipping a guest play feature in 56 minutes, running into an authentication issue with question banks, building a signed permit mechanism, and ultimately deleting the feature when realizing it undermined a recent security decision for an unmeasured funnel.",
+  tags: ["software-engineering", "architecture", "product-management", "security"],
+}
+
+## We shipped guest play at 17:39 and deleted it at 18:35
+
+17:39  Show the first score free and let guests play one game per provider
+18:05  Let guest plays load their question bank with a signed permit
+18:35  Remove guest play, require account for game access
+
+Fifty six minutes from shipped to deleted. The middle commit is the interesting one, because it is a genuinely good piece of code that should never have needed to exist, and writing it is what made the deletion obvious.
+
+## What guest play was
+
+A signed-out visitor could play one free-tier practice game per provider with no account. The finished game state was parked in `localStorage`, never scored, and the completion screen asked for a signup. After authentication, a landing-intent cookie (`claim:<gameId>`) returned them to the game route, the parked state was posted to a claim endpoint, scored on the server, validated, and saved through the same path as any normal session.
+
+That is a reasonable conversion funnel. Let people feel the product before asking for an email. The claim path was careful: it re-validated that the game was guest-playable, that the state was genuinely complete, that the duration and the age of the parked session were plausible. The play budget and the free-score rule applied unchanged because it saved through the same code.
+
+It shipped, and it did not work, because of something nobody had joined up.
+
+## The 401 nobody predicted
+
+Our question banks are served from an authenticated API route. They are the authored content of the product, and moving them behind a session was a deliberate piece of work that happened a few days earlier.
+
+So a signed-out visitor starting a free game got a 401 on the bank fetch and sat looking at a spinner. Every bank-backed free game was broken from the moment guest play went live.
+
+Two obvious ways to fix that, and both are bad:
+
+1. **Drop the auth check on the bank route.** That undoes the whole point of moving the banks out of the public directory, for the entire library, in order to serve one funnel.
+2. **Special-case the free games' banks.** This needs a game-to-bank map, and we do not have a reliable one: bank ids live as literals inside each engine, several engines take the bank as a prop so one component serves many games, and several banks legitimately back more than one game. A map built by inspection gets those cases wrong, and a wrong map returns an error to a paying customer mid-test.
+
+## The thing we built instead
+
+A short-lived signed permit. The game page, which has already established that this game is guest-playable, mints one; the bank route accepts it in place of a session.
+
+```typescript
+export function mintGuestPass(gameId: string, now: number = Date.now()): string | null {
+  if (!getGuestPlayableGame(gameId)) return null;
+
+  const key = secret();
+  if (!key) return null;
+
+  const expiresAt = now + GUEST_PASS_TTL_MS;
+  const payload = `${gameId}.${expiresAt}`;
+  return `${payload}.${sign(payload, key)}`;
+}
+```
+
+Three design choices in there that I would make again in any capability-token situation:
+
+**The module re-checks the rule itself.** The caller has already resolved a guest-playable game, and `mintGuestPass` checks again anyway, so that this module rather than its callers is the thing that decides what a permit may be issued for. Capability minting should not be a function that trusts its argument.
+
+**No fallback secret.** `secret()` returns null when nothing is configured, and every verification then fails closed. A literal default would quietly become a key that every deployment shares. Failing closed costs guests their free game and costs nobody their content, which is the right way round.
+
+**Verification re-checks the rule too.** The permit is rejected if it is malformed, expired, signed with the wrong key, or names a game that is not guest-playable *now*, because a game can lose its free tier after a permit was minted. A token that encodes a decision made three hours ago should be re-validated against the decision as it stands.
+
+Plus the small correctness detail that comparison goes through `timingSafeEqual`, which throws on a length mismatch, so lengths are checked first.
+
+## And then we deleted it
+
+Thirty minutes later, all of it: guest play, the claim endpoint, the permit module, the landing-intent plumbing, about 350 lines of tests.
+
+The permit was not the reason. The permit was the symptom. Writing it forced a sentence out loud that had not been said before: *we are adding an anonymous path to the authored content, three days after deliberately closing one, to support a funnel we had not measured.*
+
+Once it is phrased that way the decision is not close. The permit was honest about its own limits, and the file said so: it did not bind to a bank id, it bounded the gap with a time limit and a rate limit instead. That is a perfectly respectable trade when the feature is load-bearing. Guest play was not load-bearing. It was a hypothesis.
+
+What replaced it is duller and stronger: the first score is free. A free account sees the raw score for its first completed ability session with each provider, decided on the server at save time from sessions already in the database:
+
+```plaintext
+- It is decided on the server at save time, from the sessions already in
+  the database, never from anything the client claims.
+- It is scoped per PROVIDER, not per game and not per account. Trying a
+  second provider earns a second free score, which is deliberate.
+- Only ABILITY games count. Trait games have no score to
+```
+
+---
+*Originally published at https://dev.to/daniel_pertu/we-shipped-guest-play-at-1739-and-deleted-it-at-1835-49b3*
