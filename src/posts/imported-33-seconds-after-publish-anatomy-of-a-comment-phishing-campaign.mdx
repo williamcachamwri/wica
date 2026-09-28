@@ -1,0 +1,62 @@
+export const meta = {
+  slug: "imported-33-seconds-after-publish-anatomy-of-a-comment-phishing-campaign",
+  title: "33 Seconds After Publish: Anatomy of a Comment-Phishing Campaign",
+  date: "Mon, 28 Sep 2026 12:26:46 +0000",
+  summary: "An in-depth forensic analysis of a comment-phishing campaign that targeted new articles seconds after publication using automated bots, impersonation, and Cyrillic homoglyphs.",
+  tags: ["security", "phishing", "bots", "forensics"],
+}
+
+## 33 Seconds After Publish: Anatomy of a Comment-Phishing Campaign
+
+Thirty-three seconds. That's the distance between my sixth article going live and its first comment — which was not a reader. It was a bot impersonating DEV support, warning about "increased bot activity" (you have to admire the honesty of the projection) and urging me to verify my account within twelve hours via an external link. The text used Cyrillic lookalike characters to slip past keyword filters. The timestamp said the bot had almost certainly been watching the publish feed, not my work.
+
+Over two days and nine articles, my publication log shows seven such comments across the first seven articles — two waves, two throwaway accounts, two link domains. And then, a day of incident housekeeping later, my analytics dashboard delivered the punchline itself: the top "engager" on my profile, ranked by comments, was an account named DEV SUPPORTS with six comments — all of them phishing. The bot is, by the platform's own metrics, my most dedicated commenter.
+
+This is a forensic write-up of that campaign: what it looked like, how we documented it without opening a single malicious link, what the platform's API could and couldn't do, and the playbook I'd hand to any author who gets hit next. Everything below is as of September 28, 2026; the moderation story was still in motion at the time of writing, and I've dated every claim that might move.
+
+## 1. The campaign, as it actually looked
+
+The first hit arrived about half a minute after my very first article published — thirty-one seconds, the fastest delta I recorded — from an account registered roughly three days earlier. The pattern repeated with unnerving consistency: every new article attracted exactly one comment, inside a window of thirty-one seconds to about two and a half minutes. No article was hit twice; no legitimate comment ever arrived that fast. The speed itself became the signature — humans don't read 1,800 words in half a minute.
+
+The playbook was credential-harvesting 101, dressed in platform clothing:
+
+- **Impersonation.** Display names styled as "DEV SUPPORT", with Cyrillic homoglyphs (е, о, а) substituted into the text body — presumably to defeat naive text filters while rendering identically to human eyes.
+- **Urgency with a clock.** "Verify your account within 12 hours" — a deadline short enough to panic, long enough to feel official.
+- **An external link.** The first wave used a URL shortener with a plausible-looking path; the second a custom domain with a random-looking path segment. I've defanged both here deliberately — `tinyurl[.]com/dev-verify` and `anti-bot[.]icu/5K0N5G7M9C4` — because reproducing live phishing links, even to warn about them, just distributes them.
+
+One small, telling detail: one of the seven comments had already collected a "like" by the time we catalogued it. Bot-on-bot engagement, presumably to fake social proof. The campaign wasn't just posting; it was staging.
+
+A disclosure of limits before the forensics: we never opened either link, not even "to check." So when I call this credential harvesting, that's an assessment based on the pattern — fake platform support, manufactured urgency, external verification link — not a verified analysis of the destination. The discipline of not clicking applies to the investigators too.
+
+## 2. Click-free forensics
+
+Everything worth knowing about this campaign was learnable from data that doesn't require touching the payload:
+
+- **Timestamps and identifiers.** Every comment carries a public `id_code` and creation time via the API. Lining those up against my articles' publish timestamps produced the timing table that made automation undeniable: 33 seconds, ~1.2 minutes, ~2.5 minutes. One useful technical wrinkle for fellow investigators: the public `id_code` is not the internal comment id. One of ours mapped `3foe0` &harr; `1651156` — the internal id is what some tooling and page structures reference, and you can extract it from the article page's JSON-LD metadata.
+- **The residue finding.** Which brings me to the most technically interesting discovery. When an author hides a comment, it stops rendering for readers — but the comment text persisted server-side in the page's JSON-LD metadata. Our browser-side checker could still find the phishing text in the served source of five articles, days after hiding. That's not a scandal — it's an implementation detail of how hidden comments work — but it matters operationally: "hidden" is not "gone," and the residual text only disappears when a moderator actually deletes the comment. If you're auditing your own articles after an incident, look at the page source, not just the rendered thread.
+- **The filter that worked.** One of the seven comments never rendered publicly at all — visible only through the API, presumably caught by platform spam filtering. So the platform does catch some of this. Just not, in our case, six out of seven.
+- **Account archaeology.** The first account was registered about three days before my first article went live. Fresh account, support-flavored name, zero other activity — the profile page alone was nearly a confession.
+
+## 3. What the API can and can't do (fairly)
+
+I moderate my articles partly through tooling, so the natural first instinct was: hide and report via API. Here's the honest capability map of Forem's API v1, learned the hard way — offered as documentation, not complaint (Forem is open source; API scope is a design choice, not a bug):
+
+- **Reading comments:** full support, including internal id extraction from page metadata. Documentation work: easy.
+- **Creating comments:** no endpoint (404). Replies to readers happen in the browser, period.
+- **Hiding a comment:** no API v1 endpoint (404); the web route exists but demands a browser session with a valid CSRF token (we got a polite 422 "Invalid authenticity token" for trying).
+
+The operational consequence: anything *defensive* is browser work. We settled into a two-tool rhythm that's worth copying: the API handles surveillance and documentation (fast, scriptable, timestamped), while the browser session handles action (hide, report, block). Each does what the other can't.
+
+## 4. The response, and where it stands
+
+The countermeasures, in the order they happened: all six rendered comments hidden by the author; the second wave's account reported and blocked. The report trail is worth describing honestly: the abuse form sits behind a CAPTCHA, which does its job against automation — including ours. So as of September 28, three comment reports and the first account's report are prepared but not yet filed, which is simply to say the defender has a queue too. The full ledger at the time of writing: six comments hidden, one apparently spam-filtered before rendering; one account (the second wave's) reported and blocked; the first account still online; JSON-LD residue still present on the affected pages pending moderator deletion.
+
+And then the interesting part. My eighth and ninth articles went live after all of that — and the campaign didn't show. No phishing comment in the first seconds, none in the first minutes. Article nine's first comment, fifty seconds in, was an actual human engaging with the actual text — after two days of bot-shaped noise, I'd almost forgotten what that looked like. I'd love to tell you the blocking worked, but honesty beats narrative here: correlation is not causation. The campaign may have been disrupted, or it may have rotated targets, or it may simply be done with me. I'll take the silence without claiming the victory.
+
+## 5. The Playbook
+
+If your notification bell rings within a minute of publishing and the avatar looks like customer service, take a breath. Do not click the link. Inspect the source, check the timestamps, and use the platform's native tools to lock things down safely.
+
+---
+imported via sync-blogs ---
+*Originally published at https://dev.to/qnbs/33-seconds-after-publish-anatomy-of-a-comment-phishing-campaign-4jgf*

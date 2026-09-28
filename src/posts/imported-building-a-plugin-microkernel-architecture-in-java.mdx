@@ -1,0 +1,111 @@
+export const meta = {
+  slug: "imported-building-a-plugin-microkernel-architecture-in-java",
+  title: "Building a Plugin (Microkernel) Architecture in Java",
+  date: "Mon, 28 Sep 2026 12:26:32 +0000",
+  summary: "An in-depth guide on implementing the Microkernel (Plugin) Architecture pattern in Java, featuring a text editor example with a core system and isolated plugins.",
+  tags: ["java", "architecture", "designpatterns", "microkernel"],
+}
+
+## Building a Plugin (Microkernel) Architecture in Java
+
+Ever been asked to add "just one more custom rule" to your application, only to watch your elegant logic turn into a massive, fragile `switch` statement? We’ve all been there.
+
+When your core system needs to stay stable but your feature set needs to grow indefinitely, it's time to reach for the **Microkernel Architecture Pattern** (often called the Plug-in Architecture).
+
+I recently implemented this pattern for the [`iluwatar/java-design-patterns`](https://github.com/iluwatar/java-design-patterns?utm_source=gemini) repository. Here is a breakdown of how it works, where it's useful, and how you can build it in Java.
+
+## What is the Microkernel Architecture?
+
+Think of your favorite tools: VS Code, Eclipse, or Chrome. Out of the box, they are essentially empty shells. They provide a basic foundation (managing files, rendering text), but the real functionality comes from the extensions and plugins you install.
+
+The Microkernel architecture splits your application into two distinct parts:
+
+- **The Core System (Microkernel):** The absolute minimum functionality required to keep the application running. It doesn't know about special business rules or custom features.
+- **The Plugin Modules:** Independent, stand-alone components that contain specialized processing logic.
+
+Because the core system and the plugins communicate through a strict contract, you can add, update, or remove plugins at runtime without ever touching the core codebase.
+
+## The Blueprint: Building a Text Editor
+
+To see this in action, let's build a simple extensible Text Editor. Our core system will only manage a text buffer. If we want to transform that text (make it uppercase, format it as Java code, or remove spaces), we will route that text to a plugin.
+
+## 1. The Contract (The Plugin Interface)
+
+First, we need a universal language. The Core System shouldn't care *what* a plugin does, only *how* to talk to it.
+
+```java
+public interface Plugin {
+    String getName();
+    String getDescription();
+
+    // Lifecycle hooks
+    void initialize(IpcRouter ipcRouter);
+    void onStart();
+    void onStop();
+    boolean isStarted();
+
+    // The main execution method
+    String handleMessage(Message message);
+}
+```
+
+## 2. The Core System (The Microkernel)
+
+The Core System holds the domain state (our `documentBuffer`) and manages the lifecycle of our plugins. When a user requests a transformation, the kernel wraps the current text into an Inter-Process Communication (IPC) `Message` and routes it to the target plugin.
+
+```java
+public class MicroKernel {
+    private final PluginRegistry registry;
+    private final IpcRouter ipcRouter;
+    private final StringBuilder documentBuffer = new StringBuilder();
+
+    public void loadPlugin(Plugin plugin) {
+        registry.register(plugin);
+        plugin.initialize(ipcRouter);
+    }
+
+    public String transformDocumentWithPlugin(String pluginName) {
+        // 1. Package the core state into a message
+        Message msg = new Message("Kernel", pluginName, "TRANSFORM", documentBuffer.toString());
+
+        // 2. Dispatch to the isolated plugin
+        String transformedText = ipcRouter.sendMessage(msg);
+
+        // 3. Update core state with the result
+        documentBuffer.setLength(0);
+        documentBuffer.append(transformedText);
+
+        return "Success: Document transformed by " + pluginName;
+    }
+}
+```
+
+## 3. The Plugins (The Custom Logic)
+
+Now we can write our custom features in complete isolation. Because we established a strict contract, we can abstract out the boilerplate into an `AbstractOnDemandPlugin` and focus purely on the business logic.
+
+```java
+public class UppercasePlugin extends AbstractOnDemandPlugin {
+
+    @Override
+    public String getName() {
+        return "Uppercase";
+    }
+
+    @Override
+    public String getDescription() {
+        return "Converts all document text to uppercase";
+    }
+
+    @Override
+    public String handleMessage(Message message) {
+        if ("TRANSFORM".equals(message.getType())) {
+            return message.getContent().toUpperCase();
+        }
+        return message.getContent();
+    }
+}
+```
+
+--- imported via sync-blogs ---
+*Originally published at https://dev.to/kishalayp/building-a-plugin-microkernel-architecture-in-java-1bjk*
