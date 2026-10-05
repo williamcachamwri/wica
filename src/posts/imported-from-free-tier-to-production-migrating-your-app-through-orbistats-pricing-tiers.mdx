@@ -1,0 +1,139 @@
+export const meta = {
+  slug: "imported-from-free-tier-to-production-migrating-your-app-through-orbistats-pricing-tiers",
+  title: "From Free Tier to Production: Migrating Your App Through Orbistats' Pricing Tiers",
+  date: "Mon, 05 Oct 2026 13:12:50 +0000",
+  summary: "A comprehensive guide on migrating your app through Orbistats' pricing tiers, from the free prototype stage up to production scale.",
+  tags: ["nodejs", "api", "sports", "development"],
+}
+
+Disclosure: I work with the Orbistats team. This guide is written to be useful whichever plan you end up on, including staying on the free one.
+
+Every successful API-powered app goes through the same awkward phase. It starts as a weekend prototype on a free key, works beautifully with three test users, and then someone says the dangerous sentence: "Can we launch this next month?"
+
+Suddenly you have real questions. Will the free tier survive real traffic? When exactly do you need to pay? What changes in your code when you move from polling to real time? Do you need historical data now or later? And how do you upgrade without a rewrite or a Friday-night outage?
+
+This post walks through that journey step by step using Orbistats, which covers 13 sports (football, basketball, American football, cricket, tennis, baseball, esports, combat sports, volleyball, handball, ice hockey, golf and horse racing) behind one API. We'll cover:
+
+- What each pricing tier is actually for
+- How to make the free tier last far longer than you think
+- A request budget tracker you can copy
+- A cost estimator so you can predict usage before launch
+- How to move from polling to WebSockets and webhooks
+- How to backfill historical data safely
+- A phase-by-phase migration plan with go-live checklists
+
+All code is plain Node.js 18 or newer, so you can drop it into any backend.
+
+## The four tiers at a glance
+
+At the time of writing (October 2026), the pricing page lists four tiers. Always confirm current limits there before you plan around them.
+
+- **Free** is $0 and positioned for testing. The documentation describes 150 requests per day on this plan, which is the number that shapes everything in the first half of this article.
+- **Starter** is $19 per month and positioned for real-time production use.
+- **Growth** is $79 per month and adds historical data, widgets and webhooks.
+- **Enterprise** is custom pricing with dedicated infrastructure, for teams with specific volume, support or delivery requirements.
+
+A useful way to read this ladder is that each step unlocks a new capability, not just a bigger number. Free lets you prove the idea. Starter lets you run it live. Growth lets you build a richer product around history, embeds and push delivery. Enterprise lets you run it at serious scale with infrastructure of your own.
+
+## Stage 1: Prototype on the free tier
+
+Start here, and don't feel bad about it. A free tier exists so you can find out whether your idea deserves money.
+
+First, create an account and copy your API key. Second, read the quickstart and the documentation. Authentication is a bearer token, and the base URL is:
+
+```text
+[https://api.orbistats.com/v1/](https://api.orbistats.com/v1/)
+```
+
+Third, before you write any code, try a few calls in the Sandbox to see what real responses look like. Ten minutes there will save you hours of guessing field names.
+
+Your first request looks like this:
+
+```js
+// first-call.js
+const res = await fetch("[https://api.orbistats.com/v1/football/fixtures](https://api.orbistats.com/v1/football/fixtures)", {
+  headers: {
+    Authorization: `Bearer ${process.env.ORBISTATS_API_KEY}`,
+    Accept: "application/json",
+  },
+});
+
+console.log(res.status);
+console.log(await res.json());
+```
+
+Run it with `node first-call.js` and a key in your environment. If you see a 200 and some JSON, you are in business.
+
+The important mindset for stage one: treat the daily limit as a design constraint from day one, not as a surprise at launch. Which brings us to the most valuable habit in this whole article.
+
+## Why 150 requests per day is enough for a prototype (if you are smart)
+
+150 sounds tiny, but notice what it actually limits. It limits requests from your server to Orbistats. It does not limit how many people use your app.
+
+If ten thousand users open your football page and your server answers all of them from a cache, you make one upstream request, not ten thousand. That single idea is the difference between a prototype that dies at ten users and one that survives a demo day.
+
+> The rule: users talk to your cache, and your cache talks to Orbistats.
+
+Different data deserves different cache lifetimes, because different data changes at different speeds:
+
+- Live scores change constantly, so they get short lifetimes.
+- Fixtures change a few times a day.
+- Standings change after matches finish.
+- Team and competition lists barely change at all.
+
+## Build the client: cache, de-duplication, stale fallback and retries
+
+Here is a small client that does the four things every production integration needs, even on the free plan. It caches by data type, shares one in-flight request between simultaneous callers, serves slightly old data if the API fails, and retries politely.
+
+First, a tier configuration, so your code knows what the current plan allows:
+
+```js
+// tiers.js
+// null means: take the value from the Orbistats docs and set it in your environment.
+export const TIERS = {
+  free:       { dailyBudget: 150,  realtime: false, historical: false, webhooks: false, widgets: false },
+  starter:    { dailyBudget: null, realtime: true,  historical: false, webhooks: false, widgets: false },
+  growth:     { dailyBudget: null, realtime: true,  historical: true,  webhooks: true,  widgets: true  },
+  enterprise: { dailyBudget: null, realtime: true,  historical: true,  webhooks: true,  widgets: true  },
+};
+
+export const tier = TIERS[process.env.ORBISTATS_TIER ?? "free"];
+```
+
+Notice that the plan is an environment variable. When you upgrade, you change one setting and the rest of your app adapts, which is exactly the migration experience you want.
+
+Next, a request budget tracker. It counts every upstream call and refuses to exceed your plan, so a bug can never burn your whole day's allowance in ten minutes:
+
+```js
+// budget.js
+import { tier } from "./tiers.js";
+
+const today = () => new Date().toISOString().slice(0, 10);
+
+export const budget = {
+  limit: Number(process.env.ORBISTATS_DAILY_BUDGET) || tier.dailyBudget,
+  day: today(),
+  used: 0,
+
+  take() {
+    if (this.day !== today()) {
+      this.day = today();
+      this.used = 0;
+    }
+    if (this.limit && this.used >= this.limit) return false;
+    this.used += 1;
+    return true;
+  },
+
+  status() {
+    return {
+      used: this.used,
+      limit: this.limit,
+      ratio: this.limit ? this.used / this.limit : null,
+    };
+  },
+};
+```
+
+--- imported via sync-blogs ---
+*Originally published at https://dev.to/orbistats/from-free-tier-to-production-migrating-your-app-through-orbistats-pricing-tiers-4ank*

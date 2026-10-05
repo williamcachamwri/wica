@@ -1,0 +1,56 @@
+export const meta = {
+  slug: "imported-californias-new-seven-day-rule-changes-how-protected-health-data-requests-are-ha",
+  title: "California’s New Seven-Day Rule Changes How Protected Health-Data Requests Are Handled",
+  date: "Mon, 05 Oct 2026 13:12:53 +0000",
+  summary: "An analysis of California's newly enacted Assembly Bill 1930, which mandates a seven-business-day notice to the Attorney General before producing records related to protected health data, and what it means for compliance and engineering workflows.",
+  tags: ["dataprivacy", "compliance", "california", "healthcare"],
+}
+
+California has added a new checkpoint between certain legal demands and the production of highly sensitive health information. The change is not a proposal awaiting a vote. Governor Gavin Newsom signed Assembly Bill 1930 on September 26, 2026, and it was filed as Chapter 468 the same day.
+
+The new law addresses subpoenas, discovery demands, and other formal requests tied to investigations involving abortion or gender-affirming health care that California treats as legally protected. For developers, compliance teams, and vendors that maintain health-related data, the practical lesson is immediate: responding to a legal request can no longer be treated as a simple export-and-send process.
+
+## What AB 1930 actually requires
+
+[AB 1930](https://leginfo.legislature.ca.gov/faces/billTextClient.xhtml?bill_id=202520260AB1930) applies to a person or entity that is located, headquartered, incorporated, or otherwise doing business in California. When that person or entity receives a subpoena, discovery request, or other request that is part of a civil, criminal, regulatory, or legislative investigation concerning protected abortion or gender-affirming health care, it generally must notify the California Attorney General at least seven business days before producing responsive records.
+
+The notice must include a copy of the demand. The receiving organization may redact identifying or confidential information about specific patients, individuals, or providers when confidentiality or applicable law requires it. Unless an exception applies, the organization also must wait at least seven business days after giving notice before producing the records.
+
+The [Governor’s September 26 announcement](https://www.gov.ca.gov/2026/09/26/governor-newsom-signs-legislation-protecting-the-lgbtq-community-pushing-back-on-attacks-by-the-trump-administration/) describes the measure as part of a six-bill package designed to strengthen protections for private information. The enacted text matters more than the summary because it defines the precise triggers, exemptions, deadlines, and penalties.
+
+AB 1930 is a chaptered law, not a bill that merely passed one chamber or cleared a committee. Because it is a non-urgency statute enacted during a regular session and contains no special effective-date provision, California’s ordinary constitutional rule makes it effective January 1, 2027. [Article IV, Section 8 of the California Constitution](https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?article=IV&lawCode=CONS&sectionNum=SEC.+8.) supplies that general effective-date rule.
+
+## The seven-day rule is not an absolute block
+
+The statute does not automatically invalidate every demand for protected health information. It creates notice and timing obligations, along with authority for the Attorney General to respond.
+
+The seven-business-day process does not apply when the demand is ordered by a court with jurisdiction, issued by a California state or local agency, or accompanied by a qualifying attestation. An attestation may state, for example, that the information will not be used to investigate or impose liability for care that is lawful in California, or that the demand concerns conduct unlawful under identified California law. The exception also covers situations in which references to abortion or gender-affirming services are merely incidental to the investigation.
+
+Federal timing can also change the process. If federal law or another federal obligation requires a faster response, notice to the Attorney General may be given contemporaneously with production. The responding organization must make best efforts to deliver the records on the date the federal obligation requires.
+
+These distinctions are important. A request’s label is not enough. A team must examine who issued it, what investigation it supports, which records it seeks, whether an attestation is present, and whether another binding deadline controls.
+
+## Why this becomes an engineering workflow
+
+Many legal-response systems begin with a ticket and end with a database export. AB 1930 requires more structure. The intake form should capture the issuing authority, jurisdiction, service date, response deadline, investigative purpose, data categories, relevant individuals, and any attestation. The workflow then needs a decision point for California coverage and the statute’s exemptions before production is enabled.
+
+That decision cannot be reliable without a usable data map. An organization should know which systems contain appointment details, messages, search activity, location signals, billing information, clinical records, referrals, and support logs. It should also know which processors, cloud vendors, and analytics services may hold copies. If the company cannot locate the data quickly, the seven-business-day buffer can disappear while teams are still identifying systems.
+
+Product architecture matters as well. Data about protected care should not be mixed into broad exports when narrower retrieval is possible. Access to production tools should be role-based, and every search, view, redaction, approval, and disclosure should create an auditable record. A litigation hold must prevent destruction without turning into indefinite retention of unrelated information.
+
+The safest operational design includes separate gates for identification, legal review, Attorney General notice, individual-confidentiality review, executive approval, and production. A deadline service should calculate business days correctly and record why an exception shortened or removed the waiting period. No engineer should be asked to decide the statute’s applicability alone, but engineers must build the controls that let the legal and privacy teams make and enforce that decision.
+
+## Enforcement raises the cost of shortcuts
+
+The California Attorney General may intervene in certain civil actions brought to resist a demand, pursue a person or entity that attaches a false attestation, and seek injunctions or other available remedies. A false attestation may carry a $15,000 civil penalty. An intentional, knowing, willful, or reckless violation may result in a penalty of up to $10,000 for a first violation and up to $15,000 for each subsequent violation.
+
+For consumers, the law adds time and public oversight, but it should not be mistaken for a promise that records can never be produced. The Attorney General may attempt to notify the person connected to the protected care, yet the statute does not guarantee that every individual will receive notice before every disclosure. Existing federal and state confidentiality rules may add other protections depending on the data and organization involved.
+
+The larger lesson is that sensitive-data protection depends on process as much as policy. By January 1, 2027, covered organizations should be able to recognize a qualifying demand, pause production, notify the proper authority, document the analysis, and disclose no more than the law requires. A privacy program that begins only after a database export has been created is already too late.
+
+> **About Joseph Sides**
+>
+> Joseph Sides is a South Florida-based data privacy advocate, consultant, and entrepreneur whose work focuses on consumer rights, digital transparency, website tracking, meaningful privacy choices, and responsible technology. His public DEV introduction describes a bachelor's degree in criminology, a minor in business, and training in data analytics. These interests connect questions about how technology operates with questions about what people understand and how organizations remain accountable for their decisions.
+
+--- imported via sync-blogs ---
+*Originally published at https://dev.to/joseph_sides/californias-new-seven-day-rule-changes-how-protected-health-data-requests-are-handled-2589*
