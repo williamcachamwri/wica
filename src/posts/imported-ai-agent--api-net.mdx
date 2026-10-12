@@ -1,0 +1,156 @@
+export const meta = {
+  slug: "imported-ai-agent--api-net",
+  title: "AI Agent-এর জন্য API: শূন্য থেকে শুরু, .NET ডেভেলপারের শেখার নোট",
+  date: "Mon, 12 Oct 2026 06:09:07 +0000",
+  summary: "A .NET backend developer's learning notes on adapting APIs for AI Agents, covering schemas, consistency, structured errors, idempotency, and clean operations.",
+  tags: [".net", "ai-agents", "api", "csharp", "webdev"],
+}
+
+## Why This Post
+
+I am a .NET backend developer. Up until now, I have built APIs exclusively for frontend or mobile teams. Lately, however, I keep hearing: "An AI Agent will use your API." I wanted to find out what that actually means and what changes I need to make to my APIs.
+
+This post is my learning notes. It is not written by an expert, but rather neatly summarized by a student so that you can understand the whole concept in one read.
+
+## TL;DR
+
+AI Agents do not use APIs like humans do. They do not read documentation, they do not guess, they do not debug errors on their own unless guided, and they retry very fast. Therefore, you need to focus on 5 key things:
+
+| # | Task | In Simple Terms |
+|---|---|---|
+| 1 | Complete schema & description | Clearly tell the agent what to send |
+| 2 | Consistent rules everywhere | Write similar things the same way |
+| 3 | Structured error | If something goes wrong, tell it what to fix |
+| 4 | Idempotency | Ensure duplicate calls don't duplicate actions |
+| 5 | Thoughtful operations | Provide concise, useful operations |
+
+## Clarifying Some Terms First
+
+- **AI Agent:** A program where an LLM makes decisions itself and calls various tools and APIs to complete a task. For example, if told "Place an order for this customer," it decides which API to call in what order.
+- **OpenAPI spec:** The machine-readable description of your API (the source behind what Swagger shows), detailing endpoints, required payloads, and responses.
+- **Idempotency:** Ensuring sending the same request multiple times produces the same result as sending it once.
+- **MCP (Model Context Protocol):** An open protocol for connecting AI Agents with external tools and data—kind of like a "USB port for AI."
+
+## Human Developer vs. AI Agent
+
+| Feature | Human Developer | AI Agent |
+|---|---|---|
+| Documentation | Reads and understands | Relies mainly on OpenAPI specs and descriptions |
+| Ambiguous fields | Guesses or asks | Can make incorrect assumptions |
+| Encountering errors | Reads messages and debugs | Can repeat the same mistake if instructions aren't in the message |
+| Speed | Slow | Very fast, and mistakes compound quickly |
+
+These differences lead to the following 5 rules.
+
+## A Fictional Example
+
+To make it easy to understand, imagine an Order API where an Agent is told, "Place an order for 2 items." (This is a hypothetical scenario, not a real event.)
+
+- The type for `quantity` wasn't specified in the spec, so the Agent sent `"2"` (a string).
+- The server responded with `&#123;"error": "Invalid input"&#125;` without specifying which field was wrong.
+- The Agent sent the same request again. Same response.
+
+A human would open the documentation. An Agent only has the spec and the response. If both are ambiguous, it gets stuck. Following the rules below helps avoid these situations.
+
+## 1. Complete Schema & Meaningful Description
+
+**Rule:** Provide types, formats, constraints, and descriptions for every field.
+
+In .NET, adding attributes to your request model populates the OpenAPI spec:
+
+```csharp
+public record PlaceOrderRequest(
+    [property: Description("The ID of the customer placing the order")]
+    Guid CustomerId,
+
+    [property: Description("The ID of the product")]
+    Guid ProductId,
+
+    [property: Range(1, 1000)]
+    [property: Description("Quantity of products (integer, minimum 1)")]
+    int Quantity);
+```
+
+Think about endpoint descriptions too. Instead of "Gets the data", using "Returns a paginated list of invoices filtered by status and date range" gives the Agent much better signals.
+
+## 2. Consistency Everywhere
+
+An Agent learns a pattern from one endpoint and applies it to others. If status is `pending` in one place, `IN_PROGRESS` in another, and `done` in a third, it gets confused.
+
+Establish a convention and stick to it everywhere:
+
+- Naming conventions (camelCase or snake_case, not both)
+- ID format (e.g., `uuid` everywhere)
+- Pagination style
+- Error structure
+- Status value formatting
+
+## 3. Structured Errors
+
+**Rule:** Make errors instructions for the Agent: which field is wrong, what was received, and what valid values are.
+
+ASP.NET Core has RFC 9457 (Problem Details) built-in, and you can add custom fields:
+
+```csharp
+return Results.Problem(
+    title: "Invalid field value",
+    detail: "Field 'status' received invalid value 'processing'.",
+    statusCode: StatusCodes.Status400BadRequest,
+    extensions: new Dictionary<string, object?>
+    {
+        ["field"] = "status",
+        ["receivedValue"] = "processing",
+        ["allowedValues"] = new[] { "pending", "shipped", "delivered", "cancelled" }
+    });
+```
+
+Resulting JSON:
+
+```json
+{
+  "title": "Invalid field value",
+  "status": 400,
+  "detail": "Field 'status' received invalid value 'processing'.",
+  "field": "status",
+  "receivedValue": "processing",
+  "allowedValues": [
+    "pending",
+    "shipped",
+    "delivered",
+    "cancelled"
+  ]
+}
+```
+
+## 4. Idempotency
+
+Agents retry quickly when network glitches happen or timeouts occur. If a payment or order creation endpoint is not idempotent, duplicate charges or orders can happen.
+
+Use idempotency keys for write operations:
+
+```csharp
+[HttpPost("orders")]
+public async Task<IActionResult> PlaceOrder(
+    [FromHeader(Name = "X-Idempotency-Key")] string idempotencyKey,
+    [FromBody] PlaceOrderRequest request)
+{
+    // Check if request with this idempotencyKey was already processed
+    if (await _cache.TryGetValueAsync(idempotencyKey, out OrderResult existingResult))
+    {
+        return Ok(existingResult);
+    }
+
+    // Process order...
+    var result = await _orderService.CreateAsync(request);
+    await _cache.SetAsync(idempotencyKey, result);
+    
+    return Ok(result);
+}
+```
+
+## 5. Thoughtful and Concise Operations
+
+Instead of exposing a dozen micro-endpoints that require multiple round-trips, design higher-level operations that encapsulate logical workflows safely. An Agent performs better with fewer, well-documented, powerful endpoints than navigating a complex maze of granular services.
+
+--- imported via sync-blogs ---
+*Originally published at https://dev.to/rakibahasan/ai-agent-er-jny-api-shuuny-theke-shuru-net-ddebhelpaarer-shekhaar-nott-63m*

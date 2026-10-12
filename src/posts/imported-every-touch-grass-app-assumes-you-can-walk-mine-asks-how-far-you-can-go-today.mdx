@@ -1,0 +1,108 @@
+export const meta = {
+  slug: "imported-every-touch-grass-app-assumes-you-can-walk-mine-asks-how-far-you-can-go-today",
+  title: "Every \"touch grass\" app assumes you can walk. Mine asks how far you can go today.",
+  date: "Mon, 12 Oct 2026 06:08:18 +0000",
+  summary: "An introduction to Doorstep, an open-source app built for Hacktoberfest that helps people with physical limits explore their surroundings based on today's mobility ceiling rather than motivation.",
+  tags: ["hacktoberfest", "ai", "opensource", "accessibility", "gemma"],
+}
+
+This is a submission for the Hacktoberfest Open-Source AI Challenge Week 1: Touch Grass
+
+## What I Built
+
+I read the other entries to this challenge before I wrote a line. Around ninety of them. Quest generators, trail guides, bird call identifiers, foliage route planners, apps that lock your phone until you go outside.
+
+Every single one assumes the thing stopping you is motivation.
+
+None of them are for someone who already wants to go out and cannot. Someone three weeks after surgery. Someone with a knee that decides each morning how far it is willing to travel. Someone eighty years old who can manage the end of the street and back, and some days not that.
+
+**Doorstep** asks the one question none of the others ask:
+
+> ## How far today?
+
+Not a target. A ceiling. Some days it is smaller, and that is allowed.
+
+It takes today's number, finds everything genuinely inside it, and asks a local open-weight model to pick **one** place worth the walk.
+
+```plaintext
+How far today?  [=====o----------------]  200 metres
+
+   Balbhim Mandir
+   138 metres · somewhere to sit · shaded
+   "Shaded most of the way, and somewhere to sit at the end."
+```
+
+Then, later, one question: *did you go?* That is the entire loop. No steps, no pace, no calories, no streak.
+
+## Demo
+
+Doorstep holds two things about you: how far your body could carry you today, and the exact point those metres are counted from. Together, that is a medical record with a home address stapled to it.
+
+Which creates a problem for a demo. The app displays place names, not coordinates. "The mandir at a hundred and thirty metres." "The cafe at the end of the road." A screenshot of this working where I live gives away where I live, to within a couple of streets, without a single number on screen.
+
+So this demo runs on a public park in a city I do not live in, with a few days of history written in by hand so the panel is not empty. The app is real, the OpenStreetMap data is real, every sentence Gemma writes is real. The address is the one thing that is not.
+
+Doorstep suggesting one place within today's reach
+
+Doorstep refusing to suggest anything, because nothing is mapped within reach
+
+A tool that asks for your address should be able to demonstrate itself without publishing its author's.
+
+## Code
+
+### Doorstep
+
+**Outside, for people whose outside is two hundred metres.**
+
+Every app that wants to get you outdoors assumes the only thing stopping you is motivation. Doorstep assumes the opposite: that you already want to go, and the limit is your body. It asks one question nothing else asks.
+
+> **How far today?**
+
+Not a target. A ceiling. Some days it is smaller, and that is allowed.
+
+Built for the Hacktoberfest Open-Source AI Challenge, Week 1: Touch Grass.
+
+### The idea
+
+Fitness apps treat distance as a number to beat. Streaks, personal bests, "you walked less this week". For someone recovering from surgery, living with chronic pain, or simply eighty years old, distance is not an ambition. It is a ceiling set by the body, and it moves day to day.
+
+Doorstep takes today's ceiling as an input, finds everything genuinely within it, and asks a local open-weight model to pick…
+
+## How I Built It
+
+**Gemma 3 4B through Ollama, running locally.** OpenStreetMap for the neighbourhood, downloaded exactly once. Node and a single HTML page. The daemon binds to loopback.
+
+### The rule that matters
+
+**The model chooses which. It never chooses how far.**
+
+Every place is filtered against today's reach in code, before the model is asked anything:
+
+```javascript
+const eligible = places.filter((p) => p.metres <= reach);
+```
+
+By the time Gemma sees the list, every option on it is already safe. The worst it can do is pick a dull one.
+
+This is not architectural tidiness. A language model that cheerfully offers somewhere "just a little further" is, for this user, an app that strands them two streets from home with nowhere to sit. Distance is the one thing in this product that must not be a judgement call, so it is arithmetic.
+
+A pick naming a place that was not on the list is treated as a hallucination rather than a suggestion, and falls back to the nearest place to sit.
+
+### What it says when there is nothing
+
+```plaintext
+There is nothing mapped within 100 metres of you today.
+
+That is the map being thin here, not you.
+```
+
+It does not quietly widen the radius to find something. It does not invent a bench. For this user a made-up destination is worse than no answer, because they will walk to it.
+
+### The same app is a different app in the next city
+
+I fetched the map twice, for two Indian cities about 300 km apart.
+
+---
+
+*Originally published at https://dev.to/imarpan/every-touch-grass-app-assumes-you-can-walk-mine-asks-how-far-you-can-go-today-3o7a*
+--- imported via sync-blogs ---
