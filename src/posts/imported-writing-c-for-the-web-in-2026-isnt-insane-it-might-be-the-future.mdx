@@ -1,0 +1,78 @@
+export const meta = {
+  slug: "imported-writing-c-for-the-web-in-2026-isnt-insane-it-might-be-the-future",
+  title: "Writing C for the Web in 2026 Isn't Insane. It Might Be the Future",
+  date: "Mon, 19 Oct 2026 06:08:31 +0000",
+  summary: "A deep dive into why building modern commercial web applications in C using traditional tech stacks like CGI might actually be a rational response to supply-chain vulnerabilities, AI-driven complexity, and the rising value of software simplicity.",
+  tags: ["c", "webdev", "architecture", "security", "ai"],
+}
+
+Someone shipped a modern, commercial web product -- user accounts, Stripe payments, a search dashboard, transactional emails -- written entirely in **C**, served over **CGI**, the technology we all quietly agreed died somewhere around 2004.
+
+Your first instinct is probably to laugh. Or to call it a stunt, a party trick, the kind of thing a certain type of developer does to prove a point on Hacker News. That was my instinct too.
+
+Then I read *why* he did it, and the laugh died in my throat.
+
+Because every single reason turned out to be a sober, direct answer to a problem I've watched get worse every year I've been doing this. Not nostalgia. Not contrarianism. A clear-eyed response to forces that are reshaping our entire industry right now -- supply-chain attacks, AI-generated complexity, and the quietly rising value of software you can actually understand and trust.
+
+The piece that sent me down this hole is Corey Prophitt's "A Modern Web App in C," about his product marketyour.games. I'd encourage you to read his original -- this isn't a summary of it. What I want to do is zoom out from his specific build to the thing it's a *signal* of, because I think the most "insane" stack of 2026 might be pointed directly at the future, and I want to walk through why.
+
+## First, no, it's not a toy
+
+Let's kill the easy dismissal upfront, because it's the reason most people stop reading.
+
+This is not a hello-world. It's a real, shipping, commercial product. From the outside it's indistinguishable from anything built on a modern stack: accounts, a dashboard, folders, Stripe, Postmark. From the inside it's C, CGI, SQLite, and OpenBSD -- a single statically-linked binary dropped into a folder, three libraries total, deployed by *replacing the binary*. A clean build takes seconds.
+
+So we're not talking about whether you *can* do a weekend experiment this way. Someone is taking payments through it. The question isn't feasibility. The question is whether the rest of us have been wrong about something.
+
+## Your first objection is probably out of date
+
+The reflexive response is "but CGI is *slow* -- you fork a whole process on every request." And you'd have been completely right to say that. In 2004.
+
+The thing is, that objection quietly expired and nobody re-ran the test. Modern kernels optimize process creation heavily; forking is nowhere near the cost it was when we all fled CGI. And if it ever did become a bottleneck, FastCGI is a small step away. The performance reason we abandoned this entire approach was real *then* and mostly isn't *now* -- we just never went back to check, because our industry only ever moves in one direction: toward more.
+
+That's the first crack in the certainty. A lot of what we treat as settled fact is really just un-re-examined reflex. "Everyone knows CGI is dead" is doing a lot of load-bearing work for something nobody's actually measured since flip phones were cool.
+
+But performance was never the interesting part. The interesting part is *why someone would choose this on purpose today* -- and those reasons didn't even exist the last time we had this debate.
+
+## Why it's not nostalgia: the reasons are brand new
+
+Here's what changed my mind. The case for radical simplicity isn't "the old days were better." It's that three forces, all of them new, all of them intensifying, have quietly made the minimal stack the *rational* one. And they happen to be the exact forces reshaping everything else about how we build.
+
+### Every dependency became a liability
+
+Start with the one I think about most, because I've written about its ugly edges before.
+
+A modern web app's dependency graph is enormous. You add two or three direct dependencies and a package manager cheerfully pulls in *hundreds* of transitive ones -- each maintained by someone you've never heard of, many unmaintained, some with publish credentials protected by a password that's been reused since 2015. That graph is not a convenience. It's your attack surface.
+
+And that attack surface is *on fire* right now. Package repositories get hit weekly. Attackers register typo-and-hallucination-shaped package names and wait. Autonomous coding agents install dependencies on your behalf, at machine speed, often without a human ever reading what got pulled in. In that environment, every dependency you add is a small act of trust extended to a stranger, multiplied by hundreds, re-rolled every time you update.
+
+Now look at the minimal stack. Its entire supply chain is a C compiler and three libraries -- things like libcurl, which the entire internet watches. As Prophitt puts it, compromising it would mean compromising a project under constant global scrutiny, not "a package with eleven weekly downloads and an owner who left in 2019."
+
+"The most secure dependency is the one you never added" used to be a cute aphorism. In 2026 it's a defensive posture. Minimalism stopped being an aesthetic and became a security strategy, and almost nobody has updated their instincts to match.
+
+### AI made complexity cheap -- which made understanding rare
+
+Here's the second force, and it's the one I find genuinely beautiful.
+
+For the entire history of software, *producing* code was the expensive, scarce, valuable thing. So we optimized relentlessly for production: frameworks, generators, abstractions, anything that let us make more software faster. Complexity was an acceptable price for output, because output was hard.
+
+AI inverted that overnight. Producing code -- even producing *abstraction* -- is now nearly free. You can generate a thousand lines, or a whole framework's worth of scaffolding, in seconds.
+
+And when production becomes free, the bottleneck moves. It moves to *understanding* and *trusting* what you now have. The scarce resource isn't the code anymore; it's a human being who can actually hold the system in their head, reason about it, and be confident it does what they think it does. In a world drowning in generated code, a system small enough to *comprehend* is worth more than it has been in twenty years -- because comprehensibility is exactly the thing the flood destroys.
+
+This is why "the whole app fits in your head" stopped being a humblebrag and became a real advantage. A system you can open file by file and fully understand is a system you can *verify*. And verification, not production, is the hard part now. The minimal stack isn't behind the AI curve. It's weirdly, accidentally, perfectly adapted to it.
+
+### The complexity tax finally came due
+
+The third force is just arithmetic catching up with us.
+
+We spent fifteen years adding layers to solve the problems created by the previous layers. The modern default is genuinely strange when you say it plainly: you run a web server (nginx) in front of a *second* web server (your app server in Ruby, Python, Go), which also happens to hold your business logic. Then you add a container to run it, an orchestrator to run the containers, a build pipeline to produce the containers, and a language server just to help you navigate the abstraction you've accumulated. Each layer solves a real problem -- usually a problem the previous layer introduced.
+
+At some point the cure becomes the disease. The minimal stack isn't *missing* all of that machinery. It never needed it, because it never created the problems the machinery exists to solve. One web server that calls your logic directly. One file to deploy. One language for your editor to understand. The complexity didn't get managed better -- it got refused.
+
+## What you actually get
+
+Enough phil
+
+--- imported via sync-blogs ---
+*Originally published at https://dev.to/james_anderson_h/writing-c-for-the-web-in-2026-isnt-insane-it-might-be-the-future-529c*
