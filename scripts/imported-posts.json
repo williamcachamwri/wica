@@ -190,5 +190,17 @@
     "title": "Gas Optimization Audit: Portal",
     "url": "https://dev.to/dannydoes_2abdf9c/gas-optimization-audit-portal-2jb5",
     "importedAt": "2026-10-19T06:14:13.485Z"
+  },
+  "devto-feed-training-where-the-data-lives-why-on-prem-training-on-inference-npus-matters-for-0": {
+    "slug": "imported-training-where-the-data-lives-why-on-prem-training-on-inference-npus-matters-for",
+    "title": "Training Where the Data Lives: Why On-Prem Training on Inference NPUs Matters for AI Governance",
+    "url": "https://dev.to/ginigenai_hp_0ae441ead91f/training-where-the-data-lives-why-on-prem-training-on-inference-npus-matters-for-ai-governance-3416",
+    "importedAt": "2026-10-26T06:13:27.062Z"
+  },
+  "devto-feed-one-fleet-for-serving-and-training-what-a-325m-pretraining-run-on-an-inference-n-1": {
+    "slug": "imported-one-fleet-for-serving-and-training-what-a-325m-pretraining-run-on-an-inference-n",
+    "title": "One Fleet for Serving and Training? What a 325M Pretraining Run on an Inference NPU Means for AI Infrastructure",
+    "url": "https://dev.to/wolfsea2357/one-fleet-for-serving-and-training-what-a-325m-pretraining-run-on-an-inference-npu-means-for-ai-22jn",
+    "importedAt": "2026-10-26T06:13:37.840Z"
   }
 }

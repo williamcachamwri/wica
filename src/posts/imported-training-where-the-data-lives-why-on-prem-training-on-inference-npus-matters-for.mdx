@@ -1,0 +1,78 @@
+export const meta = {
+  slug: "imported-training-where-the-data-lives-why-on-prem-training-on-inference-npus-matters-for",
+  title: "Training Where the Data Lives: Why On-Prem Training on Inference NPUs Matters for AI Governance",
+  date: "Mon, 26 Oct 2026 06:12:25 +0000",
+  summary: "Disclosure: this account is run by members of the VIDRAFT team, and the work discussed below is VIDRAFT's own result. It is not an independent review.\n\n\n  \n  \n  TL;DR\n\n\nAdapting a model usually means sending data to rented GPUs. VIDRAFT pretrained a 325M model from scratch on a Rebellions ATOM-Max i",
+  tags: ["ai", "machinelearning", "security", "privacy"],
+}
+
+*Disclosure: this account is run by members of the VIDRAFT team, and the work discussed below is VIDRAFT's own result. It is not an independent review.*
+
+
+  
+  
+  TL;DR
+
+
+Adapting a model usually means sending data to rented GPUs. VIDRAFT pretrained a 325M model from scratch on a Rebellions ATOM-Max inference NPU (2025) and matched a B200 twin on unseen text (0.7993 vs 0.7994). From a governance standpoint two things matter: training can stay on hardware an organization already controls, and the claim was published in a form others can verify.
+
+
+  
+  
+  Why does training location matter for safety and governance?
+
+
+Every copy of sensitive data sent to an external training cluster widens the attack surface and complicates audits. If the accelerators already deployed for inference inside a network can also train or fine-tune, the data never has to leave.
+
+
+  
+  
+  What was shown?
+
+
+[](https://media2.dev.to/dynamic/image/width=800%2Cheight=%2Cfit=scale-down%2Cgravity=auto%2Cformat=auto/https%3A%2F%2Fhuggingface.co%2FFINAL-Bench%2FVKORE-325M-NPU-Base%2Fresolve%2Fmain%2Farticle%2Ffig6_twin_design.png)
+
+
+[](https://media2.dev.to/dynamic/image/width=800%2Cheight=%2Cfit=scale-down%2Cgravity=auto%2Cformat=auto/https%3A%2F%2Fhuggingface.co%2FFINAL-Bench%2FVKORE-325M-NPU-Base%2Fresolve%2Fmain%2Farticle%2Ffig3_evaluation.png)
+
+
+Same model, same data, same schedule on an NPU and a B200 GPU. On text neither saw, the two models are indistinguishable (paired difference -0.0001, standard error 0.0007).
+
+
+  
+  
+  Why is verifiability part of safety?
+
+
+Claims about models should be checkable. Both checkpoints and evaluate_unseen.py are public in [the model repo](https://huggingface.co/FINAL-Bench/VKORE-325M-NPU-Base), and the authors corrected an evaluation label after finding that their first "held out" windows overlapped training. That kind of correction is what accountable reporting looks like.
+
+
+[](https://media2.dev.to/dynamic/image/width=800%2Cheight=%2Cfit=scale-down%2Cgravity=auto%2Cformat=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Farticles%2Fy50kh9fr17pvf4zzc3vx.png)
+
+
+  
+  
+  Limits
+
+
+- The NPU alone does not enable training; it depends on VIDRAFT's own training stack and a stability technique under patent application.
+- 325M on 5B tokens is research scale, with one run per hardware.
+
+
+  
+  
+  FAQ
+
+
+**Which NPU?** Rebellions ATOM-Max, released in 2025.
+
+
+**Does this remove the need for GPUs?** No. It shows inference hardware can carry real training when the software exists.
+
+
+  
+  
+  Sources
+
+
+Technical report: [https://huggingface.co/blog/FINAL-Bench/pretraining-a-325m-language-model-from-zero-on-an](https://huggingface.co/blog/FINAL-Bench/pretraining-a-325m-language-model-from-zero-on-an)

@@ -1,0 +1,53 @@
+export const meta = {
+  slug: "imported-one-fleet-for-serving-and-training-what-a-325m-pretraining-run-on-an-inference-n",
+  title: "One Fleet for Serving and Training? What a 325M Pretraining Run on an Inference NPU Means for AI Infrastructure",
+  date: "Mon, 26 Oct 2026 06:12:23 +0000",
+  summary: "VIDRAFT demonstrates pretraining a 325M model from scratch on a Rebellions ATOM-Max inference NPU, matching a GPU twin and opening discussions on unified AI infrastructure fleets.",
+  tags: ["ai", "infrastructure", "npu", "machinelearning"],
+}
+
+Disclaimer: This account is run by members of the VIDRAFT team, and the work discussed below is VIDRAFT's own result. It is not an independent review.
+
+## TL;DR
+
+Most AI infrastructure is planned as two fleets: GPUs for training, cheaper accelerators for serving. VIDRAFT pretrained a 325M model from scratch on a Rebellions ATOM-Max inference NPU (2025) and matched a B200 twin on unseen text (0.7993 vs 0.7994). For capacity planners, the interesting question is how much training work could move onto serving hardware.
+
+![At a glance](https://media2.dev.to/dynamic/image/width=800%2Cheight=%2Cfit=scale-down%2Cgravity=auto%2Cformat=auto/https%3A%2F%2Fhuggingface.co%2FFINAL-Bench%2FVKORE-325M-NPU-Base%2Fresolve%2Fmain%2Farticle%2Ffig1_hero.png)
+
+## Why do teams keep two fleets today?
+
+Serving accelerators are cheaper per query and more power-efficient, but their software runs forward passes only. Anything that needs gradients, from LoRA adaptation to pretraining, goes to GPUs, often rented and often in another region.
+
+## What changes if serving hardware can train?
+
+- **Utilization:** Serving fleets idle off-peak; training jobs could fill those hours.
+- **Data locality:** Adaptation can run where the data and the deployed model already live.
+- **Procurement:** One hardware class covers more of the model lifecycle.
+
+## What was measured?
+
+![Training curves](https://media2.dev.to/dynamic/image/width=800%2Cheight=%2Cfit=scale-down%2Cgravity=auto%2Cformat=auto/https%3A%2F%2Fhuggingface.co%2FFINAL-Bench%2FVKORE-325M-NPU-Base%2Fresolve%2Fmain%2Farticle%2Ffig2_training_loss.png)
+
+![Evaluation](https://media2.dev.to/dynamic/image/width=800%2Cheight=%2Cfit=scale-down%2Cgravity=auto%2Cformat=auto/https%3A%2F%2Fhuggingface.co%2FFINAL-Bench%2FVKORE-325M-NPU-Base%2Fresolve%2Fmain%2Farticle%2Ffig3_evaluation.png)
+
+The run covered 5.0B tokens in 76,292 steps over about four days without divergence. On 1,024 unseen windows the paired difference to the GPU twin is -0.0001 (standard error 0.0007).
+
+## What should planners not assume yet?
+
+- **Throughput and cost per run** are not reported.
+- **The chip alone does not train.** The ATOM-Max software is built for inference; training relies on VIDRAFT's own stack and a stability technique under patent application.
+- **Scale** beyond 325M is unproven.
+
+## FAQ
+
+- **Which NPU?** Rebellions ATOM-Max, released in 2025.
+- **Can the results be checked?** Yes: weights and evaluate_unseen.py are in [the model repo](https://huggingface.co/FINAL-Bench/VKORE-325M-NPU-Base).
+
+## Sources
+
+- Technical report: [https://huggingface.co/blog/FINAL-Bench/pretraining-a-325m-language-model-from-zero-on-an](https://huggingface.co/blog/FINAL-Bench/pretraining-a-325m-language-model-from-zero-on-an)
+
+---
+
+--- imported via sync-blogs ---
+*Originally published at https://dev.to/wolfsea2357/one-fleet-for-serving-and-training-what-a-325m-pretraining-run-on-an-inference-npu-means-for-ai-22jn*
