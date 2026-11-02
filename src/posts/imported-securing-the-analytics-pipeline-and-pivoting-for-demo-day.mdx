@@ -1,0 +1,34 @@
+export const meta = {
+  slug: "imported-securing-the-analytics-pipeline-and-pivoting-for-demo-day",
+  title: "Securing the Analytics Pipeline and Pivoting for Demo Day",
+  date: "Mon, 02 Nov 2026 14:16:18 +0000",
+  summary: "A sprint retrospective covering the implementation of zero-trust analytics with FastAPI and Firebase, followed by Sprint 12 planning focused on UI polish and demo day preparation.",
+  tags: ["security", "fastapi", "firebase", "agile"],
+}
+
+## Sprint Retrospective: Implementing Zero-Trust Analytics
+
+Sprint 11 wrapped up with a heavy emphasis on access control and nailing down our live cloud deployments. Our main hurdle was refactoring dashboard metrics endpoints so they remain accessible to any logged-in user—regardless of role hierarchy like Admin, Editor, or Viewer—while keeping unauthenticated traffic blocked completely.
+
+Instead of tying macro-level insights to strict Role-Based Access Control (RBAC), I overhauled the FastAPI backend to use a zero-trust `require_authenticated_user` dependency. By cleaning up Firebase ID token validation, we opened up quality trends and specialty distribution metrics to all valid users, ensuring unverified requests still hit a hard 401 Unauthorized wall. These changes went through our GitHub Actions pipeline and landed on Google Cloud Run, making our V1.0 backend architecture official.
+
+*Live MedReach-AI dashboard successfully fetching the executive metrics via Cloud Run, bypassing RBAC while enforcing strict Firebase token validation.*
+
+## Sprint 12 Planning: UI Polish and Demo Preparation
+
+With our final Capstone presentation coming up on November 19th, Sprint 12 calls for a smart pivot. As the Technical Project Manager, I'm keeping scope creep at bay by shifting gears from complex backend aggregation to UI polish and frontend stability, using AI-assisted coding tools to keep velocity high.
+
+*Sprint 12 Backlog detailing our UI feature freeze, static demo data integration, and Capstone commercial production tasks.*
+
+Our core deliverables for this cycle (Nov 2 – Nov 8) include:
+
+- Global Navigation UI (MA-95): Collin is developing the interactive frontend components, including the top-right user profile dropdown, secure Firebase logout routing, and modals for notifications and global search.
+- Analytics Demo Data Binding (MA-96): To ensure a flawless live presentation without worrying about database downtime, I am using our VS agent to hook up the new Analytics page to a local JSON payload of rich, static demo data.
+- Capstone Commercial Production (MA-97): I am drafting the script and using AI narration tools to produce our final 60-second marketing commercial highlighting the core value proposition.
+- V1.0 Code Freeze and Documentation (MA-98): I am enforcing a strict feature freeze on the main branch. My final tasks involve regression testing live production URLs and polishing repository documentation with our zero-trust architecture diagrams.
+
+We will meet for our regular sync later this week to check out the dropdown Pull Requests and review the commercial storyboard ahead of Sunday's milestone submission.
+
+---
+*Originally published at https://dev.to/scott_shoemaker_8d10ccbd2/securing-the-analytics-pipeline-and-pivoting-for-demo-day-5766*
+--- imported via sync-blogs ---
