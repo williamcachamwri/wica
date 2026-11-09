@@ -1,0 +1,62 @@
+export const meta = {
+  slug: "imported-why-the-same-page-gives-different-playwright-screenshots-five-sources-each-measu",
+  title: "Why the same page gives different Playwright screenshots: five sources, each measured",
+  date: "Mon, 09 Nov 2026 14:40:39 +0000",
+  summary: "An analysis of five sources of flakiness in Playwright screenshots, measuring differing pixels caused by live clocks, CSS animations, sub-pixel text rendering, and timing.",
+  tags: ["playwright", "testing", "javascript", "automation"],
+}
+
+A visual test that fails once in ten runs is usually blamed on "the browser being flaky". I wanted to know which parts of a page actually change the pixels, so I took the same page over and over and counted differing pixels while switching one suspect at a time.
+
+Short version, from one machine:
+
+- A live clock, a running CSS animation and a screenshot taken mid-transition each produced different PNGs from the same page.
+- A blinking text caret changed 5 pixels, depending only on timing.
+- Re-launching the browser, using new headless, `--disable-gpu` and `--font-render-hinting=none` changed nothing.
+- `--disable-lcd-text` changed 1085 pixels, because the default launch draws coloured sub-pixel text.
+
+## Setup
+
+Linux 6.8, AMD EPYC VM, Node v24.22.2, Playwright 1.63.0 with Chromium 153.0.8010.12 (headless shell). Pages are served from `127.0.0.1`. Differences are counted with `pixelmatch` at `threshold: 0`, so any change in any channel counts.
+
+```shell
+npm i playwright@1.63.0 pngjs@7 pixelmatch@7
+```
+
+The fixture has a timestamp, an infinite pulse animation, a 400 ms transition that starts after load, and a focused input.
+
+```html
+
+
+body{font:16px/1.4 system-ui,sans-serif;margin:24px;width:600px}
+.pulse{width:120px;height:40px;background:#36c;animation:p 1s ease-in-out infinite alternate}
+@keyframes p{from{opacity:.2}to{opacity:1}}
+.slide{width:60px;height:20px;background:#c63;transition:transform 400ms}
+.slide.go{transform:translateX(200px)}
+input{font:16px sans-serif;width:200px}
+
+
+# Order #1042
+
+
+Rendered at 
+
+
+document.getElementById('t').textContent = new Date().toISOString().slice(0, 19) + 'Z';
+requestAnimationFrame(() => requestAnimationFrame(() => document.getElementById('s').classList.add('go')));
+document.getElementById('i').focus();
+
+```
+
+A small helper serves it and compares PNGs.
+
+```javascript
+// file: lib.js
+const http = require('http'), fs = require('fs'), crypto = require('crypto');
+const { PNG } = require('pngjs');
+const pixelmatch = require('pixelmatch');
+```
+
+---
+imported via sync-blogs ---
+*Originally published at https://dev.to/curlshot/why-the-same-page-gives-different-playwright-screenshots-five-sources-each-measured-118g*

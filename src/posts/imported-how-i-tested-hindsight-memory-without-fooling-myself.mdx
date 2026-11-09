@@ -1,0 +1,86 @@
+export const meta = {
+  slug: "imported-how-i-tested-hindsight-memory-without-fooling-myself",
+  title: "How I Tested Hindsight Memory Without Fooling Myself",
+  date: "Mon, 09 Nov 2026 14:40:04 +0000",
+  summary: "An honest evaluation of testing an ML lab notebook agent with and without Hindsight memory, detailing the experimental design, findings, and limitations.",
+  tags: ["AIAgents", "AgentMemory", "Hindsight", "LLM"],
+}
+
+## How I Tested Hindsight Memory Without Fooling Myself
+
+An agent with memory looks smarter in almost any demo, because you pick the example where it remembers something. We wanted a test that could have said no. On accuracy, it did: after 120 training runs, mean test F1 was 0.573 for the agent without memory and 0.574 for the agent with Hindsight memory.
+
+This is how we designed the comparison, and what it could and couldn't tell us.
+
+## The project in one paragraph
+
+Ninaivu is an ML lab notebook agent. It trains real scikit-learn models on the Telco Customer Churn dataset from Kaggle, remembers every experiment (including failures), and uses that history to propose the next run. The code is public at github.com/divya240707/Ninaivu. The memory layer is the open-source agent memory system Hindsight, and the Hindsight documentation covers the retain, recall and reflect operations we used. For background on the idea, see what agent memory is.
+
+## Decision 1: change only one thing
+
+Both agents use the same model (openai/gpt-oss-20b on Groq), the same system prompt and the same search space. The only difference is that the memory agent calls Hindsight recall at the start of each run in sessions 2 and 3, and retain after every run. If anything else differs, you can't say memory caused the difference.
+
+## Decision 2: wipe the context between sessions
+
+A trial has 3 sessions of 10 runs. At each session boundary, the agent's in-context history is cleared. The baseline starts session 2 knowing nothing. The memory agent can still recall what happened earlier. This models coming back to a project weeks later, and it makes memory the only thing carrying information across sessions.
+
+## Decision 3: one memory bank per trial
+
+Each trial writes to its own Hindsight bank:
+
+```python
+bank = f"ninaivu-{trial}-{int(time.time())}"
+```
+
+Without this, trial 2 would inherit the lessons of trial 1, and the comparison would be contaminated.
+
+## Decision 4: make everything except the agent deterministic
+
+Every run uses the same fixed split of the data:
+
+```python
+X_tr, X_te, y_tr, y_te = train_test_split(X, y, test_size=0.25, stratify=y, random_state=SEED)
+```
+
+So score differences come from the configuration the agent chose, not from a lucky split. The language model only proposes a configuration. Python trains the model, scores it, and clamps every value into a safe range, so a bad suggestion can't crash a run:
+
+```python
+LIMITS = {
+    "n_estimators": (10, 300),
+    "max_depth": (1, 40),
+    "C": (0.0001, 100.0),
+    "learning_rate": (0.01, 1.0),
+}
+```
+
+We also flag a run as overfit when train F1 exceeds test F1 by more than 0.15, and count overfit runs and crashes together as bad runs.
+
+## Decision 5: use session 1 as a control
+
+Neither agent has memory in session 1, so any gap there is pure noise. It came out at 5 bad runs for the baseline and 4 for the memory agent. In sessions 2 and 3, the memory agent made 4 bad runs out of 40 and the baseline made 9 out of 40. That later gap is only a few runs bigger than the noise gap we measured for free, which is why we call it a pattern and not a result.
+
+## The trap we planted, and what it taught us
+
+The dataset has a customerID column. A model that memorizes IDs overfits. In a manual check, a logistic regression with the column kept had train F1 0.7543 and test F1 0.6047. With it dropped, train F1 was 0.6031 and test F1 was 0.607: the overfitting gap disappeared, but the test score did not change.
+
+We expected memory to teach the agent to drop it. Instead, the baseline dropped the column in all 60 of its runs. The memory agent dropped it in 52 of 60, keeping it 4 times in each of sessions 1 and 2 and never in session 3. The language model already knew. Our planted trap showed that the baseline was ahead of our idea, and we only found that out because the baseline's configurations were logged too.
+
+## What this test can't tell you
+
+- It has 2 trials per agent on one dataset. With counts this small, we describe patterns and avoid claiming effects.
+- The F1 ceiling for these model families on this dataset looks like it sits around 0.60, which leaves little room for any agent to improve.
+- We ran no significance test, and we wouldn't trust one on this few trials.
+
+What we would try next: more trials, and a task where the base model has no prior knowledge, such as a dataset with a quirk that can only be learned by trying things. That is where memory has the most to add.
+
+## Lessons
+
+- Design the control before the demo. Session 1 gave us a noise estimate for free.
+- Isolate memory. One bank per trial, and wipe the context between sessions.
+- Log the baseline as carefully as the memory agent. It is the baseline's behavior that tells you whether memory had anything to add.
+- Report small counts as counts. "4 of 40 against 9 of 40" says more than a percentage.
+
+The full code, data and results are in the Ninaivu repository. To try agent memory yourself, start with the Hindsight documentation.
+
+--- imported via sync-blogs ---
+*Originally published at https://dev.to/afrin_reffiq_bc0a69257698/how-i-tested-hindsight-memory-without-fooling-myself-1go6*
