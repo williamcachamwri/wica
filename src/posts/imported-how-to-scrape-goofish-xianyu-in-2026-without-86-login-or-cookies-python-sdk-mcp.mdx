@@ -1,0 +1,71 @@
+export const meta = {
+  slug: "imported-how-to-scrape-goofish-xianyu-in-2026-without-86-login-or-cookies-python-sdk-mcp",
+  title: "How to Scrape Goofish (Xianyu / 闲鱼) in 2026 Without +86 Login or Cookies (Python SDK + MCP)",
+  date: "Mon, 16 Nov 2026 14:24:57 +0000",
+  summary: "Goofish (闲鱼 / Xianyu) is Alibaba's flagship C2C recommerce marketplace — processing over 100M+ monthly active buyers across vintage mirrorless cameras, PC GPUs, retro handhelds, road bikes, luxury handbags, and anime/ACG collectibles (guzi / 谷子). Because individual Chinese sellers price used gear fo",
+  tags: ["python", "webscraping", "mcp", "productivity"],
+}
+
+**Goofish (`闲鱼` / Xianyu)** is Alibaba's flagship C2C recommerce marketplace — processing over **100M+ monthly active buyers** across vintage mirrorless cameras, PC GPUs, retro handhelds, road bikes, luxury handbags, and anime/ACG collectibles (*guzi* / `谷子`). Because individual Chinese sellers price used gear for fast domestic turnover, street prices on Goofish routinely sit **20%–45% below eBay, Reverb, Mercari JP, or Chrono24**.
+
+
+Yet if you have ever tried building a Python deal monitor, price-comp dataset, or AI shopping agent for Goofish from outside mainland China, you hit four immediate engineering walls:
+
+
+**Ephemeral Request Signing &amp; Session Tokens**: Goofish's web and mobile endpoints require short-lived cryptographic request signatures paired with rotating session tokens that expire rapidly.
+
+**Alipay / +86 Real-Name Login Walls**: Unauthenticated keyword search and seller-profile requests on standard web views immediately hit a mandatory Taobao/Alipay QR login gate requiring mainland +86 SMS or passport KYC verification.
+
+**Aggressive Datacenter Anti-Bot Filtering**: Standard cloud IPs (AWS, GCP, GitHub Actions, Hetzner) are immediately blocked or challenged with interactive verification sliders.
+
+**Opaque `m.tb.cn` Share Snippets &amp; Slang**: Sellers share links as raw mobile text (`【闲鱼】https://m.tb.cn/h.xxxx 点击链接直接打开`), and listings use domain-specific Chinese shorthand (`箱说全` = full box &amp; papers, `无拆无修` = unopened/unrepaired, `个人闲置` = personal seller, `吧唧` = anime tin badge) that literal English keyword searches miss completely.
+
+
+In this guide, we will walk through how to query live Goofish listings, resolve `m.tb.cn` share links, compute CNY-to-USD markdowns, generate 1-click **Superbuy / AllChinaBuy** proxy checkout links, and audit seller **Zhima Credit (`芝麻信用`)** &amp; buyer reviews using the open-source **`goofish-xianyu-api`** Python SDK and **`goofish-xianyu-mcp`** Model Context Protocol server — with **zero Taobao/Alipay cookies**.
+
+
+  
+  
+  Architecture &amp; Realistic Capabilities
+
+
+Instead of maintaining brittle local Playwright browsers, +86 SIM cards, and residential proxy pools, `goofish-xianyu-api` (zero third-party Python dependencies) and `goofish-xianyu-mcp` expose a typed client + local helpers (offline English-to-Chinese Xianyu slang glossary, `itemId` watchlist state deduplication, CNY-to-USD markdown math, and Zhima Credit scoring) backed by cloud HTTP endpoints:
+
+
+Module / Tool
+Package
+Key Capabilities
+
+
+`GoofishClient.search_items` / `search_many`
+
+[`goofish-xianyu-api`](https://pypi.org/project/goofish-xianyu-api/)
+Single &amp; multi-keyword search, cross-keyword `itemId` dedup, auto-pagination, `only_new` state file
+
+
+`GoofishClient.get_item_detail` / `get_seller_*`
+
+[`goofish-xianyu-api`](https://pypi.org/project/goofish-xianyu-api/)
+
+`m.tb.cn` share-link resolution, seller Zhima Credit &amp; KYC badges, `onsale`/`sold` comps, buyer reviews
+
+
+`search_goofish_items` &amp; 4 Seller/Item MCP Tools
+[`goofish-xianyu-mcp`](https://www.npmjs.com/package/goofish-xianyu-mcp)
+Native stdio MCP server for Claude Desktop, Cursor, Windsurf, and VS Code
+
+
+  
+  
+  What Works Without Login vs. Platform Boundaries
+
+
+Before writing code, it helps to separate what public guest extraction reliably delivers from what requires a personal mobile app session:
+
+
+**Works Reliably Without Cookies**:
+
+
+- Live keyword search with CNY `price_min` / `price_max`, `personal_only` (`个人闲置`), `free_shipping` (`包邮`), sort order (`newest`, `price_asc`, `priceDrop`, `credit`), and city region filters.
+- Multi-page Standby auto-pagination (`30` items/page up to `150` items synchronously, or up to `1,500` items via batch fallback).
+Full item detail resolution (description, HD image gallery, specs dictionary, `wants` count, city, condition tag) from numeric IDs, `goofish.com` URLs, o
